@@ -1,0 +1,1 @@
+# stratego.io
