@@ -5,14 +5,13 @@ define (require) ->
 
   describe 'Piece', ->
 
-    for rank of ranks
-      do (rank) ->
-        it "should not throw if rank #{rank}", ->
-          expect(->
-            new Piece
-              rank: rank
-              side: 0
-          ).to.not.throw()
+    it 'should not throw if rank is valid', ->
+      for rank of ranks
+        expect(->
+          new Piece
+            rank: rank
+            side: 0
+        ).to.not.throw()
 
     it 'should throw if rank is not valid', ->
       expect(->
