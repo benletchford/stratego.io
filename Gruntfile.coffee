@@ -6,14 +6,15 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-contrib-requirejs'
   grunt.loadNpmTasks 'grunt-mocha-phantomjs'
+  grunt.loadNpmTasks 'grunt-contrib-htmlmin'
 
   grunt.initConfig
     pkg: grunt.file.readJSON 'package.json'
 
     clean:
-      build:
-        ['build']
       app:
+        ['app']
+      js:
         ['js/**/*.js']
       tests:
         ['test/specs/**/*.js']
@@ -23,10 +24,10 @@ module.exports = (grunt) ->
         options:
           compress: true
         files:
-          'build/styles.min.css': 'css/styles.less'
+          'app/static/stratego.min.css': 'css/styles.less'
 
     coffee:
-      app:
+      js:
         expand: true
         flatten: true
         src: [
@@ -43,12 +44,21 @@ module.exports = (grunt) ->
         dest: 'test/specs'
         ext: '.spec.js'
 
+    htmlmin:
+      app:
+        options:
+          removeComments: true
+          collapseWhitespace: true
+          link: true
+        files:
+          'app/static/index.html': 'html/index.html'
+
     requirejs:
       app:
         options:
           baseUrl: './js',
           name: './main'
-          out: 'build/stratego.min.js'
+          out: 'app/static/stratego.min.js'
           paths:
             'jquery': 'http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min'
 
@@ -59,8 +69,10 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'build', [
     'clean:app'
-    'coffee:app'
+    'clean:js'
+    'coffee:js'
     'less'
+    'htmlmin'
     'requirejs'
   ]
 

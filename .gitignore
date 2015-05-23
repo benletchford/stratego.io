@@ -1,7 +1,7 @@
 gae.auth
 bower_components
 node_modules
-build
+app
 stratego.sublime-workspace
 
 test/specs/*.js
