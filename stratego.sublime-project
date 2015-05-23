@@ -1,0 +1,18 @@
+{
+	"folders":
+	[
+		{
+			"path": ".",
+      "folder_exclude_patterns": [
+        "node_modules",
+        "bower_components"
+      ],
+      "file_exclude_patterns": [
+        // "*.sublime-project",
+        "gae.auth",
+        "js/*.js",
+        "test/specs/*.js",
+      ]
+		}
+	]
+}

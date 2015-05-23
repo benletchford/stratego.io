@@ -1,0 +1,8 @@
+gae.auth
+bower_components
+node_modules
+build
+stratego.sublime-workspace
+
+test/specs/*.js
+js/*.js
