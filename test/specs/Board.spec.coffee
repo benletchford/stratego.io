@@ -34,7 +34,7 @@ define (require) ->
       it 'should allow one space move', ->
         from = x: 5, y: 5
 
-        oneSpaceMovePermutations = [
+        validMoves = [
             x: from.x + 1, y: from.y - 1
           ,
             x: from.x + 1, y: from.y
@@ -52,13 +52,27 @@ define (require) ->
             x: from.x, y: from.y + 1
         ]
 
-        for to in oneSpaceMovePermutations
+        invalidMoves = [
+            x: from.x, y: from.y + 2
+          ,
+            x: from.x + 2, y: from.y
+        ]
+
+        for to in validMoves
           board = new Board
           board.set from, @marshal
 
           move = board.move from, to
 
           expect(move).to.equal moveTypes.MOVE
+
+        for to of invalidMoves
+          board = new Board
+          board.set from, @marshal
+
+          expect(->
+            board.move from, to
+          ).to.throw()
 
       it 'should not allow more than one space move', ->
         from = x: 5, y: 5
