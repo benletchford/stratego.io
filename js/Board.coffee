@@ -30,22 +30,23 @@ define (require) ->
 
       # Bombs and flags can't move.
       if fromPiece.rank is 'B'
-        throw new Error "Bombs can't be moved."
+        throw new Error 'Bombs cannot be moved.'
       if fromPiece.rank is 'F'
-        throw new Error "Flags can't be moved."
+        throw new Error 'Flags cannot be moved.'
 
       diff = {}
-      diff.x = from.x - to.x
-      diff.y = from.y - to.y
+      diff.x = Math.abs from.x - to.x
+      diff.y = Math.abs from.y - to.y
 
       # Position hasn't changed.
       if diff.x is 0 and diff.y is 0
         throw new Error 'Invalid move.'
 
-      # We're moving one square.
-      if (Math.abs(diff.x) in [0..1] and Math.abs(diff.y) in [0..1]) or
-         # Scouts can move in straight lines.
-         (fromPiece.rank is '9' and ((diff.x isnt 0) != (diff.y isnt 0)))
+      # We're either moving one square or we're a scout moving in a straight
+      # line.
+      if ((diff.x is 1) != (diff.y is 1) or (fromPiece.rank is '9')) and
+         # We can't move diagonally
+         (diff.x is 0) != (diff.y is 0)
 
         return moveTypes.MOVE
 
