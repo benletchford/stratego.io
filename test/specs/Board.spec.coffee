@@ -67,9 +67,48 @@ define (require) ->
         board.set from, @marshal
 
         expect(->
-          move = board.move from, x: 5, y: 7
+          board.move from, x: 5, y: 7
         ).to.throw()
 
         expect(->
-          move = board.move from, x: 7, y: 5
+          board.move from, x: 7, y: 5
         ).to.throw()
+
+      it 'should allow scouts to move straight in any direction', ->
+        from = x: 5, y: 5
+
+        validMoves = [
+            x: from.x + 4, y: from.y
+          ,
+            x: from.x - 5, y: from.y
+          ,
+            x: from.x, y: from.y + 4
+          ,
+            x: from.x, y: from.y - 5
+        ]
+
+        invalidMoves = [
+            x: from.x + 4, y: from.y + 1
+          ,
+            x: from.x - 5, y: from.y + 4
+          ,
+            x: from.x - 2, y: from.y + 4
+          ,
+            x: from.x + 4, y: from.y - 5
+        ]
+
+        for to in validMoves
+          board = new Board
+          board.set from, @scout
+
+          expect(->
+            board.move from, to
+          ).to.not.throw()
+
+        for to of invalidMoves
+          board = new Board
+          board.set from, @marshal
+
+          expect(->
+            board.move from, to
+          ).to.throw()

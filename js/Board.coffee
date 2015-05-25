@@ -29,8 +29,10 @@ define (require) ->
         throw new Error 'Nothing to move.'
 
       # Bombs and flags can't move.
-      if fromPiece.rank is 'B' or fromPiece.rank is 'F'
-        throw new Error "Bombs or flags can't be moved."
+      if fromPiece.rank is 'B'
+        throw new Error "Bombs can't be moved."
+      if fromPiece.rank is 'F'
+        throw new Error "Flags can't be moved."
 
       diff = {}
       diff.x = from.x - to.x
@@ -43,7 +45,7 @@ define (require) ->
       # We're moving one square.
       if (Math.abs(diff.x) in [0..1] and Math.abs(diff.y) in [0..1]) or
          # Scouts can move in straight lines.
-         (fromPiece.rank is '9' and (diff.x isnt 0 != diff.y isnt 0))
+         (fromPiece.rank is '9' and ((diff.x isnt 0) != (diff.y isnt 0)))
 
         return moveTypes.MOVE
 
