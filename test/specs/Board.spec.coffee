@@ -112,3 +112,23 @@ define (require) ->
           expect(->
             board.move from, to
           ).to.throw()
+
+      it 'should not allow flags to move', ->
+        from = x: 5, y: 5
+
+        board = new Board
+        board.set from, @flag
+
+        expect(->
+          board.move from, {x: from.x, y: from.y + 1}
+        ).to.throw()
+
+      it 'should not allow bombs to move', ->
+        from = x: 5, y: 5
+
+        board = new Board
+        board.set from, @bomb
+
+        expect(->
+          board.move from, {x: from.x, y: from.y + 1}
+        ).to.throw()
