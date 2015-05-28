@@ -24,7 +24,7 @@ module.exports = (grunt) ->
         options:
           compress: true
         files:
-          'app/static/stratego.min.css': 'css/styles.less'
+          'app/static/stratego.min.css': 'css/main.less'
 
     coffee:
       js:
@@ -64,6 +64,7 @@ module.exports = (grunt) ->
             'jquery'    : 'empty:'
             'backbone'  : 'empty:'
             'underscore': 'empty:'
+            'pace'      : 'empty:'
 
     mocha_phantomjs:
       options:

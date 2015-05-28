@@ -1,0 +1,17 @@
+{
+  "name": "stratego.io",
+  "version": "0.0.1",
+  "description": "HTML5 stratego",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "pace": "~1.0.2",
+    "requirejs": "~2.1.17"
+  }
+}
