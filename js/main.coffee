@@ -3,11 +3,10 @@ define (require) ->
   $        = require 'jquery'
   _        = require 'underscore'
   Backbone = require 'backbone'
-  Pace     = require 'pace'
 
   BoardView = require 'BoardView'
 
-  Pace.on 'done', ->
+  Pace.on 'hide', ->
     BoardView = new BoardView
 
     $(document.body).append BoardView.el

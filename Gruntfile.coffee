@@ -65,7 +65,6 @@ module.exports = (grunt) ->
             'jquery'    : 'empty:'
             'backbone'  : 'empty:'
             'underscore': 'empty:'
-            'pace'      : 'empty:'
 
     mocha_phantomjs:
       options:
