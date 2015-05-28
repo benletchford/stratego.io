@@ -4,7 +4,18 @@
   <meta charset="UTF-8">
   <title>stratego.io</title>
   <link rel="stylesheet" href="stratego.min.css">
-  <script data-main="stratego.min.js" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.17/require.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.17/require.min.js"></script>
+  <script>
+    requirejs.config({
+        paths: {
+          'main': 'stratego.min',
+          'jquery': 'http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min',
+          'underscore': 'http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min',
+          'backbone': 'http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min',
+        }
+    });
+    requirejs(['main']);
+  </script>
 </head>
 <body>
 </body>

@@ -1,6 +1,7 @@
 define (require) ->
 
-  $ = require 'jquery'
-  something = require 'Board'
+  $        = require 'jquery'
+  _        = require 'underscore'
+  Backbone = require 'backbone'
 
-  return 1
+  document.write 'hello world'

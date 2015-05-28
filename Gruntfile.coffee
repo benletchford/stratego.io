@@ -50,6 +50,7 @@ module.exports = (grunt) ->
           removeComments: true
           collapseWhitespace: true
           link: true
+          minifyJS: true
         files:
           'app/static/index.html': 'html/index.html'
 
@@ -60,7 +61,9 @@ module.exports = (grunt) ->
           name: './main'
           out: 'app/static/stratego.min.js'
           paths:
-            'jquery': 'http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min'
+            'jquery'    : 'empty:'
+            'backbone'  : 'empty:'
+            'underscore': 'empty:'
 
     mocha_phantomjs:
       options:
