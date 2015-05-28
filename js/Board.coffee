@@ -48,7 +48,15 @@ define (require) ->
          # We can't move diagonally
          (diff.x is 0) != (diff.y is 0)
 
-        return moveTypes.MOVE
+        if toPiece
+          _attack from, to
+
+        else
+          return moveTypes.MOVE
 
       else
         throw new Error 'Invalid move.'
+
+    _attack: (fromPiece, toPiece) ->
+      fromPiece = @get from
+      toPiece   = @get to

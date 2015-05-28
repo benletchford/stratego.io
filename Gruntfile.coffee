@@ -13,7 +13,7 @@ module.exports = (grunt) ->
 
     clean:
       app:
-        ['app']
+        ['app/static']
       js:
         ['js/**/*.js']
       tests:
@@ -67,6 +67,14 @@ module.exports = (grunt) ->
         reporter: 'spec'
       all: ['test/index.html']
 
+    gae:
+      deploy:
+        options:
+          path: 'app'
+          auth: 'gae.auth'
+          version: '1'
+        action: 'update'
+
   grunt.registerTask 'build', [
     'clean:app'
     'clean:js'
@@ -80,4 +88,8 @@ module.exports = (grunt) ->
     'clean:tests'
     'coffee:tests'
     'mocha_phantomjs'
+  ]
+
+  grunt.registerTask 'deploy', [
+    'gae'
   ]
