@@ -7,6 +7,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-requirejs'
   grunt.loadNpmTasks 'grunt-mocha-phantomjs'
   grunt.loadNpmTasks 'grunt-contrib-htmlmin'
+  grunt.loadNpmTasks 'grunt-contrib-copy'
 
   grunt.initConfig
     pkg: grunt.file.readJSON 'package.json'
@@ -79,6 +80,12 @@ module.exports = (grunt) ->
           version: '1'
         action: 'update'
 
+    copy:
+      graphics:
+        expand: true
+        src: 'graphics/*'
+        dest: 'app/static/'
+
   grunt.registerTask 'build', [
     'clean:app'
     'clean:js'
@@ -86,6 +93,7 @@ module.exports = (grunt) ->
     'less'
     'htmlmin'
     'requirejs'
+    'copy'
   ]
 
   grunt.registerTask 'test', [

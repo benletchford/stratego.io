@@ -5,5 +5,9 @@ define (require) ->
   Backbone = require 'backbone'
   Pace     = require 'pace'
 
+  BoardView = require 'BoardView'
+
   Pace.on 'done', ->
-    $(document.body).append "<div>I guess we're done.</div>"
+    BoardView = new BoardView
+
+    $(document.body).append BoardView.el
