@@ -12,7 +12,7 @@ define (require) ->
       expect [].concat.apply([], board._places)
         .to.have.length 100
 
-    describe 'moves', ->
+    describe 'movement', ->
 
       beforeEach ->
         @marshal = new Piece
@@ -133,7 +133,7 @@ define (require) ->
           board.move from, {x: from.x, y: from.y + 1}
         ).to.throw()
 
-      it 'should not allow moves onto friendly piece', ->
+      it 'should not allow movement onto friendly piece', ->
         from = x: 5, y: 5
 
         board = new Board
@@ -142,4 +142,66 @@ define (require) ->
 
         expect(->
           board.move from, {x: from.x, y: from.y + 1}
+        ).to.throw()
+
+      it 'should not allow scouts to jump over pieces', ->
+        from = x: 5, y: 5
+
+        toPositions = [
+            x: 9, y: 5
+          ,
+            x: 2, y: 5
+          ,
+            x: 5, y: 8
+          ,
+            x: 5, y: 2
+        ]
+
+        inTheWayPositions = [
+            x: 8, y: 5
+          ,
+            x: 4, y: 5
+          ,
+            x: 5, y: 6
+          ,
+            x: 5, y: 3
+        ]
+
+        notInTheWayPositions = [
+            x: 9, y: 6
+          ,
+            x: 1, y: 5
+          ,
+            x: 5, y: 9
+          ,
+            x: 5, y: 0
+        ]
+
+        for i in [0...toPositions.length]
+          board = new Board
+          board.set from, @scout
+          board.setBlock inTheWayPositions[i]
+
+          expect(->
+            board.move from, toPositions[i]
+          ).to.throw()
+
+        for i in [0...toPositions.length]
+          board = new Board
+          board.set from, @scout
+          board.set notInTheWayPositions[i], @flag
+
+          expect(->
+            board.move from, toPositions[i]
+          ).to.not.throw()
+
+      it 'should not allow movement onto unmovable block', ->
+        from = x: 5, y: 5
+
+        board = new Board
+        board.set from, @marshal
+        board.setBlock {x: 6, y: 5}
+
+        expect(->
+          board.move from, {x: 6, y: 5}
         ).to.throw()

@@ -60,6 +60,7 @@ module.exports = (grunt) ->
         options:
           baseUrl: './js',
           name: './main'
+          include: []
           out: 'app/static/stratego.min.js'
           paths:
             'jquery'    : 'empty:'

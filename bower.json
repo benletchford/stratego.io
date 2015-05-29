@@ -12,9 +12,7 @@
   ],
   "dependencies": {
     "pace": "~1.0.2",
-    "requirejs": "~2.1.17"
-  },
-  "devDependencies": {
+    "requirejs": "~2.1.17",
     "bootstrap": "~3.3.4"
   }
 }

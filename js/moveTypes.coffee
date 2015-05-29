@@ -7,14 +7,17 @@ define (require) ->
   # # Could be an enemy could be your own piece.
   # PIECE_IN_THE_WAY: 1
 
-  # Plain attack
-  ATTACK: 2
+  # Plain attack won
+  ATTACK_WON: 2
+
+  # Plain attack lost :(
+  ATTACK_LOST: 3
 
   # Flag capture
-  CAPTURE: 3
+  CAPTURE: 4
 
   # Miner removes bomb
-  DISARM: 4
+  DISARM: 5
 
   # Spy kills marshall
-  ASSASINATION: 5
+  ASSASINATION: 6

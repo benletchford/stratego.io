@@ -18,6 +18,10 @@ define (require) ->
     set: (position, piece) ->
       @_places[position.x][position.y] = piece
 
+    setBlock: (position) ->
+      # 1 denotes an unmovable block - useful for settings water, etc.
+      @_places[position.x][position.y] = 1
+
     get: (position) ->
       @_places[position.x][position.y]
 
@@ -29,11 +33,13 @@ define (require) ->
       toPiece   = @get to
 
       unless fromPiece
-        throw new Error 'Nothing to move.'
+        throw new Error 'No piece to move.'
 
-      # Can not move onto friendly piece.
-      if toPiece and fromPiece.side is toPiece.side
-        throw new Error 'Invalid move.'
+      if toPiece
+        if toPiece is 1
+          throw new Error 'Can not move onto an unmoveable block.'
+        if fromPiece.side is toPiece.side
+          throw new Error 'Can not move onto friendly piece.'
 
       # Bombs and flags can't move.
       if fromPiece.rank is 'B'
@@ -45,9 +51,8 @@ define (require) ->
       diff.x = Math.abs from.x - to.x
       diff.y = Math.abs from.y - to.y
 
-      # Position hasn't changed.
       if diff.x is 0 and diff.y is 0
-        throw new Error 'Invalid move.'
+        throw new Error 'Position has not changed.'
 
       # We're either moving one square or we're a scout moving in a straight
       # line.
@@ -55,14 +60,39 @@ define (require) ->
          # We can't move diagonally
          (diff.x is 0) != (diff.y is 0)
 
+        # If we're a scout we need to verify there's nothing between from and to
+        if fromPiece.rank is '9' and @_isPieceBetween(to, from, diff)
+          throw new Error 'Can not jump over pieces.'
+
         if toPiece
-          return _attack from, to
+          return @_attack from, to
 
         else
           return moveTypes.MOVE
 
       else
-        throw new Error 'Invalid move.'
+        throw new Error 'Illegal movement.'
+
+    _isPieceBetween: (from, to, diff) ->
+      # We must know at this point that we're not moving on multiple axis
+
+      # We're moving on the x axis
+      if diff.y is 0
+        coefficient = if from.x < to.x then 1 else -1
+        for i in [1...diff.x]
+          if @get {x: from.x + (i * coefficient), y: from.y}
+            return true
+
+        return false
+
+      # We're moving on the y axis
+      else
+        coefficient = if from.y < to.y then 1 else -1
+        for i in [1...diff.y]
+          if @get {x: from.x, y: from.y + (i * coefficient)}
+            return true
+
+        return false
 
     _attack: (fromPiece, toPiece) ->
       fromPiece = @get from
