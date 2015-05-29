@@ -132,3 +132,14 @@ define (require) ->
         expect(->
           board.move from, {x: from.x, y: from.y + 1}
         ).to.throw()
+
+      it 'should not allow moves onto friendly piece', ->
+        from = x: 5, y: 5
+
+        board = new Board
+        board.set from, @marshall
+        board.set {x: from.x, y: from.y + 1}, @scout
+
+        expect(->
+          board.move from, {x: from.x, y: from.y + 1}
+        ).to.throw()

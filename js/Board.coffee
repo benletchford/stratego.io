@@ -22,11 +22,18 @@ define (require) ->
       @_places[position.x][position.y]
 
     move: (from, to) ->
+      @_moveType from, to
+
+    _moveType: (from, to) ->
       fromPiece = @get from
       toPiece   = @get to
 
       unless fromPiece
         throw new Error 'Nothing to move.'
+
+      # Can not move onto friendly piece.
+      if toPiece and fromPiece.side is toPiece.side
+        throw new Error 'Invalid move.'
 
       # Bombs and flags can't move.
       if fromPiece.rank is 'B'
@@ -49,7 +56,7 @@ define (require) ->
          (diff.x is 0) != (diff.y is 0)
 
         if toPiece
-          _attack from, to
+          return _attack from, to
 
         else
           return moveTypes.MOVE

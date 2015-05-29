@@ -65,6 +65,7 @@ module.exports = (grunt) ->
             'jquery'    : 'empty:'
             'backbone'  : 'empty:'
             'underscore': 'empty:'
+            'firebase'  : 'empty:'
 
     mocha_phantomjs:
       options:
