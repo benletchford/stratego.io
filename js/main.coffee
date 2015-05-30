@@ -17,5 +17,4 @@ define (require) ->
   if Pace.running is false
     done()
   else
-    Pace.on 'hide', ->
-      done()
+    Pace.on 'hide', done
