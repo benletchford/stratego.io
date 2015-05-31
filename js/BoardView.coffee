@@ -4,6 +4,8 @@ define (require) ->
   _        = require 'underscore'
   Backbone = require 'backbone'
 
+  MIN_WIDTH = 320
+
   class extends Backbone.View
     className:  'board-view'
 
@@ -16,6 +18,8 @@ define (require) ->
       h = $(window).height()
 
       min = Math.min w, h
+
+      min = Math.max min, MIN_WIDTH
 
       @$el
         .width min
