@@ -94,6 +94,40 @@ define (require) ->
 
         return false
 
-    _attack: (fromPiece, toPiece) ->
+    _attack: (from, to) ->
       fromPiece = @get from
       toPiece   = @get to
+
+      # Are we gonna draw?
+      if fromPiece.rank is toPiece.rank
+        return moveTypes.ATTACK_DRAW
+
+      # Any movable piece can capture the flag.
+      if toPiece.rank is 'F'
+        return moveTypes.CAPTURE
+
+      # Are we attacking a bomb?
+      if toPiece.rank is 'B'
+        if fromPiece.rank is '8'
+          return moveTypes.DISARM
+        else
+          return moveTypes.ATTACK_LOST
+
+      # Everything wins attacking a spy.
+      if toPiece.rank is 'S'
+        return moveTypes.ATTACK_WON
+
+      # Are we a spy?
+      if fromPiece.rank is 'S'
+        if toPiece.rank is '1'
+          return moveTypes.ASSASINATION
+        else
+          return moveTypes.ATTACK_LOST
+
+      fromRank = parseInt fromPiece.rank
+      toRank   = parseInt toPiece.rank
+
+      if toRank > fromRank
+        return moveTypes.ATTACK_WON
+      else
+        return moveTypes.ATTACK_LOST

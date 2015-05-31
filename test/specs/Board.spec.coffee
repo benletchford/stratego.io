@@ -4,6 +4,15 @@ define (require) ->
   Piece = require 'Piece'
   moveTypes = require 'moveTypes'
 
+  MOVE_TYPE_TO_NAME =
+    0: 'move'
+    1: 'attack and draw'
+    2: 'attack and win'
+    3: 'attack and lose'
+    4: 'capture'
+    5: 'disarm'
+    6: 'assasinate'
+
   describe 'Board', ->
 
     it 'should have 100 blank places', ->
@@ -205,3 +214,319 @@ define (require) ->
         expect(->
           board.move from, {x: 6, y: 5}
         ).to.throw()
+
+      describe.only 'attacking', ->
+
+        beforeEach ->
+          @from = x: 5, y: 5
+          @to   = x: 5, y: 6
+
+        describe 'marshall', ->
+
+          rules =
+            '1': moveTypes.ATTACK_DRAW
+            '2': moveTypes.ATTACK_WON
+            '3': moveTypes.ATTACK_WON
+            '4': moveTypes.ATTACK_WON
+            '5': moveTypes.ATTACK_WON
+            '6': moveTypes.ATTACK_WON
+            '7': moveTypes.ATTACK_WON
+            '8': moveTypes.ATTACK_WON
+            '9': moveTypes.ATTACK_WON
+            'S': moveTypes.ATTACK_WON
+            'B': moveTypes.ATTACK_LOST
+            'F': moveTypes.CAPTURE
+
+          for toRank, result of rules
+            do (toRank) ->
+              it "should vs #{toRank} #{MOVE_TYPE_TO_NAME[result]}", ->
+                marshal = new Piece
+                  rank: '1'
+                  side: 0
+
+                board = new Board
+                board.set @from, marshal
+                board.set @to, new Piece
+                  rank: toRank
+                  side: 1
+
+                expect(board.move(@from, @to)).to.equal rules[toRank]
+
+        describe 'general', ->
+
+          rules =
+            '1': moveTypes.ATTACK_LOST
+            '2': moveTypes.ATTACK_DRAW
+            '3': moveTypes.ATTACK_WON
+            '4': moveTypes.ATTACK_WON
+            '5': moveTypes.ATTACK_WON
+            '6': moveTypes.ATTACK_WON
+            '7': moveTypes.ATTACK_WON
+            '8': moveTypes.ATTACK_WON
+            '9': moveTypes.ATTACK_WON
+            'S': moveTypes.ATTACK_WON
+            'B': moveTypes.ATTACK_LOST
+            'F': moveTypes.CAPTURE
+
+          for toRank, result of rules
+            do (toRank) ->
+              it "should vs #{toRank} #{MOVE_TYPE_TO_NAME[result]}", ->
+                general = new Piece
+                  rank: '2'
+                  side: 0
+
+                board = new Board
+                board.set @from, general
+                board.set @to, new Piece
+                  rank: toRank
+                  side: 1
+
+                expect(board.move(@from, @to)).to.equal rules[toRank]
+
+        describe 'colonel', ->
+
+          rules =
+            '1': moveTypes.ATTACK_LOST
+            '2': moveTypes.ATTACK_LOST
+            '3': moveTypes.ATTACK_DRAW
+            '4': moveTypes.ATTACK_WON
+            '5': moveTypes.ATTACK_WON
+            '6': moveTypes.ATTACK_WON
+            '7': moveTypes.ATTACK_WON
+            '8': moveTypes.ATTACK_WON
+            '9': moveTypes.ATTACK_WON
+            'S': moveTypes.ATTACK_WON
+            'B': moveTypes.ATTACK_LOST
+            'F': moveTypes.CAPTURE
+
+          for toRank, result of rules
+            do (toRank) ->
+              it "should vs #{toRank} #{MOVE_TYPE_TO_NAME[result]}", ->
+                colonel = new Piece
+                  rank: '3'
+                  side: 0
+
+                board = new Board
+                board.set @from, colonel
+                board.set @to, new Piece
+                  rank: toRank
+                  side: 1
+
+                expect(board.move(@from, @to)).to.equal rules[toRank]
+
+        describe 'major', ->
+
+          rules =
+            '1': moveTypes.ATTACK_LOST
+            '2': moveTypes.ATTACK_LOST
+            '3': moveTypes.ATTACK_LOST
+            '4': moveTypes.ATTACK_DRAW
+            '5': moveTypes.ATTACK_WON
+            '6': moveTypes.ATTACK_WON
+            '7': moveTypes.ATTACK_WON
+            '8': moveTypes.ATTACK_WON
+            '9': moveTypes.ATTACK_WON
+            'S': moveTypes.ATTACK_WON
+            'B': moveTypes.ATTACK_LOST
+            'F': moveTypes.CAPTURE
+
+          for toRank, result of rules
+            do (toRank) ->
+              it "should vs #{toRank} #{MOVE_TYPE_TO_NAME[result]}", ->
+                major = new Piece
+                  rank: '4'
+                  side: 0
+
+                board = new Board
+                board.set @from, major
+                board.set @to, new Piece
+                  rank: toRank
+                  side: 1
+
+                expect(board.move(@from, @to)).to.equal rules[toRank]
+
+        describe 'captain', ->
+
+          rules =
+            '1': moveTypes.ATTACK_LOST
+            '2': moveTypes.ATTACK_LOST
+            '3': moveTypes.ATTACK_LOST
+            '4': moveTypes.ATTACK_LOST
+            '5': moveTypes.ATTACK_DRAW
+            '6': moveTypes.ATTACK_WON
+            '7': moveTypes.ATTACK_WON
+            '8': moveTypes.ATTACK_WON
+            '9': moveTypes.ATTACK_WON
+            'S': moveTypes.ATTACK_WON
+            'B': moveTypes.ATTACK_LOST
+            'F': moveTypes.CAPTURE
+
+          for toRank, result of rules
+            do (toRank) ->
+              it "should vs #{toRank} #{MOVE_TYPE_TO_NAME[result]}", ->
+                captain = new Piece
+                  rank: '5'
+                  side: 0
+
+                board = new Board
+                board.set @from, captain
+                board.set @to, new Piece
+                  rank: toRank
+                  side: 1
+
+                expect(board.move(@from, @to)).to.equal rules[toRank]
+
+        describe 'lieutenant', ->
+
+          rules =
+            '1': moveTypes.ATTACK_LOST
+            '2': moveTypes.ATTACK_LOST
+            '3': moveTypes.ATTACK_LOST
+            '4': moveTypes.ATTACK_LOST
+            '5': moveTypes.ATTACK_LOST
+            '6': moveTypes.ATTACK_DRAW
+            '7': moveTypes.ATTACK_WON
+            '8': moveTypes.ATTACK_WON
+            '9': moveTypes.ATTACK_WON
+            'S': moveTypes.ATTACK_WON
+            'B': moveTypes.ATTACK_LOST
+            'F': moveTypes.CAPTURE
+
+          for toRank, result of rules
+            do (toRank) ->
+              it "should vs #{toRank} #{MOVE_TYPE_TO_NAME[result]}", ->
+                lieutenant = new Piece
+                  rank: '6'
+                  side: 0
+
+                board = new Board
+                board.set @from, lieutenant
+                board.set @to, new Piece
+                  rank: toRank
+                  side: 1
+
+                expect(board.move(@from, @to)).to.equal rules[toRank]
+
+        describe 'sergeant', ->
+
+          rules =
+            '1': moveTypes.ATTACK_LOST
+            '2': moveTypes.ATTACK_LOST
+            '3': moveTypes.ATTACK_LOST
+            '4': moveTypes.ATTACK_LOST
+            '5': moveTypes.ATTACK_LOST
+            '6': moveTypes.ATTACK_LOST
+            '7': moveTypes.ATTACK_DRAW
+            '8': moveTypes.ATTACK_WON
+            '9': moveTypes.ATTACK_WON
+            'S': moveTypes.ATTACK_WON
+            'B': moveTypes.ATTACK_LOST
+            'F': moveTypes.CAPTURE
+
+          for toRank, result of rules
+            do (toRank) ->
+              it "should vs #{toRank} #{MOVE_TYPE_TO_NAME[result]}", ->
+                sergeant = new Piece
+                  rank: '7'
+                  side: 0
+
+                board = new Board
+                board.set @from, sergeant
+                board.set @to, new Piece
+                  rank: toRank
+                  side: 1
+
+                expect(board.move(@from, @to)).to.equal rules[toRank]
+
+        describe 'miner', ->
+
+          rules =
+            '1': moveTypes.ATTACK_LOST
+            '2': moveTypes.ATTACK_LOST
+            '3': moveTypes.ATTACK_LOST
+            '4': moveTypes.ATTACK_LOST
+            '5': moveTypes.ATTACK_LOST
+            '6': moveTypes.ATTACK_LOST
+            '7': moveTypes.ATTACK_LOST
+            '8': moveTypes.ATTACK_DRAW
+            '9': moveTypes.ATTACK_WON
+            'S': moveTypes.ATTACK_WON
+            'B': moveTypes.DISARM
+            'F': moveTypes.CAPTURE
+
+          for toRank, result of rules
+            do (toRank) ->
+              it "should vs #{toRank} #{MOVE_TYPE_TO_NAME[result]}", ->
+                miner = new Piece
+                  rank: '8'
+                  side: 0
+
+                board = new Board
+                board.set @from, miner
+                board.set @to, new Piece
+                  rank: toRank
+                  side: 1
+
+                expect(board.move(@from, @to)).to.equal rules[toRank]
+
+        describe 'scout', ->
+
+          rules =
+            '1': moveTypes.ATTACK_LOST
+            '2': moveTypes.ATTACK_LOST
+            '3': moveTypes.ATTACK_LOST
+            '4': moveTypes.ATTACK_LOST
+            '5': moveTypes.ATTACK_LOST
+            '6': moveTypes.ATTACK_LOST
+            '7': moveTypes.ATTACK_LOST
+            '8': moveTypes.ATTACK_LOST
+            '9': moveTypes.ATTACK_DRAW
+            'S': moveTypes.ATTACK_WON
+            'B': moveTypes.ATTACK_LOST
+            'F': moveTypes.CAPTURE
+
+          for toRank, result of rules
+            do (toRank) ->
+              it "should vs #{toRank} #{MOVE_TYPE_TO_NAME[result]}", ->
+                scout = new Piece
+                  rank: '9'
+                  side: 0
+
+                board = new Board
+                board.set @from, scout
+                board.set @to, new Piece
+                  rank: toRank
+                  side: 1
+
+                expect(board.move(@from, @to)).to.equal rules[toRank]
+
+        describe 'spy', ->
+
+          rules =
+            '1': moveTypes.ASSASINATION
+            '2': moveTypes.ATTACK_LOST
+            '3': moveTypes.ATTACK_LOST
+            '4': moveTypes.ATTACK_LOST
+            '5': moveTypes.ATTACK_LOST
+            '6': moveTypes.ATTACK_LOST
+            '7': moveTypes.ATTACK_LOST
+            '8': moveTypes.ATTACK_LOST
+            '9': moveTypes.ATTACK_LOST
+            'S': moveTypes.ATTACK_DRAW
+            'B': moveTypes.ATTACK_LOST
+            'F': moveTypes.CAPTURE
+
+          for toRank, result of rules
+            do (toRank) ->
+              it "should vs #{toRank} #{MOVE_TYPE_TO_NAME[result]}", ->
+                spy = new Piece
+                  rank: 'S'
+                  side: 0
+
+                board = new Board
+                board.set @from, spy
+                board.set @to, new Piece
+                  rank: toRank
+                  side: 1
+
+                expect(board.move(@from, @to)).to.equal rules[toRank]

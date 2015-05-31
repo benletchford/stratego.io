@@ -7,6 +7,8 @@ define (require) ->
   # # Could be an enemy could be your own piece.
   # PIECE_IN_THE_WAY: 1
 
+  ATTACK_DRAW: 1
+
   # Plain attack won
   ATTACK_WON: 2
 
