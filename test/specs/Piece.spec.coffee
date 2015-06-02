@@ -1,7 +1,7 @@
 define (require) ->
 
-  Piece = require 'Piece'
-  ranks = require 'ranks'
+  Piece = require 'Piece.coffee'
+  ranks = require 'ranks.coffee'
 
   describe 'Piece', ->
 

@@ -1,36 +1,33 @@
-require.config({
-  baseUrl: '../js',
-  paths: {
-    // 'jquery': 'http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min',
-    'mocha': '../node_modules/mocha/mocha',
-    'chai' : '../node_modules/chai/chai',
-  },
-  shim: {
-    mocha: {
-      exports: 'mocha'
-    }
+// bind pollyfill for PhantomJS & old browsers
+Function.prototype.bind = function (oThis) {
+  if (typeof this !== "function") {
+    // closest thing possible to the ECMAScript 5 internal IsCallable function
+    throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable")
   }
-});
+
+  var aArgs = Array.prototype.slice.call(arguments, 1);
+  var fToBind = this;
+  var fNOP = function () {};
+  var fBound = function () {
+    return fToBind.apply(this instanceof fNOP && oThis ? this : oThis, aArgs.concat(Array.prototype.slice.call(arguments)))
+  };
+
+  fNOP.prototype = this.prototype;
+  fBound.prototype = new fNOP();
+
+  return fBound
+}
 
 define(function(require) {
   var chai = require('chai');
-  var mocha = require('mocha');
 
-  // Chai
+
+
+  // Make expect global :-|
   expect = chai.expect;
-  // chai.use(chaiJquery);
-
-  mocha.setup('bdd');
 
   require([
-    '../test/specs/Board.spec',
-    '../test/specs/Piece.spec',
-  ], function(require) {
-    if (window.mochaPhantomJS) {
-        mochaPhantomJS.run();
-    }
-    else {
-        mocha.run();
-    }
-  });
+    'mocha!./specs/Board.spec.coffee',
+    'mocha!./specs/Piece.spec.coffee'
+  ]);
 });

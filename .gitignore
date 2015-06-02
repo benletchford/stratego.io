@@ -4,5 +4,9 @@ node_modules
 app
 stratego.sublime-workspace
 
-test/specs/*.js
 js/*.js
+
+test/testBundle.js
+test/specs/*.js
+
+1.*

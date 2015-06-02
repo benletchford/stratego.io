@@ -3,9 +3,10 @@ define (require) ->
   $        = require 'jquery'
   _        = require 'underscore'
   Backbone = require 'backbone'
-  Firebase = require 'firebase'
 
   BoardView = require 'BoardView'
+  Board     = require 'Board'
+  Piece     = require 'Piece'
 
   done = ->
     BoardView = new BoardView

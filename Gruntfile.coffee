@@ -1,49 +1,40 @@
-module.exports = (grunt) ->
+_       = require 'underscore'
+webpack = require 'webpack'
 
+webpackBase =
+  module:
+    loaders: [
+        test: /\.css$/, loader: 'style!css'
+      ,
+        test: /\.coffee$/, loader: 'coffee-loader'
+    ]
+  resolve:
+    root: ['js']
+    extensions: [
+      '.js'
+      '.coffee'
+      ''
+    ]
+  externals:
+    jquery    : 'jQuery'
+    backbone  : 'Backbone'
+    underscore: '_'
+  plugins: [
+    new webpack.ProvidePlugin({
+        $: "jquery",
+        jQuery: "jquery",
+        "window.jQuery": "jquery"
+    })
+  ]
+
+module.exports = (grunt) ->
+  grunt.loadNpmTasks 'grunt-webpack'
   grunt.loadNpmTasks 'grunt-gae'
-  grunt.loadNpmTasks 'grunt-contrib-coffee'
-  grunt.loadNpmTasks 'grunt-contrib-less'
-  grunt.loadNpmTasks 'grunt-contrib-clean'
-  grunt.loadNpmTasks 'grunt-contrib-requirejs'
   grunt.loadNpmTasks 'grunt-mocha-phantomjs'
   grunt.loadNpmTasks 'grunt-contrib-htmlmin'
-  grunt.loadNpmTasks 'grunt-contrib-copy'
 
   grunt.initConfig
     pkg: grunt.file.readJSON 'package.json'
-
-    clean:
-      app:
-        ['app/static']
-      js:
-        ['js/**/*.js']
-      tests:
-        ['test/specs/**/*.js']
-
-    less:
-      app:
-        options:
-          compress: true
-        files:
-          'app/static/stratego.min.css': 'css/main.less'
-
-    coffee:
-      js:
-        expand: true
-        flatten: true
-        src: [
-          'js/**/*.coffee'
-        ]
-        dest: 'js'
-        ext: '.js'
-      tests:
-        expand: true
-        flatten: true
-        src: [
-          'test/specs/**/*.coffee'
-        ]
-        dest: 'test/specs'
-        ext: '.spec.js'
 
     htmlmin:
       app:
@@ -55,22 +46,9 @@ module.exports = (grunt) ->
         files:
           'app/static/index.html': 'html/index.html'
 
-    requirejs:
-      app:
-        options:
-          baseUrl: './js',
-          name: './main'
-          include: []
-          out: 'app/static/stratego.min.js'
-          paths:
-            'jquery'    : 'empty:'
-            'backbone'  : 'empty:'
-            'underscore': 'empty:'
-            'firebase'  : 'empty:'
-
     mocha_phantomjs:
       options:
-        reporter: 'spec'
+        reporter: 'dot'
       all: ['test/index.html']
 
     gae:
@@ -81,28 +59,34 @@ module.exports = (grunt) ->
           version: '1'
         action: 'update'
 
-    copy:
-      graphics:
-        expand: true
-        src: 'graphics/*'
-        dest: 'app/static/'
+    webpack:
+      app: _.extend({
+          entry: './js/main.coffee'
+          output:
+            path: __dirname + '/app/static'
+            filename: 'stratego.js'
+        }, webpackBase)
+
+      tests: _.extend({
+          entry: 'mocha!./test/specRunner.js'
+          output:
+            path: __dirname + '/test'
+            filename: 'testBundle.js'
+        }, webpackBase)
 
   grunt.registerTask 'build', [
-    'clean:app'
-    'clean:js'
-    'coffee:js'
-    'less'
     'htmlmin'
-    'requirejs'
-    'copy'
+    'webpack:app'
   ]
 
-  grunt.registerTask 'test', [
-    'clean:tests'
-    'coffee:tests'
-    'mocha_phantomjs'
+  grunt.registerTask 'build:tests', [
+    'webpack:tests'
   ]
 
   grunt.registerTask 'deploy', [
     'gae'
+  ]
+
+  grunt.registerTask 'test', [
+    'mocha_phantomjs'
   ]
