@@ -214,9 +214,8 @@ define (require) ->
         expect(->
           board.move from, {x: 6, y: 5}
         ).to.throw()
-<<<<<<< HEAD
 
-      describe.only 'attacking', ->
+      describe 'attacking', ->
 
         beforeEach ->
           @from = x: 5, y: 5
@@ -531,5 +530,3 @@ define (require) ->
                   side: 1
 
                 expect(board.move(@from, @to)).to.equal rules[toRank]
-=======
->>>>>>> [try-webpack] Webpack
