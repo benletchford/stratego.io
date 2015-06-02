@@ -1,3 +1,5 @@
+@mobile-width: 480px;
+
 #preload {
   display: none;
 }
@@ -8,12 +10,12 @@
 }
 
 .panel-view {
+  width: 80%;
+  height: 50%;
   position: relative;
   top: 50%;
   transform: translateY(-50%);
 
-  width: 80%;
-  height: 50%;
   margin: 0 auto;
 
   // background: rgb(43,171,226);
@@ -23,4 +25,9 @@
   border-radius: 5px;
   opacity: 0.88;
   color: white;
+
+  @media (max-width: 480px) {
+    width: 100%;
+    height: 80%;
+  }
 }
