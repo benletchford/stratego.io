@@ -21,8 +21,6 @@ Function.prototype.bind = function (oThis) {
 define(function(require) {
   var chai = require('chai');
 
-
-
   // Make expect global :-|
   expect = chai.expect;
 
