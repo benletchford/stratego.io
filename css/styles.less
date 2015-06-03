@@ -1,33 +1,16 @@
-@mobile-width: 480px;
+body {
+  font-family: "Open Sans";
+}
+a {
+  color: white;
+  text-decoration: none;
+}
 
 #preload {
   display: none;
 }
 
-.board-view {
-  background-image: url('graphics/board.png');
+.board-view, #preload {
+  background-image: url('../graphics/board.png');
   background-size: contain;
-}
-
-.panel-view {
-  width: 80%;
-  height: 50%;
-  position: relative;
-  top: 50%;
-  transform: translateY(-50%);
-
-  margin: 0 auto;
-
-  // background: rgb(43,171,226);
-  // background: rgb(43,43,43);
-  background: rgb(0, 1, 2);
-  border: 1px solid #020911;
-  border-radius: 5px;
-  opacity: 0.88;
-  color: white;
-
-  @media (max-width: 480px) {
-    width: 100%;
-    height: 80%;
-  }
 }

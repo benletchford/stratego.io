@@ -4,10 +4,12 @@ define (require) ->
   _        = require 'underscore'
   Backbone = require 'backbone'
 
-  BoardView = require 'BoardView'
-  PanelView = require 'PanelView'
-  Board     = require 'Board'
-  Piece     = require 'Piece'
+  BoardView = require './BoardView'
+  PanelView = require './panel/PanelView'
+  Board     = require './Board'
+  Piece     = require './Piece'
+
+  require '../css/main.less'
 
   done = ->
     BoardView = new BoardView

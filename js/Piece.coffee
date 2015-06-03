@@ -1,6 +1,6 @@
 define (require) ->
 
-  ranks = require 'ranks'
+  ranks = require './ranks'
 
   class Piece
 

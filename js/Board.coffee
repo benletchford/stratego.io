@@ -1,6 +1,6 @@
 define (require) ->
 
-  moveTypes = require 'moveTypes'
+  moveTypes = require './moveTypes'
 
   SIZE = 10
 

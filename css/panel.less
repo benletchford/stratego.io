@@ -1,0 +1,42 @@
+@panel-color: rgb(43,43,43);
+
+.panel-view {
+  width: 80%;
+  height: 50%;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0 auto;
+
+  opacity: 0.88;
+  background: @panel-color;
+  border: 1px solid lighten(@panel-color, 10%);
+  border-radius: 5px;
+  color: white;
+
+  @media (max-width: 480px) {
+    width: 95%;
+    height: 95%;
+  }
+}
+
+.panel-option-view {
+  display: block;
+  margin: 10px;
+  padding: 20px;
+
+  background: lighten(@panel-color, 5%);
+  border: 1px solid lighten(@panel-color, 10%);
+
+  &:hover {
+    background: lighten(@panel-color, 10%);
+    border: 1px solid lighten(@panel-color, 15%);
+  }
+
+  .title {
+
+  }
+  .description {
+    font-size: 11px;
+  }
+}
