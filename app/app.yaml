@@ -1,0 +1,20 @@
+application: wwwstrategoio
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+
+- login: admin
+  script: api.app
+  url: /api/.*
+
+- login: admin
+  url: /
+  static_files: static/index.html
+  upload: static/index.html
+
+- login: admin
+  url: /(.*)
+  static_files: static/\1
+  upload: static/(.*)
