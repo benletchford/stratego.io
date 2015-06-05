@@ -1,23 +1,3 @@
-// bind pollyfill for PhantomJS & old browsers
-Function.prototype.bind = function (oThis) {
-  if (typeof this !== "function") {
-    // closest thing possible to the ECMAScript 5 internal IsCallable function
-    throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable")
-  }
-
-  var aArgs = Array.prototype.slice.call(arguments, 1);
-  var fToBind = this;
-  var fNOP = function () {};
-  var fBound = function () {
-    return fToBind.apply(this instanceof fNOP && oThis ? this : oThis, aArgs.concat(Array.prototype.slice.call(arguments)))
-  };
-
-  fNOP.prototype = this.prototype;
-  fBound.prototype = new fNOP();
-
-  return fBound
-}
-
 define(function(require) {
   var chai = require('chai');
 
@@ -25,7 +5,6 @@ define(function(require) {
   expect = chai.expect;
 
   require([
-    'mocha!./specs/Board.spec.coffee',
-    'mocha!./specs/Piece.spec.coffee'
+    'mocha!./specs/Game.spec.coffee'
   ]);
 });

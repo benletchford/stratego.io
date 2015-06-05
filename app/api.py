@@ -20,6 +20,26 @@ class MainPage(webapp2.RequestHandler):
         self.response.write(json.dumps(response))
 
 
+class CreateHandler(webapp2.RequestHandler):
+
+    def post(self):
+        board = self.request.get('board')
+
+    def get(self):
+
+        ref = Firebase('https://shining-fire-2321.firebaseio.com/something.json',
+                       'u3bOjyHvk2Pc3a42YoqQBiVrPb7T97Hu7UIxDO5I')
+
+        response = ref.put({
+            'firstname': 'Ben',
+            'lastname': 'Letchford'
+        })
+
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.write(json.dumps(response))
+
+
 app = webapp2.WSGIApplication([
-    ('/api/hi', MainPage)
+    ('/api/hi', MainPage),
+    ('/api/create', MainPage)
 ], debug=True)

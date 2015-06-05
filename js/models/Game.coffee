@@ -1,36 +1,39 @@
 define (require) ->
 
-  moveTypes = require './moveTypes'
+  Backbone = require 'backbone'
+  moveTypes = require '../moveTypes'
 
-  SIZE = 10
+  class extends Backbone.Firebase.Model
 
-  class Board
+    urlRoot: 'https://asd.firebaseio.com/todos'
 
-    constructor: ->
-      # Initialize a blank 10x10 matrix.
-      @_places = []
-      for x in [0...SIZE]
-        col = new Array
-        col.length = SIZE
+    defaults: ->
+      board: [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      ]
+      turn: 0
 
-        @_places.push col
+    setPiece: ({x, y}, piece) ->
+      @get('board')[x][y] = piece
 
-    set: (position, piece) ->
-      @_places[position.x][position.y] = piece
+    setBlock: ({x, y}) ->
+      @get('board')[x][y] = 1
 
-    setBlock: (position) ->
-      # 1 denotes an unmovable block - useful for settings water, etc.
-      @_places[position.x][position.y] = 1
-
-    get: (position) ->
-      @_places[position.x][position.y]
-
-    move: (from, to) ->
-      @_moveType from, to
+    getPiece: ({x, y}) ->
+      @get('board')[x][y]
 
     canMove: (from, to) ->
-      fromPiece = @get from
-      toPiece   = @get to
+      fromPiece = @getPiece from
+      toPiece   = @getPiece to
 
       unless fromPiece
         throw new Error 'No piece to move.'
@@ -80,7 +83,7 @@ define (require) ->
       if diff.y is 0
         coefficient = if from.x < to.x then 1 else -1
         for i in [1...diff.x]
-          if @get {x: from.x + (i * coefficient), y: from.y}
+          if @getPiece {x: from.x + (i * coefficient), y: from.y}
             return true
 
         return false
@@ -89,14 +92,14 @@ define (require) ->
       else
         coefficient = if from.y < to.y then 1 else -1
         for i in [1...diff.y]
-          if @get {x: from.x, y: from.y + (i * coefficient)}
+          if @getPiece {x: from.x, y: from.y + (i * coefficient)}
             return true
 
         return false
 
     _attack: (from, to) ->
-      fromPiece = @get from
-      toPiece   = @get to
+      fromPiece = @getPiece from
+      toPiece   = @getPiece to
 
       # Are we gonna draw?
       if fromPiece.rank is toPiece.rank

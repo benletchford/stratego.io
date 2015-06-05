@@ -1,7 +1,6 @@
 define (require) ->
 
-  Board = require 'Board'
-  Piece = require 'Piece'
+  Game = require 'models/Game'
   moveTypes = require 'moveTypes'
 
   MOVE_TYPE_TO_NAME =
@@ -13,30 +12,24 @@ define (require) ->
     5: 'disarm'
     6: 'assasinate'
 
-  describe 'Board', ->
-
-    it 'should have 100 blank places', ->
-      board = new Board
-
-      expect [].concat.apply([], board._places)
-        .to.have.length 100
+  describe 'game', ->
 
     describe 'movement', ->
 
       beforeEach ->
-        @marshal = new Piece
+        @marshal =
           rank: '1'
           side: 0
 
-        @scout = new Piece
+        @scout =
           rank: '9'
           side: 0
 
-        @flag = new Piece
-          rank: 'B'
+        @flag =
+          rank: 'F'
           side: 0
 
-        @bomb = new Piece
+        @bomb =
           rank: 'B'
           side: 0
 
@@ -68,19 +61,19 @@ define (require) ->
         ]
 
         for to in validMoves
-          board = new Board
-          board.set from, @marshal
+          game = new Game()
+          game.setPiece from, @marshal
 
-          move = board.move from, to
+          move = game.canMove from, to
 
           expect(move).to.equal moveTypes.MOVE
 
         for to in invalidMoves
-          board = new Board
-          board.set from, @marshal
+          game = new Game()
+          game.setPiece from, @marshal
 
           expect(->
-            board.move from, to
+            game.canMove from, to
           ).to.throw()
 
       it 'should allow scouts to move straight in any direction', ->
@@ -107,50 +100,50 @@ define (require) ->
         ]
 
         for to in validMoves
-          board = new Board
-          board.set from, @scout
+          game = new Game()
+          game.setPiece from, @scout
 
           expect(->
-            board.move from, to
+            game.canMove from, to
           ).to.not.throw()
 
         for to in invalidMoves
-          board = new Board
-          board.set from, @marshal
+          game = new Game()
+          game.setPiece from, @marshal
 
           expect(->
-            board.move from, to
+            game.canMove from, to
           ).to.throw()
 
       it 'should not allow flags to move', ->
         from = x: 5, y: 5
 
-        board = new Board
-        board.set from, @flag
+        game = new Game()
+        game.setPiece from, @flag
 
         expect(->
-          board.move from, {x: from.x, y: from.y + 1}
+          game.canMove from, {x: from.x, y: from.y + 1}
         ).to.throw()
 
       it 'should not allow bombs to move', ->
         from = x: 5, y: 5
 
-        board = new Board
-        board.set from, @bomb
+        game = new Game()
+        game.setPiece from, @bomb
 
         expect(->
-          board.move from, {x: from.x, y: from.y + 1}
+          game.canMove from, {x: from.x, y: from.y + 1}
         ).to.throw()
 
       it 'should not allow movement onto friendly piece', ->
         from = x: 5, y: 5
 
-        board = new Board
-        board.set from, @marshall
-        board.set {x: from.x, y: from.y + 1}, @scout
+        game = new Game()
+        game.setPiece from, @marshall
+        game.setPiece {x: from.x, y: from.y + 1}, @scout
 
         expect(->
-          board.move from, {x: from.x, y: from.y + 1}
+          game.canMove from, {x: from.x, y: from.y + 1}
         ).to.throw()
 
       it 'should not allow scouts to jump over pieces', ->
@@ -187,32 +180,32 @@ define (require) ->
         ]
 
         for i in [0...toPositions.length]
-          board = new Board
-          board.set from, @scout
-          board.setBlock inTheWayPositions[i]
+          game = new Game()
+          game.setPiece from, @scout
+          game.setBlock inTheWayPositions[i]
 
           expect(->
-            board.move from, toPositions[i]
+            game.canMove from, toPositions[i]
           ).to.throw()
 
         for i in [0...toPositions.length]
-          board = new Board
-          board.set from, @scout
-          board.set notInTheWayPositions[i], @flag
+          game = new Game()
+          game.setPiece from, @scout
+          game.setPiece notInTheWayPositions[i], @flag
 
           expect(->
-            board.move from, toPositions[i]
+            game.canMove from, toPositions[i]
           ).to.not.throw()
 
       it 'should not allow movement onto unmovable block', ->
         from = x: 5, y: 5
 
-        board = new Board
-        board.set from, @marshal
-        board.setBlock {x: 6, y: 5}
+        game = new Game()
+        game.setPiece from, @marshal
+        game.setBlock {x: 6, y: 5}
 
         expect(->
-          board.move from, {x: 6, y: 5}
+          game.canMove from, {x: 6, y: 5}
         ).to.throw()
 
       describe 'attacking', ->
@@ -240,17 +233,17 @@ define (require) ->
           for toRank, result of rules
             do (toRank) ->
               it "should vs #{toRank} #{MOVE_TYPE_TO_NAME[result]}", ->
-                marshal = new Piece
+                marshal =
                   rank: '1'
                   side: 0
 
-                board = new Board
-                board.set @from, marshal
-                board.set @to, new Piece
+                game = new Game()
+                game.setPiece @from, marshal
+                game.setPiece @to,
                   rank: toRank
                   side: 1
 
-                expect(board.move(@from, @to)).to.equal rules[toRank]
+                expect(game.canMove(@from, @to)).to.equal rules[toRank]
 
         describe 'general', ->
 
@@ -271,17 +264,17 @@ define (require) ->
           for toRank, result of rules
             do (toRank) ->
               it "should vs #{toRank} #{MOVE_TYPE_TO_NAME[result]}", ->
-                general = new Piece
+                general =
                   rank: '2'
                   side: 0
 
-                board = new Board
-                board.set @from, general
-                board.set @to, new Piece
+                game = new Game()
+                game.setPiece @from, general
+                game.setPiece @to,
                   rank: toRank
                   side: 1
 
-                expect(board.move(@from, @to)).to.equal rules[toRank]
+                expect(game.canMove(@from, @to)).to.equal rules[toRank]
 
         describe 'colonel', ->
 
@@ -302,17 +295,17 @@ define (require) ->
           for toRank, result of rules
             do (toRank) ->
               it "should vs #{toRank} #{MOVE_TYPE_TO_NAME[result]}", ->
-                colonel = new Piece
+                colonel =
                   rank: '3'
                   side: 0
 
-                board = new Board
-                board.set @from, colonel
-                board.set @to, new Piece
+                game = new Game()
+                game.setPiece @from, colonel
+                game.setPiece @to,
                   rank: toRank
                   side: 1
 
-                expect(board.move(@from, @to)).to.equal rules[toRank]
+                expect(game.canMove(@from, @to)).to.equal rules[toRank]
 
         describe 'major', ->
 
@@ -333,17 +326,17 @@ define (require) ->
           for toRank, result of rules
             do (toRank) ->
               it "should vs #{toRank} #{MOVE_TYPE_TO_NAME[result]}", ->
-                major = new Piece
+                major =
                   rank: '4'
                   side: 0
 
-                board = new Board
-                board.set @from, major
-                board.set @to, new Piece
+                game = new Game()
+                game.setPiece @from, major
+                game.setPiece @to,
                   rank: toRank
                   side: 1
 
-                expect(board.move(@from, @to)).to.equal rules[toRank]
+                expect(game.canMove(@from, @to)).to.equal rules[toRank]
 
         describe 'captain', ->
 
@@ -364,17 +357,17 @@ define (require) ->
           for toRank, result of rules
             do (toRank) ->
               it "should vs #{toRank} #{MOVE_TYPE_TO_NAME[result]}", ->
-                captain = new Piece
+                captain =
                   rank: '5'
                   side: 0
 
-                board = new Board
-                board.set @from, captain
-                board.set @to, new Piece
+                game = new Game()
+                game.setPiece @from, captain
+                game.setPiece @to,
                   rank: toRank
                   side: 1
 
-                expect(board.move(@from, @to)).to.equal rules[toRank]
+                expect(game.canMove(@from, @to)).to.equal rules[toRank]
 
         describe 'lieutenant', ->
 
@@ -395,17 +388,17 @@ define (require) ->
           for toRank, result of rules
             do (toRank) ->
               it "should vs #{toRank} #{MOVE_TYPE_TO_NAME[result]}", ->
-                lieutenant = new Piece
+                lieutenant =
                   rank: '6'
                   side: 0
 
-                board = new Board
-                board.set @from, lieutenant
-                board.set @to, new Piece
+                game = new Game()
+                game.setPiece @from, lieutenant
+                game.setPiece @to,
                   rank: toRank
                   side: 1
 
-                expect(board.move(@from, @to)).to.equal rules[toRank]
+                expect(game.canMove(@from, @to)).to.equal rules[toRank]
 
         describe 'sergeant', ->
 
@@ -426,17 +419,17 @@ define (require) ->
           for toRank, result of rules
             do (toRank) ->
               it "should vs #{toRank} #{MOVE_TYPE_TO_NAME[result]}", ->
-                sergeant = new Piece
+                sergeant =
                   rank: '7'
                   side: 0
 
-                board = new Board
-                board.set @from, sergeant
-                board.set @to, new Piece
+                game = new Game()
+                game.setPiece @from, sergeant
+                game.setPiece @to,
                   rank: toRank
                   side: 1
 
-                expect(board.move(@from, @to)).to.equal rules[toRank]
+                expect(game.canMove(@from, @to)).to.equal rules[toRank]
 
         describe 'miner', ->
 
@@ -457,17 +450,17 @@ define (require) ->
           for toRank, result of rules
             do (toRank) ->
               it "should vs #{toRank} #{MOVE_TYPE_TO_NAME[result]}", ->
-                miner = new Piece
+                miner =
                   rank: '8'
                   side: 0
 
-                board = new Board
-                board.set @from, miner
-                board.set @to, new Piece
+                game = new Game()
+                game.setPiece @from, miner
+                game.setPiece @to,
                   rank: toRank
                   side: 1
 
-                expect(board.move(@from, @to)).to.equal rules[toRank]
+                expect(game.canMove(@from, @to)).to.equal rules[toRank]
 
         describe 'scout', ->
 
@@ -488,17 +481,17 @@ define (require) ->
           for toRank, result of rules
             do (toRank) ->
               it "should vs #{toRank} #{MOVE_TYPE_TO_NAME[result]}", ->
-                scout = new Piece
+                scout =
                   rank: '9'
                   side: 0
 
-                board = new Board
-                board.set @from, scout
-                board.set @to, new Piece
+                game = new Game()
+                game.setPiece @from, scout
+                game.setPiece @to,
                   rank: toRank
                   side: 1
 
-                expect(board.move(@from, @to)).to.equal rules[toRank]
+                expect(game.canMove(@from, @to)).to.equal rules[toRank]
 
         describe 'spy', ->
 
@@ -519,14 +512,14 @@ define (require) ->
           for toRank, result of rules
             do (toRank) ->
               it "should vs #{toRank} #{MOVE_TYPE_TO_NAME[result]}", ->
-                spy = new Piece
+                spy =
                   rank: 'S'
                   side: 0
 
-                board = new Board
-                board.set @from, spy
-                board.set @to, new Piece
+                game = new Game()
+                game.setPiece @from, spy
+                game.setPiece @to,
                   rank: toRank
                   side: 1
 
-                expect(board.move(@from, @to)).to.equal rules[toRank]
+                expect(game.canMove(@from, @to)).to.equal rules[toRank]

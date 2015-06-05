@@ -14,5 +14,8 @@
     "pace": "~1.0.2",
     "requirejs": "~2.1.17",
     "bootstrap": "~3.3.4"
+  },
+  "devDependencies": {
+    "backbonefire": "~0.5.1"
   }
 }
