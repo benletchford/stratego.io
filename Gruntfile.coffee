@@ -30,11 +30,12 @@ webpackBase =
     jquery    : 'jQuery'
     backbone  : 'Backbone'
     underscore: '_'
+    pusher    : 'Pusher'
   plugins: [
     new webpack.ProvidePlugin({
-        $: "jquery",
-        jQuery: "jquery",
-        "window.jQuery": "jquery"
+        $: 'jquery',
+        jQuery: 'jquery',
+        'window.jQuery': 'jquery'
     })
   ]
 
