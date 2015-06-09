@@ -4,6 +4,8 @@ import webapp2
 from lib import ndb_json
 from lib.pusher.pusher import Pusher
 
+from utils import status_codes
+
 import models
 
 
@@ -40,7 +42,11 @@ class MoveHandler(webapp2.RequestHandler):
 class GameHandler(webapp2.RequestHandler):
 
     def get(self):
-        game_id = self.request.get('game_id')
+        player_hash = self.request.get('player_hash')
+
+        if not player_hash:
+            self.response.set_status(status_codes.UNAUTHORIZED)
+            return
 
         a_game = models.Game()
         a_game.put()

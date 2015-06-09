@@ -4,24 +4,17 @@ define (require) ->
   _        = require 'underscore'
   Backbone = require 'backbone'
 
-  BoardView = require './BoardView'
-  PanelView = require './panel/PanelView'
-  Board     = require './Board'
-  Piece     = require './Piece'
+  Router = require './Router'
 
   require '../css/main.less'
 
-  done = ->
-    BoardView = new BoardView
-    PanelView = new PanelView
-
-    $(document.body).append BoardView.el
-
-    BoardView.$el.append PanelView.el
+  appReady = ->
+    new Router()
+    Backbone.history.start()
 
   # Due to a potential race condition Pace could finish before the hide event
   # is bound and it will never be triggered :(
   if Pace.running is false
-    done()
+    appReady()
   else
-    Pace.on 'hide', done
+    Pace.on 'hide', appReady

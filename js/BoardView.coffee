@@ -13,6 +13,10 @@ define (require) ->
       @_resize()
       $(window).on 'resize', _.debounce _.bind(@_resize, @), 100
 
+      @$el.html '<div class="over-board-container"></div>'
+
+      @$overboard = @$el.find '.over-board-container'
+
     _resize: ->
       w = $(window).width()
       h = $(window).height()

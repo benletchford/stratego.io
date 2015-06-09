@@ -1,11 +1,9 @@
 @panel-color: rgb(43,43,43);
 
-.panel-view {
-  width: 80%;
-  height: 50%;
-  position: relative;
-  top: 50%;
-  transform: translateY(-50%);
+.panel {
+  position: absolute;
+  left: 0;
+  right: 0;
   margin: 0 auto;
 
   opacity: 0.88;
@@ -14,9 +12,17 @@
   border-radius: 5px;
   color: white;
 
-  @media (max-width: 480px) {
-    width: 95%;
-    height: 95%;
+  &.default-panel {
+    width: 80%;
+    height: 50%;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+
+    @media (max-width: 480px) {
+      width: 95%;
+      height: 95%;
+    }
   }
 }
 

@@ -44,9 +44,12 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-gae'
   grunt.loadNpmTasks 'grunt-mocha-phantomjs'
   grunt.loadNpmTasks 'grunt-contrib-htmlmin'
+  grunt.loadNpmTasks 'grunt-contrib-clean'
 
   grunt.initConfig
     pkg: grunt.file.readJSON 'package.json'
+
+    clean: ['js/**/*.js']
 
     htmlmin:
       app:
@@ -87,6 +90,7 @@ module.exports = (grunt) ->
         }, webpackBase)
 
   grunt.registerTask 'build', [
+    'clean'
     'htmlmin'
     'webpack:app'
   ]
