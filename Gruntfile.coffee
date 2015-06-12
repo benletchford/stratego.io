@@ -31,6 +31,7 @@ webpackBase =
     backbone  : 'Backbone'
     underscore: '_'
     pusher    : 'Pusher'
+    sortable  : 'Sortable'
   plugins: [
     new webpack.ProvidePlugin({
         $: 'jquery',
@@ -45,11 +46,17 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-mocha-phantomjs'
   grunt.loadNpmTasks 'grunt-contrib-htmlmin'
   grunt.loadNpmTasks 'grunt-contrib-clean'
+  grunt.loadNpmTasks 'grunt-contrib-copy'
 
   grunt.initConfig
     pkg: grunt.file.readJSON 'package.json'
 
-    clean: ['js/**/*.js']
+    clean: ['js/**/*.js', 'app/static']
+
+    copy:
+      app:
+        src: 'bower_components/dragula.js/dist/dragula.min.js'
+        dest: 'app/static/dragula.min.js'
 
     htmlmin:
       app:
@@ -93,6 +100,7 @@ module.exports = (grunt) ->
     'clean'
     'htmlmin'
     'webpack:app'
+    'copy'
   ]
 
   grunt.registerTask 'build:tests', [
