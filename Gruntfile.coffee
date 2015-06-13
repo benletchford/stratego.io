@@ -79,7 +79,7 @@ module.exports = (grunt) ->
         }, webpackBase)
 
       tests: _.extend({
-          entry: 'mocha!./test/specRunner.js'
+          entry: './test/specRunner.js'
           output:
             path: __dirname + '/test'
             filename: 'testBundle.js'

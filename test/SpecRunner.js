@@ -7,4 +7,4 @@ define(function(require) {
   require([
     'mocha!./specs/Game.spec.coffee'
   ]);
-});
+});	

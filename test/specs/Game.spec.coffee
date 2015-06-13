@@ -1,7 +1,7 @@
 define (require) ->
 
-  Game = require 'models/Game'
-  moveTypes = require 'moveTypes'
+  Game = require '../../js/models/Game'
+  moveTypes = require '../../js/moveTypes'
 
   MOVE_TYPE_TO_NAME =
     0: 'move'
