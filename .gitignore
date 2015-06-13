@@ -10,4 +10,4 @@ js/*.js
 test/testBundle.js
 test/specs/*.js
 
-1.*
+1.*.js
