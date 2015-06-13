@@ -3,6 +3,30 @@ define (require) ->
   Game = require '../../js/models/Game'
   moveTypes = require '../../js/moveTypes'
 
+  Game::defaults = ->
+    board: [
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+    turn: 0
+
+  Game::setPiece = ({x, y}, piece) ->
+    @get('board')[x][y] = piece
+
+  Game::setBlock = ({x, y}) ->
+    @get('board')[x][y] = 1
+
+  Game::getPiece = ({x, y}) ->
+    @get('board')[x][y]
+
   MOVE_TYPE_TO_NAME =
     0: 'move'
     1: 'attack and draw'

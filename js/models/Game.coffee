@@ -3,33 +3,7 @@ define (require) ->
   Backbone = require 'backbone'
   moveTypes = require '../moveTypes'
 
-  class extends Backbone.Firebase.Model
-
-    urlRoot: 'https://asd.firebaseio.com/todos'
-
-    defaults: ->
-      board: [
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-      ]
-      turn: 0
-
-    setPiece: ({x, y}, piece) ->
-      @get('board')[x][y] = piece
-
-    setBlock: ({x, y}) ->
-      @get('board')[x][y] = 1
-
-    getPiece: ({x, y}) ->
-      @get('board')[x][y]
+  class extends Backbone.Model
 
     canMove: (from, to) ->
       fromPiece = @getPiece from

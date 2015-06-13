@@ -1,0 +1,79 @@
+@grid-border-color: black;
+@cell-hover-color: rgba(255, 255, 255, 0.5);
+
+.setup-view {
+  width: 100%;
+  height: 100%;
+
+  .setup-panel {
+    width: 95%;
+    height: 55%;
+    top: 2.5%;
+  }
+  .horizontal-grid-line {
+    width: 100%;
+    height: 1px;
+    position: absolute;
+    background: @grid-border-color;
+
+    &[data-number="0"] {
+      top: 25%;
+    }
+    &[data-number="1"] {
+      top: 50%;
+    }
+    &[data-number="2"] {
+      top: 75%;
+    }
+  }
+  .vertical-grid-line {
+    width: 1px;
+    height: 100%;
+    position: absolute;
+    background: @grid-border-color;
+
+    &[data-number="0"] {
+      left: 10%;
+    }
+    &[data-number="1"] {
+      left: 20%;
+    }
+    &[data-number="2"] {
+      left: 30%;
+    }
+    &[data-number="3"] {
+      left: 40%;
+    }
+    &[data-number="4"] {
+      left: 50%;
+    }
+    &[data-number="5"] {
+      left: 60%;
+    }
+    &[data-number="6"] {
+      left: 70%;
+    }
+    &[data-number="7"] {
+      left: 80%;
+    }
+    &[data-number="8"] {
+      left: 90%;
+    }
+  }
+  .setup-grid {
+    width: 100%;
+    height: 40%;
+    top: 60%;
+    position: relative;
+
+    .cell {
+      float: left;
+      width: 10%;
+      height: 25%;
+
+      // &:hover {
+      //   background-color: @cell-hover-color;
+      // }
+    }
+  }
+}
