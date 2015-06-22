@@ -38,6 +38,9 @@ webpackBase =
         jQuery: 'jquery',
         'window.jQuery': 'jquery'
     })
+    # new webpack.ProvidePlugin({
+    #     'underscore': '_',
+    # })
   ]
 
 module.exports = (grunt) ->

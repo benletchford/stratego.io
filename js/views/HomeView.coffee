@@ -4,7 +4,7 @@ define (require) ->
   _        = require 'underscore'
   Backbone = require 'backbone'
 
-  PanelOptionView = require './panel/PanelOptionView'
+  PanelOptionView = require '../panel/PanelOptionView'
 
   class extends Backbone.View
     className: 'home-view panel default-panel'

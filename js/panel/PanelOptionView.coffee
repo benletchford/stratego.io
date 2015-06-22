@@ -11,7 +11,6 @@ define (require) ->
     tagName  : 'a'
 
     initialize: (options) ->
-
       options = _.defaults options,
         href       : '#'
         title      : 'Option Title'

@@ -14,7 +14,8 @@
     "pace": "~1.0.2",
     "requirejs": "~2.1.17",
     "bootstrap": "~3.3.4",
-    "dragula.js": "~1.6.1"
+    "dragula.js": "~1.6.1",
+    "eventEmitter": "~4.2.11"
   },
   "devDependencies": {
     "backbonefire": "~0.5.1"

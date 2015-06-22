@@ -2,14 +2,14 @@ define (require) ->
 
   Backbone = require 'backbone'
 
-  BoardView = require './BoardView'
-  SetupView = require './SetupView'
-  HomeView = require './HomeView'
+  BoardView = require './views/BoardView'
+  SetupView = require './views/SetupView'
+  HomeView = require './views/HomeView'
 
   class extends Backbone.Router
     routes:
-      'create'    : 'create'
-      ''          : 'home'
+      'create' : 'create'
+      ''             : 'home'
 
     initialize: ->
       @boardView = new BoardView()
