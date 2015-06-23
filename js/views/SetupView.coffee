@@ -9,7 +9,9 @@ define (require) ->
 
   ranks = require '../ranks'
 
-  GridController = require '../controllers/GridController'
+  GridController  = require '../controllers/GridController'
+  PanelLinkView   = require '../panel/PanelLinkView'
+  PanelButtonView = require '../panel/PanelButtonView'
 
   class extends Backbone.View
     className: 'setup-view'
@@ -17,15 +19,29 @@ define (require) ->
     initialize: ->
       @$el.html template()
 
+      @$panel = @$ '.panel'
       @$grid  = @$ '.setup-grid'
       @$cells = @$ '.cell'
+
+      @$panel.append (new PanelLinkView
+        title: 'Back'
+        description: 'Go back to the main menu.'
+        href: '#').el
+
+      startBtn = new PanelButtonView(
+        title: 'Start'
+        description: 'Once you\'re happy with the setup click here to start the game.'
+      )
+      startBtn.$el.on 'click', ->
+        console.log 'cl'
+
+      @$panel.append startBtn.el
 
       for pieceRank, pieceDetails of ranks
         for [1..pieceDetails.amount]
           @$cells.filter(':empty:first').html piece(rank: pieceRank, side: 3)
 
       @$gridController = new GridController @$grid
-
       @$gridController.move = _.bind @swap, @
 
     cordinatesToCell: (co) ->

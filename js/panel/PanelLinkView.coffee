@@ -7,7 +7,7 @@ define (require) ->
   template = require '../../jade/panelOption.jade'
 
   class extends Backbone.View
-    className: 'panel-option-view'
+    className: 'panel-link-view panel-option'
     tagName  : 'a'
 
     initialize: (options) ->

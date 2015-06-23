@@ -56,7 +56,7 @@ define (require) ->
         x: $toCell.data 'x'
         y: $toCell.data 'y'
 
-      @_move data.from, to
+      @move data.from, to
 
     _dragLeaveCell: (e) ->
       @_getCellFromTarget(e).removeClass 'hover'
@@ -84,7 +84,7 @@ define (require) ->
           x: $fromCell.data 'x'
           y: $fromCell.data 'y'
 
-        @_move from, to
+        @move from, to
 
       # If nothing is selected, is there a piece in this cell we can select?
       else if $(e.target).hasClass 'piece'

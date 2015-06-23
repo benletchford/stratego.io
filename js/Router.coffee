@@ -8,8 +8,8 @@ define (require) ->
 
   class extends Backbone.Router
     routes:
-      'create' : 'create'
-      ''             : 'home'
+      'create/setup': 'create'
+      ''      : 'home'
 
     initialize: ->
       @boardView = new BoardView()
