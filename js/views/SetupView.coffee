@@ -4,12 +4,14 @@ define (require) ->
   _        = require 'underscore'
   Backbone = require 'backbone'
 
+  Setup = require '../models/Setup.coffee'
+
   template = require '../../jade/setup.jade'
   piece    = require '../../jade/piece.jade'
 
   ranks = require '../ranks'
 
-  GridController  = require '../controllers/GridController'
+  GridView        = require './GridView'
   PanelLinkView   = require '../panel/PanelLinkView'
   PanelButtonView = require '../panel/PanelButtonView'
 
@@ -19,9 +21,8 @@ define (require) ->
     initialize: ->
       @$el.html template()
 
-      @$panel = @$ '.panel'
-      @$grid  = @$ '.setup-grid'
-      @$cells = @$ '.cell'
+      @$panel         = @$ '.panel'
+      @$gridContainer = @$ '.grid-container'
 
       @$panel.append (new PanelLinkView
         title: 'Back'
@@ -36,12 +37,12 @@ define (require) ->
 
       @$panel.append startBtn.el
 
-      for pieceRank, pieceDetails of ranks
-        for [1..pieceDetails.amount]
-          @$cells.filter(':empty:first').html piece(rank: pieceRank, side: 3)
 
-      @$gridController = new GridController @$grid
-      @$gridController.move = _.bind @swap, @
+      window.setup = new Setup()
+      @grid = new GridView window.setup 
+      @$gridContainer.append @grid.el
+
+      # @grid.listenTo 'move', _.bind @swap, @
 
     cordinatesToCell: (co) ->
       @$cells.filter("[data-x=#{co.x}][data-y=#{co.y}]")
@@ -57,3 +58,4 @@ define (require) ->
       $fromPiece.appendTo $to
 
     clickStart: ->
+

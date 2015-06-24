@@ -4,10 +4,19 @@ define (require) ->
   _        = require 'underscore'
   Backbone = require 'backbone'
 
-  ranks = require '../ranks'
+  template = require '../../jade/grid.jade'
 
-  class
-    constructor: (@$el) ->
+  require '../../css/grid.less'
+
+  class extends Backbone.View
+    className: 'grid-view'
+
+    initialize: (@boardModel) ->
+      @render()
+      @boardModel.on 'change', _.bind @render, @
+
+    render: ->
+      @$el.html template(board: @boardModel.get('board'))
       @bindEvents()
 
     bindEvents: ->
@@ -56,7 +65,7 @@ define (require) ->
         x: $toCell.data 'x'
         y: $toCell.data 'y'
 
-      @move data.from, to
+      @trigger 'move', [data.from, to]
 
     _dragLeaveCell: (e) ->
       @_getCellFromTarget(e).removeClass 'hover'
@@ -84,7 +93,7 @@ define (require) ->
           x: $fromCell.data 'x'
           y: $fromCell.data 'y'
 
-        @move from, to
+        @trigger 'move', [from, to]
 
       # If nothing is selected, is there a piece in this cell we can select?
       else if $(e.target).hasClass 'piece'
