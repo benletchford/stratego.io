@@ -32,8 +32,7 @@ define (require) ->
         title: 'Start'
         description: 'Once you\'re happy with the setup click here to start the game.'
       )
-      startBtn.$el.on 'click', ->
-        console.log 'cl'
+      startBtn.$el.on 'click', _.bind @clickStart, @
 
       @$panel.append startBtn.el
 
@@ -56,3 +55,5 @@ define (require) ->
 
       $toPiece.appendTo $from
       $fromPiece.appendTo $to
+
+    clickStart: ->

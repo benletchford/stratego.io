@@ -5,6 +5,7 @@ define(function(require) {
   expect = chai.expect;
 
   require([
-    'mocha!./specs/Game.spec.coffee'
+    'mocha!./specs/Game.spec.coffee',
+    'mocha!./specs/Setup.spec.coffee'
   ]);
 });	
