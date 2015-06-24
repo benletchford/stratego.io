@@ -15,10 +15,11 @@ define (require) ->
             ]
 
         setPiece: ({x, y}, piece) ->
-            @get('board')[x][y] = piece
+            @get('board')[y][x] = piece
+            @trigger 'change', @
 
         getPiece: ({x, y}) ->
-            @get('board')[x][y]
+            @get('board')[y][x]
 
         initialize: ->
             pieces = []

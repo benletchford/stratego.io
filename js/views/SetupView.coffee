@@ -4,7 +4,7 @@ define (require) ->
   _        = require 'underscore'
   Backbone = require 'backbone'
 
-  Setup = require '../models/Setup.coffee'
+  GameSetup = require '../models/GameSetup.coffee'
 
   template = require '../../jade/setup.jade'
   piece    = require '../../jade/piece.jade'
@@ -37,25 +37,20 @@ define (require) ->
 
       @$panel.append startBtn.el
 
+      @setup = new GameSetup()
 
-      window.setup = new Setup()
-      @grid = new GridView window.setup 
+      @grid = new GridView @setup
       @$gridContainer.append @grid.el
 
-      # @grid.listenTo 'move', _.bind @swap, @
-
-    cordinatesToCell: (co) ->
-      @$cells.filter("[data-x=#{co.x}][data-y=#{co.y}]")
+      @listenTo @grid, 'move', _.bind(@swap, @)
 
     swap: (from, to) ->
-      $from = @cordinatesToCell from
-      $to   = @cordinatesToCell to
+      fromPiece = @setup.getPiece from
+      toPiece   = @setup.getPiece to
 
-      $fromPiece = $from.find '.piece'
-      $toPiece   = $to.find '.piece'
-
-      $toPiece.appendTo $from
-      $fromPiece.appendTo $to
+      @setup.setPiece from, toPiece
+      @setup.setPiece to, fromPiece
 
     clickStart: ->
-
+      $.post 'api/create',
+        board: @setup.get 'board'

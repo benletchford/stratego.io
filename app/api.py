@@ -12,31 +12,19 @@ import models
 class CreatePrivateHandler(webapp2.RequestHandler):
 
     def post(self):
-        board_setup = self.request.get('board_setup')
-
-
-class CreatePublicHandler(webapp2.RequestHandler):
-
-    def post(self):
-        board_setup = self.request.get('board_setup')
+        board = self.request.get('board')
 
 
 class JoinPrivateHandler(webapp2.RequestHandler):
 
     def post(self):
-        board_setup = self.request.get('board_setup')
-
-
-class JoinPublicHandler(webapp2.RequestHandler):
-
-    def post(self):
-        board_setup = self.request.get('board_setup')
+        board = self.request.get('board')
 
 
 class MoveHandler(webapp2.RequestHandler):
 
     def post(self):
-        board_setup = self.request.get('board_setup')
+        board = self.request.get('board')
 
 
 class GameHandler(webapp2.RequestHandler):
@@ -69,11 +57,11 @@ class GameHandler(webapp2.RequestHandler):
 
 
 app = webapp2.WSGIApplication([
-    ('/api/create/private', CreatePrivateHandler),
-    ('/api/create/public', CreatePublicHandler),
+    ('/api/private', CreatePrivateHandler),
+    # ('/api/create/public', CreatePublicHandler),
 
-    ('/api/join/private', JoinPrivateHandler),
-    ('/api/join/public', JoinPublicHandler),
+    ('/api/private', JoinPrivateHandler),
+    # ('/api/join/public', JoinPublicHandler),
 
     ('/api/move', MoveHandler),
     ('/api/game', GameHandler),

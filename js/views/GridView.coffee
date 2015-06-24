@@ -26,14 +26,16 @@ define (require) ->
       @$cells.on 'click', _.bind @_clickCell, @
       @$cells.on 'mouseover', _.bind @_hoverInCell, @
       @$cells.on 'mouseleave', _.bind @_hoverOutCell, @
-      @$cells.on 'dragover', _.bind @_dragOverCell, @  
-      @$cells.on 'dragleave', _.bind @_dragLeaveCell, @  
+      @$cells.on 'dragover', _.bind @_dragOverCell, @
+      @$cells.on 'dragleave', _.bind @_dragLeaveCell, @
       @$cells.on 'drop', _.bind @_dropCell, @
 
       @$pieces.on 'dragstart', _.bind @_dragStart, @
       @$pieces.on 'dragend', _.bind @_dragEnd, @
 
     _dragStart: (e) ->
+      @$cells.removeClass 'selected'
+
       $cell = $(e.target).parent()
       $cell.addClass 'selected'
 
@@ -65,7 +67,7 @@ define (require) ->
         x: $toCell.data 'x'
         y: $toCell.data 'y'
 
-      @trigger 'move', [data.from, to]
+      @trigger 'move', data.from, to
 
     _dragLeaveCell: (e) ->
       @_getCellFromTarget(e).removeClass 'hover'
@@ -93,7 +95,7 @@ define (require) ->
           x: $fromCell.data 'x'
           y: $fromCell.data 'y'
 
-        @trigger 'move', [from, to]
+        @trigger 'move', from, to
 
       # If nothing is selected, is there a piece in this cell we can select?
       else if $(e.target).hasClass 'piece'
