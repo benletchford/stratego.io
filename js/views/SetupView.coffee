@@ -53,4 +53,4 @@ define (require) ->
 
     clickStart: ->
       $.post 'api/create',
-        board: @setup.get 'board'
+        board: JSON.stringify @setup.get('board')

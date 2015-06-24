@@ -37,14 +37,14 @@ class Game(BaseModel):
         self.blue_hash = uuid.uuid4().hex
         self.join_hash = uuid.uuid4().hex
 
-    def move(self, to, from):
+    def move(self, toPos, fromPos):
         pass
 
-    def _canMove(from, to):
+    def _canMove(fromPos, toPos):
         pass
 
-    def _isPieceBetween(from, to, diff):
+    def _isPieceBetween(fromPos, toPos, diff):
         pass
 
-    def _attack(from, to):
+    def _attack(fromPos, toPos):
         pass

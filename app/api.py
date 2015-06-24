@@ -57,7 +57,7 @@ class GameHandler(webapp2.RequestHandler):
 
 
 app = webapp2.WSGIApplication([
-    ('/api/private', CreatePrivateHandler),
+    ('/api/create', CreatePrivateHandler),
     # ('/api/create/public', CreatePublicHandler),
 
     ('/api/private', JoinPrivateHandler),
