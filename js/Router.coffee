@@ -9,6 +9,7 @@ define (require) ->
   class extends Backbone.Router
     routes:
       'create/setup': 'create'
+      'play/:hash'  : 'play'
       ''      : 'home'
 
     initialize: ->
@@ -26,3 +27,8 @@ define (require) ->
 
       setupView = new SetupView()
       @boardView.$overboard.html setupView.el
+
+    play: (hash) ->
+      @boardView.$overboard.empty()
+
+      console.log hash

@@ -52,5 +52,8 @@ define (require) ->
       @setup.setPiece to, fromPiece
 
     clickStart: ->
-      $.post 'api/create',
+      $.post('api/create',
         board: JSON.stringify @setup.get('board')
+      )
+        .done (response) =>
+          window.location.hash = "play/#{response.red_hash}"

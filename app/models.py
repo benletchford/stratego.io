@@ -1,4 +1,5 @@
 import uuid
+import json
 
 from google.appengine.ext import ndb
 
@@ -26,6 +27,9 @@ class Game(BaseModel):
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         ]''')
 
+    red_setup = ndb.JsonProperty()
+    blue_setup = ndb.JsonProperty()
+
     # Who's turn is it currently? False = red, True = blue
     turn = ndb.BooleanProperty(default=False)
 
@@ -33,9 +37,12 @@ class Game(BaseModel):
     private = ndb.BooleanProperty(default=True)
 
     def _pre_put_hook(self):
-        self.red_hash = uuid.uuid4().hex
-        self.blue_hash = uuid.uuid4().hex
-        self.join_hash = uuid.uuid4().hex
+        self.red_hash = uuid.uuid4().hex[:6]
+        self.blue_hash = uuid.uuid4().hex[:6]
+        self.join_hash = uuid.uuid4().hex[:6]
+
+    def getBoard(self):
+        return json.loads(self.board)
 
     def move(self, toPos, fromPos):
         pass

@@ -12,7 +12,18 @@ import models
 class CreatePrivateHandler(webapp2.RequestHandler):
 
     def post(self):
-        board = self.request.get('board')
+        json_board = self.request.get('board')
+        board = json.loads(json_board)
+
+        new_game = models.Game(red_setup=json_board)
+        new_game.put()
+
+        response = {
+            'red_hash': new_game.red_hash
+        }
+
+        self.response.headers['Content-Type'] = 'text/json'
+        self.response.write(json.dumps(response))
 
 
 class JoinPrivateHandler(webapp2.RequestHandler):
