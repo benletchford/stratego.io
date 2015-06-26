@@ -41,7 +41,7 @@ class Game(BaseModel):
         self.blue_hash = uuid.uuid4().hex[:6]
         self.join_hash = uuid.uuid4().hex[:6]
 
-    def getBoard(self):
+    def get_board(self):
         return json.loads(self.board)
 
     def move(self, toPos, fromPos):

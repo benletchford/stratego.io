@@ -47,10 +47,18 @@ class GameHandler(webapp2.RequestHandler):
             self.response.set_status(status_codes.UNAUTHORIZED)
             return
 
-        a_game = models.Game()
-        a_game.put()
+        game = models.Game.query(
+            models.Game.red_hash == player_hash
+        ).get()
 
-        game = models.Game.get_by_id(a_game.key.id())
+        if not game:
+            game = models.Game.query(
+                models.Game.blue_hash == player_hash
+            ).get()
+
+        if not game:
+            self.response.set_status(status_codes.NOT_FOUND)
+            return
 
         game = json.loads(ndb_json.dumps(game))
 
@@ -58,6 +66,8 @@ class GameHandler(webapp2.RequestHandler):
         del game['red_hash']
         del game['blue_hash']
         del game['join_hash']
+        del game['red_setup']
+        del game['blue_setup']
 
         # We know the board is in json, let's load it so everything is on one
         # level and not wrapped in a string.

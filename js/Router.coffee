@@ -4,7 +4,8 @@ define (require) ->
 
   BoardView = require './views/BoardView'
   SetupView = require './views/SetupView'
-  HomeView = require './views/HomeView'
+  HomeView  = require './views/HomeView'
+  GameView  = require './views/GameView'
 
   class extends Backbone.Router
     routes:
@@ -31,4 +32,5 @@ define (require) ->
     play: (hash) ->
       @boardView.$overboard.empty()
 
-      console.log hash
+      gameView = new GameView(hash)
+      @boardView.$overboard.html gameView.el
