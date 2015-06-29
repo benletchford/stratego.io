@@ -7,7 +7,6 @@ define (require) ->
   GameSetup = require '../models/GameSetup.coffee'
 
   template = require '../../jade/setup.jade'
-  piece    = require '../../jade/piece.jade'
 
   ranks = require '../ranks'
 
