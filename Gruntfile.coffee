@@ -74,7 +74,7 @@ module.exports = (grunt) ->
     mocha_phantomjs:
       options:
         reporter: 'dot'
-      all: ['test/index.html']
+      all: ['frontTest/index.html']
 
     gae:
       deploy:
@@ -93,9 +93,9 @@ module.exports = (grunt) ->
         }, webpackBase)
 
       tests: _.extend({
-          entry: './test/specRunner.js'
+          entry: './frontTest/specRunner.js'
           output:
-            path: __dirname + '/test'
+            path: __dirname + '/frontTest'
             filename: 'testBundle.js'
         }, webpackBase)
 

@@ -2,4 +2,5 @@ each row, y in board
   each piece, x in row
     .cell(data-x=x, data-y=y)
       if piece
-        .piece(data-rank=piece.rank, data-side=piece.side, draggable='true')
+        if piece != 1
+          .piece(data-rank=piece.rank, data-side=piece.side, draggable='true')

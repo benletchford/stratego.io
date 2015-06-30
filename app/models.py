@@ -41,8 +41,25 @@ class Game(BaseModel):
         self.blue_hash = uuid.uuid4().hex[:6]
         self.join_hash = uuid.uuid4().hex[:6]
 
+    def set_red_setup(self, red_setup):
+        if not self.red_setup:
+            board = self.get_board()
+
+            board[6] = red_setup[0]
+            board[7] = red_setup[1]
+            board[8] = red_setup[2]
+            board[9] = red_setup[3]
+
+            self.set_board(board)
+            self.red_setup = json.dumps(red_setup)
+        else:
+            raise AttributeError('yeah see...')
+
     def get_board(self):
         return json.loads(self.board)
+
+    def set_board(self, board):
+        self.board = json.dumps(board)
 
     def move(self, toPos, fromPos):
         pass

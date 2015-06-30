@@ -1,6 +1,6 @@
 define (require) ->
 
-    Setup = require '../../js/models/Setup'
+    Setup = require '../../js/models/GameSetup'
 
     describe 'game', ->
 

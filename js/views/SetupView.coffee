@@ -4,7 +4,7 @@ define (require) ->
   _        = require 'underscore'
   Backbone = require 'backbone'
 
-  GameSetup = require '../models/GameSetup.coffee'
+  GameSetup = require '../models/GameSetup'
 
   template = require '../../jade/setup.jade'
 
