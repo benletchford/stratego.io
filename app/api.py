@@ -15,6 +15,10 @@ class CreateHandler(webapp2.RequestHandler):
         json_board = self.request.get('board')
         board = json.loads(json_board)
 
+        for row in board:
+            for piece in row:
+                piece['side'] = 0
+
         new_game = models.Game()
         new_game.set_red_setup(board)
         new_game.put()
