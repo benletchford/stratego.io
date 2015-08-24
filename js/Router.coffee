@@ -11,7 +11,7 @@ define (require) ->
     routes:
       'create/setup': 'create'
       'play/:hash'  : 'play'
-      ''      : 'home'
+      ''            : 'home'
 
     initialize: ->
       @boardView = new BoardView()

@@ -10,10 +10,10 @@ define (require) ->
     className: 'home-view panel default-panel'
 
     initialize: ->
-      @$el.append (new PanelLinkView
-        title: 'Online Stratego'
-        description: 'Get matched with someone online instantly.'
-        href: '#join').el
+      # @$el.append (new PanelLinkView
+      #   title: 'Online Stratego'
+      #   description: 'Get matched with someone online instantly.'
+      #   href: '#join').el
 
       @$el.append (new PanelLinkView
         title: 'Play with a friend'

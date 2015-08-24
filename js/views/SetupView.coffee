@@ -55,4 +55,8 @@ define (require) ->
         board: JSON.stringify @setup.get('board')
       )
         .done (response) =>
-          window.location.hash = "play/#{response.red_hash}"
+
+          _.delay ->
+            window.location.hash = "play/#{response.red_hash}"
+          , 1500
+
