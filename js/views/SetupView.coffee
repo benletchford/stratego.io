@@ -58,5 +58,5 @@ define (require) ->
 
           _.delay ->
             window.location.hash = "play/#{response.red_hash}"
-          , 1500
+          , 300
 
