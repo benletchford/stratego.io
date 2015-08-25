@@ -13,7 +13,8 @@ define (require) ->
     className: 'game-view'
 
     initialize: (@hash) ->
-      # TODO, do this better... we know if this game is brand new
+      # TODO, do this better... no need to send ajax request when we already
+      # know the data from setup.
       if window._response
         @render(window._response)
         delete window._response
@@ -39,6 +40,9 @@ define (require) ->
       @$gridContainer.append @grid.el
 
       @listenTo @grid, 'move', _.bind(@move, @)
+
+      if data.side is 0
+        console.log "Join hash: #{data.join_hash}"
 
       @connect()
 

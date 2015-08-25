@@ -12,6 +12,7 @@ define (require) ->
     routes:
       'create/setup': 'create'
       'play/:hash'  : 'play'
+      'join/:hash'  : 'join'
       ''            : 'home'
 
     initialize: ->
@@ -30,6 +31,12 @@ define (require) ->
       @boardView.$overboard.empty()
 
       setupView = new SetupView()
+      @boardView.$overboard.html setupView.el
+
+    join: (hash) ->
+      @boardView.$overboard.empty()
+
+      setupView = new SetupView(hash: hash)
       @boardView.$overboard.html setupView.el
 
     play: (hash) ->
