@@ -1,4 +1,3 @@
-import uuid
 import json
 
 from google.appengine.ext import ndb
@@ -36,10 +35,10 @@ class Game(BaseModel):
     # Is this game by invite only?
     private = ndb.BooleanProperty(default=True)
 
-    def _pre_put_hook(self):
-        self.red_hash = uuid.uuid4().hex[:6]
-        self.blue_hash = uuid.uuid4().hex[:6]
-        self.join_hash = uuid.uuid4().hex[:6]
+    # def _pre_put_hook(self):
+    #     self.red_hash = uuid.uuid4().hex[:6]
+    #     self.blue_hash = uuid.uuid4().hex[:6]
+    #     self.join_hash = uuid.uuid4().hex[:6]
 
     def set_red_setup(self, red_setup):
         if not self.red_setup:
@@ -61,8 +60,15 @@ class Game(BaseModel):
     def set_board(self, board):
         self.board = json.dumps(board)
 
-    def move(self, toPos, fromPos):
-        pass
+    def move(self, fromPos, toPos):
+        board = self.get_board()
+        piece = board[fromPos['y']][fromPos['x']]
+
+        board[fromPos['y']][fromPos['x']] = 0
+
+        board[toPos['y']][toPos['x']] = piece
+
+        self.set_board(board)
 
     def _canMove(fromPos, toPos):
         pass

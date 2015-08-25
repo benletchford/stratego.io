@@ -1,10 +1,11 @@
 import json
 import webapp2
+import uuid
 
 from lib import ndb_json
 from lib.pusher.pusher import Pusher
 
-from utils import status_codes
+from utils import status_codes, general
 
 import models
 
@@ -20,6 +21,9 @@ class CreateHandler(webapp2.RequestHandler):
                 piece['side'] = 0
 
         new_game = models.Game()
+        new_game.red_hash = uuid.uuid4().hex[:6]
+        new_game.blue_hash = uuid.uuid4().hex[:6]
+        new_game.join_hash = uuid.uuid4().hex[:6]
         new_game.set_red_setup(board)
         new_game.put()
 
@@ -40,7 +44,27 @@ class JoinHandler(webapp2.RequestHandler):
 class MoveHandler(webapp2.RequestHandler):
 
     def post(self):
-        board = self.request.get('board')
+        if not general.array_has_values(self.request.arguments(), ['player_hash', 'side', 'from', 'to']):
+            self.response.set_status(status_codes.INTERNAL_ERROR)
+            return
+
+        player_hash = self.request.get('player_hash')
+        side = int(self.request.get('side'))
+        fromPos = json.loads(self.request.get('from'))
+        toPos = json.loads(self.request.get('to'))
+
+        if side == 0:
+            game = models.Game.query(
+                models.Game.red_hash == player_hash
+            ).get()
+
+        elif side == 1:
+            game = models.Game.query(
+                models.Game.blue_hash == player_hash
+            ).get()
+
+        game.move(fromPos, toPos)
+        game.put()
 
 
 class GameHandler(webapp2.RequestHandler):

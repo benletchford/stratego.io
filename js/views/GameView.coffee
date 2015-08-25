@@ -24,6 +24,7 @@ define (require) ->
           @game = new Game(
             board: response.board
             turn: 0
+            side: response.side
           )
 
           @grid = new GridView @game
@@ -41,7 +42,13 @@ define (require) ->
 
       if move is 0
         @game.movePiece from, to
-        console.log 'yes'
+
+        $.post('api/move',
+          player_hash: @hash
+          side       : @game.get('side')
+          from       : JSON.stringify from
+          to         : JSON.stringify to
+        )
 
     connect: ->
       @pusher = new Pusher 'fd2e668a4ea4f7e23ab6', encrypted: true
