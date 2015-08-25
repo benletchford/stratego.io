@@ -50,6 +50,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-htmlmin'
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-contrib-copy'
+  grunt.loadNpmTasks 'grunt-contrib-watch'
 
   grunt.initConfig
     pkg: grunt.file.readJSON 'package.json'
@@ -98,6 +99,20 @@ module.exports = (grunt) ->
             path: __dirname + '/frontTest'
             filename: 'testBundle.js'
         }, webpackBase)
+
+    watch:
+      # webpack:
+      #   files: ['fe/**/*.coffee', 'fe/**/*.jade']
+      #   tasks: ['webpack']
+      # less:
+      #   files: ['css/**/*']
+      #   tasks: ['less']
+      html:
+        files: ['html/**/*']
+        tasks: ['htmlmin']
+      coffee:
+        files: ['js/**/*', 'jade/**/*', 'css/**/*']
+        tasks: ['webpack:app']
 
   grunt.registerTask 'build', [
     'clean'

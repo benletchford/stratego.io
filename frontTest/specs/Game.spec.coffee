@@ -18,14 +18,8 @@ define (require) ->
     ]
     turn: 0
 
-  Game::setPiece = ({x, y}, piece) ->
-    @get('board')[x][y] = piece
-
   Game::setBlock = ({x, y}) ->
-    @get('board')[x][y] = 1
-
-  Game::getPiece = ({x, y}) ->
-    @get('board')[x][y]
+    @get('board')[y][x] = 1
 
   MOVE_TYPE_TO_NAME =
     0: 'move'

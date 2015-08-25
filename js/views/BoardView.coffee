@@ -29,6 +29,8 @@ define (require) ->
         .width min
         .height min
 
+      Backbone.trigger 'board:resize', min
+
     remove: ->
       $(window).off 'resize', @_resize
       Backbone.View::remove.apply this, arguments

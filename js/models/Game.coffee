@@ -108,3 +108,17 @@ define (require) ->
         return moveTypes.ATTACK_WON
       else
         return moveTypes.ATTACK_LOST
+
+    movePiece: (from, to) ->
+      piece = @get('board')[from.y][from.x]
+
+      @get('board')[from.y][from.x] = 0
+      @get('board')[to.y][to.x]     = piece
+
+      @trigger 'change', @
+
+    setPiece: ({x, y}, piece) ->
+      @get('board')[y][x] = piece
+
+    getPiece: ({x, y}) ->
+      @get('board')[y][x]
