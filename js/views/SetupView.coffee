@@ -56,7 +56,7 @@ define (require) ->
       )
         .done (response) =>
 
-          _.delay ->
-            window.location.hash = "play/#{response.red_hash}"
-          , 300
+          # TODO, do this better...
+          window._response = response
+          window.location.hash = "play/#{response.player_hash}"
 

@@ -27,12 +27,10 @@ class CreateHandler(webapp2.RequestHandler):
         new_game.set_red_setup(board)
         new_game.put()
 
-        response = {
-            'red_hash': new_game.red_hash
-        }
+        game_dict = _get_sendable_game(new_game, 0)
 
         self.response.headers['Content-Type'] = 'text/json'
-        self.response.write(json.dumps(response))
+        self.response.write(json.dumps(game_dict))
 
 
 class JoinHandler(webapp2.RequestHandler):
@@ -92,35 +90,51 @@ class GameHandler(webapp2.RequestHandler):
             self.response.set_status(status_codes.NOT_FOUND)
             return
 
-        game_dict = json.loads(ndb_json.dumps(game))
-
-        # These are secret and should never be sent.
-        del game_dict['red_hash']
-        del game_dict['blue_hash']
-        del game_dict['join_hash']
-        del game_dict['red_setup']
-        del game_dict['blue_setup']
-
-        game_dict['side'] = side
-
-        # We know the board is in json, let's load it so everything is on one
-        # level and not wrapped in a string.
-        game_dict['board'] = game.get_board()
-
-        if side == 0:
-            if not game.blue_setup:
-                unknown = {'rank': '?', 'side': 1}
-                unknown_array = [unknown, unknown, unknown, unknown,
-                                 unknown, unknown, unknown, unknown, unknown, unknown]
-
-                game_dict['board'][0] = unknown_array
-                game_dict['board'][1] = unknown_array
-                game_dict['board'][2] = unknown_array
-                game_dict['board'][3] = unknown_array
+        game_dict = _get_sendable_game(game, side)
 
         self.response.headers['Content-Type'] = 'text/json'
         self.response.write(json.dumps(game_dict))
 
+
+def _get_sendable_game(game, side):
+    game_dict = json.loads(ndb_json.dumps(game))
+
+    if side == 0:
+        game_dict['player_hash'] = game_dict['red_hash']
+
+    elif side == 1:
+        game_dict['player_hash'] = game_dict['blue_hash']
+
+    # These are secret and should never be sent.
+    del game_dict['red_hash']
+    del game_dict['blue_hash']
+    del game_dict['red_setup']
+    del game_dict['blue_setup']
+
+    game_dict['side'] = side
+
+    # We know the board is in json, let's load it so everything is on one
+    # level and not wrapped in a string.
+    game_dict['board'] = _get_sendable_board(game, side)
+
+    return game_dict
+
+
+def _get_sendable_board(game, side):
+    board = game.get_board()
+
+    if side == 0:
+        if not game.blue_setup:
+            unknown = {'rank': '?', 'side': 1}
+            unknown_array = [unknown, unknown, unknown, unknown,
+                             unknown, unknown, unknown, unknown, unknown, unknown]
+
+            board[0] = unknown_array
+            board[1] = unknown_array
+            board[2] = unknown_array
+            board[3] = unknown_array
+
+    return board
 
 app = webapp2.WSGIApplication([
     ('/api/create', CreateHandler),
