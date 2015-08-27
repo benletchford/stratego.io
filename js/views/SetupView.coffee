@@ -17,7 +17,7 @@ define (require) ->
   class extends Backbone.View
     className: 'setup-view'
 
-    initialize: ->
+    initialize: (@options) ->
       @$el.html template()
 
       @$panel         = @$ '.panel'
@@ -51,11 +51,20 @@ define (require) ->
       @setup.setPiece to, fromPiece
 
     clickStart: ->
-      $.post('api/create',
+      data =
         board: JSON.stringify @setup.get('board')
-      )
-        .done (response) =>
 
+      # We're joining a game...
+      if @options?.hash
+        api_location = 'api/join'
+        data['join_hash'] = @options.hash
+
+      # We're creating a game...
+      else
+        api_location = 'api/create'
+
+      $.post(api_location, data)
+        .done (response) =>
           # TODO, do this better...
           window._response = response
           window.location.hash = "play/#{response.player_hash}"

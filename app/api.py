@@ -5,7 +5,7 @@ import uuid
 from lib import ndb_json
 from lib.pusher.pusher import Pusher
 
-from utils import status_codes, general
+from utils import status_codes, general, board_utils
 
 import models
 
@@ -27,7 +27,7 @@ class CreateHandler(webapp2.RequestHandler):
         new_game.set_red_setup(board)
         new_game.put()
 
-        game_dict = _get_sendable_game(new_game, 0)
+        game_dict = board_utils.get_sendable_game(new_game, 0)
 
         self.response.headers['Content-Type'] = 'text/json'
         self.response.write(json.dumps(game_dict))
@@ -36,7 +36,33 @@ class CreateHandler(webapp2.RequestHandler):
 class JoinHandler(webapp2.RequestHandler):
 
     def post(self):
-        board = self.request.get('board')
+        if not general.array_has_values(self.request.arguments(), ['join_hash', 'board']):
+            self.response.set_status(status_codes.INTERNAL_ERROR)
+            return
+
+        join_hash = self.request.get('join_hash')
+        board = json.loads(self.request.get('board'))
+
+        for row in board:
+            for piece in row:
+                piece['side'] = 1
+
+        game = models.Game.query(
+            models.Game.join_hash == join_hash
+        ).get()
+
+        if game:
+            game.set_blue_setup(board)
+            game.put()
+
+            game_dict = board_utils.get_sendable_game(game, 1)
+
+            self.response.headers['Content-Type'] = 'text/json'
+            self.response.write(json.dumps(game_dict))
+
+        else:
+            self.response.set_status(status_codes.NOT_FOUND)
+            return
 
 
 class MoveHandler(webapp2.RequestHandler):
@@ -90,51 +116,11 @@ class GameHandler(webapp2.RequestHandler):
             self.response.set_status(status_codes.NOT_FOUND)
             return
 
-        game_dict = _get_sendable_game(game, side)
+        game_dict = board_utils.get_sendable_game(game, side)
 
         self.response.headers['Content-Type'] = 'text/json'
         self.response.write(json.dumps(game_dict))
 
-
-def _get_sendable_game(game, side):
-    game_dict = json.loads(ndb_json.dumps(game))
-
-    if side == 0:
-        game_dict['player_hash'] = game_dict['red_hash']
-
-    elif side == 1:
-        game_dict['player_hash'] = game_dict['blue_hash']
-
-    # These are secret and should never be sent.
-    del game_dict['red_hash']
-    del game_dict['blue_hash']
-    del game_dict['red_setup']
-    del game_dict['blue_setup']
-
-    game_dict['side'] = side
-
-    # We know the board is in json, let's load it so everything is on one
-    # level and not wrapped in a string.
-    game_dict['board'] = _get_sendable_board(game, side)
-
-    return game_dict
-
-
-def _get_sendable_board(game, side):
-    board = game.get_board()
-
-    if side == 0:
-        if not game.blue_setup:
-            unknown = {'rank': '?', 'side': 1}
-            unknown_array = [unknown, unknown, unknown, unknown,
-                             unknown, unknown, unknown, unknown, unknown, unknown]
-
-            board[0] = unknown_array
-            board[1] = unknown_array
-            board[2] = unknown_array
-            board[3] = unknown_array
-
-    return board
 
 app = webapp2.WSGIApplication([
     ('/api/create', CreateHandler),

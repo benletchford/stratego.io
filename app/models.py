@@ -54,6 +54,20 @@ class Game(BaseModel):
         else:
             raise AttributeError('yeah see...')
 
+    def set_blue_setup(self, blue_setup):
+        if not self.blue_setup:
+            board = self.get_board()
+
+            board[0] = blue_setup[0]
+            board[1] = blue_setup[1]
+            board[2] = blue_setup[2]
+            board[3] = blue_setup[3]
+
+            self.set_board(board)
+            self.blue_setup = json.dumps(blue_setup)
+        else:
+            raise AttributeError('yeah see...')
+
     def get_board(self):
         return json.loads(self.board)
 
