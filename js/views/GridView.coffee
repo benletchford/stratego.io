@@ -37,6 +37,7 @@ define (require) ->
       @$cells.removeClass 'selected'
 
       $cell = $(e.target).parent()
+
       $cell.addClass 'selected'
 
       data =
@@ -80,12 +81,11 @@ define (require) ->
       @$cells.removeClass 'selected'
       @$cells.removeClass 'hover'
 
-      # Disable drag
-      @$pieces.removeAttr 'draggable'
-
       if $fromCell.length
         # Enable drag
-        @$pieces.attr 'draggable', true
+        @$pieces.filter((i, e) =>
+          return @canSelect($(e).parent())
+        ).attr 'draggable', true
 
         to =
           x: $currentTarget.data 'x'
@@ -98,13 +98,16 @@ define (require) ->
         @trigger 'move', from, to
 
       # If nothing is selected, is there a piece in this cell we can select?
-      else if $(e.target).hasClass 'piece'
+      else if $(e.target).hasClass('piece') and @canSelect($currentTarget)
+        # Disable drag
+        @$pieces.removeAttr 'draggable'
+
         $currentTarget.addClass 'selected'
 
     _hoverInCell: (e) ->
       $cell = @_getCellFromTarget e
 
-      if $cell.find('.piece').length
+      if $cell.find('.piece').length and @canSelect($cell)
         $cell.addClass 'hover'
       else if @$cells.filter('.selected').length
         $cell.addClass 'hover'
@@ -119,6 +122,5 @@ define (require) ->
 
       $cell
 
-    move: (from, to) ->
-      console.log 'from: ' + JSON.stringify(from)
-      console.log 'to: ' + JSON.stringify(to)
+    canSelect: (cell) ->
+      if cell.find('.piece').data('rank') is '?' then false else true

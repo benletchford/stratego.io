@@ -9,6 +9,9 @@ define (require) ->
       fromPiece = @getPiece from
       toPiece   = @getPiece to
 
+      unless fromPiece.side is @get('turn')
+        throw new Error 'Not your turn.'
+
       unless fromPiece
         throw new Error 'No piece to move.'
 
@@ -122,3 +125,6 @@ define (require) ->
 
     getPiece: ({x, y}) ->
       @get('board')[y][x]
+
+    flipTurn: ->
+      @set 'turn', +!@get('turn')

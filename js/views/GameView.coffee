@@ -4,8 +4,9 @@ define (require) ->
   _        = require 'underscore'
   Backbone = require 'backbone'
 
-  GridView = require './GridView'
-  Game     = require '../models/Game'
+  GridView   = require './GridView'
+  AttackView = require './AttackView'
+  Game       = require '../models/Game'
 
   template = require '../../jade/game.jade'
 
@@ -28,11 +29,14 @@ define (require) ->
     render: (data) ->
       @$el.html template()
 
+      # attackView = new AttackView()
+      # @$el.append attackView.el
+
       @$gridContainer = @$ '.grid-container'
 
       @game = new Game(
         board: data.board
-        turn: 0
+        turn: +data.turn
         side: data.side
       )
 
@@ -44,29 +48,32 @@ define (require) ->
       if data.side is 0
         console.log "Join hash: #{data.join_hash}"
 
-      @connect()
+      # Connect to pusher...
+      @pusher = new Pusher 'fd2e668a4ea4f7e23ab6', encrypted: true
+      @channel = @pusher.subscribe "game-#{@hash}"
 
-    move: (from, to) ->
+      @channel.bind 'move', (data) =>
+        @move(data.from, data.to, false)
+
+    move: (from, to, local = true) ->
       console.log 'from: ' + JSON.stringify(from)
       console.log 'to: ' + JSON.stringify(to)
 
       move = @game.canMove(from, to)
 
+      # Flip the turn
+      @game.flipTurn()
+
       if move is 0
         @game.movePiece from, to
 
-        $.post('api/move',
-          player_hash: @hash
-          side       : @game.get('side')
-          from       : JSON.stringify from
-          to         : JSON.stringify to
-        )
+        if local
+          $.post('api/move',
+            player_hash: @hash
+            side       : @game.get('side')
+            from       : JSON.stringify from
+            to         : JSON.stringify to
+          )
 
-    connect: ->
-      @pusher = new Pusher 'fd2e668a4ea4f7e23ab6', encrypted: true
-
-      @channel = @pusher.subscribe(@hash)
-
-      @channel.bind 'opponent_move', (data) ->
-        console.log data.message
-
+      # else if move is 1
+      #   c

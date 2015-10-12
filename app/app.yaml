@@ -5,8 +5,7 @@ threadsafe: true
 
 handlers:
 
-- login: admin
-  script: api.app
+- script: api.app
   url: /api/.*
 
 - login: admin

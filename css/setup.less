@@ -67,10 +67,25 @@
     position: relative;
 
     .cell {
-      float: left;
+      position: absolute;
       width: 10%;
       height: 25%;
 
+      &[data-y="0"] {top: 0%;}
+      &[data-y="1"] {top: 25%;}
+      &[data-y="2"] {top: 50%;}
+      &[data-y="3"] {top: 75%;}
+
+      &[data-x="0"] {left: 0%;}
+      &[data-x="1"] {left: 10%;}
+      &[data-x="2"] {left: 20%;}
+      &[data-x="3"] {left: 30%;}
+      &[data-x="4"] {left: 40%;}
+      &[data-x="5"] {left: 50%;}
+      &[data-x="6"] {left: 60%;}
+      &[data-x="7"] {left: 70%;}
+      &[data-x="8"] {left: 80%;}
+      &[data-x="9"] {left: 90%;}
       // &:hover {
       //   background-color: @cell-hover-color;
       // }

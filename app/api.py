@@ -5,7 +5,7 @@ import uuid
 from lib import ndb_json
 from lib.pusher.pusher import Pusher
 
-from utils import status_codes, general, board_utils
+from utils import status_codes, general, board_utils, pusher_utils
 
 import models
 
@@ -87,8 +87,22 @@ class MoveHandler(webapp2.RequestHandler):
                 models.Game.blue_hash == player_hash
             ).get()
 
-        game.move(fromPos, toPos)
-        game.put()
+        worked = game.move(fromPos, toPos)
+        if worked:
+            game.put()
+
+            # Send move to opponent
+            pusher = Pusher(app_id=pusher_utils.APP_ID,
+                            key=pusher_utils.KEY,
+                            secret=pusher_utils.SECRET)
+
+            pusher.trigger(u'game-%s' % game.get_opponent_hash(player_hash),
+                           u'move',
+                           {u'from': fromPos,
+                            u'to': toPos})
+
+        else:
+            self.response.set_status(status_codes.UNAUTHORIZED)
 
 
 class GameHandler(webapp2.RequestHandler):

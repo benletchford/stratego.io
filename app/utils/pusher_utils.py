@@ -1,0 +1,3 @@
+APP_ID = u'123469'
+KEY = u'fd2e668a4ea4f7e23ab6'
+SECRET= u'a680166498f6b7e61627'
