@@ -29,6 +29,8 @@ class Game(BaseModel):
     red_setup = ndb.JsonProperty()
     blue_setup = ndb.JsonProperty()
 
+    last_move = ndb.JsonProperty()
+
     # Who's turn is it currently? False = red, True = blue
     turn = ndb.BooleanProperty(default=False)
 
@@ -80,6 +82,13 @@ class Game(BaseModel):
     def set_board(self, board):
         self.board = json.dumps(board)
 
+    def set_last_move(self, fromPos, toPos):
+        last_move = {
+            'from': fromPos,
+            'to': toPos
+        }
+        self.last_move = json.dumps(last_move)
+
     def move(self, fromPos, toPos):
         board = self.get_board()
         piece = board[fromPos['y']][fromPos['x']]
@@ -92,6 +101,9 @@ class Game(BaseModel):
 
         # Flip the turn
         self.turn = not self.turn
+
+        # Set last moved
+        self.set_last_move(fromPos, toPos)
 
         return True
 

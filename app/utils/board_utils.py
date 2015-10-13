@@ -19,6 +19,12 @@ def get_sendable_game(game, side):
     del game_dict['blue_setup']
 
     game_dict['side'] = side
+
+    if game_dict['last_move']:
+        game_dict['last_move'] = json.loads(game_dict['last_move'])
+    else:
+        del game_dict['last_move']
+
     game_dict['board'] = get_sendable_board(game, side)
 
     return game_dict

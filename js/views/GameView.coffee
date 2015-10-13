@@ -38,6 +38,7 @@ define (require) ->
         board: data.board
         turn: +data.turn
         side: data.side
+        last_move: data.last_move
       )
 
       @grid = new GridView @game
@@ -66,6 +67,7 @@ define (require) ->
 
       if move is 0
         @game.movePiece from, to
+        @game.setLastMove from, to
 
         if local
           $.post('api/move',

@@ -28,5 +28,4 @@ define (require) ->
           @$el.addClass 'hidden'
 
     getImageURL: (w, h) ->
-      "http://lorempixel.com/g/#{w}/#{h}/"
-      # ""
+      "http://lorempixel.com/g/#{w}/#{h}/animals"

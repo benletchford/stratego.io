@@ -19,6 +19,15 @@ define (require) ->
       @$el.html template(board: @boardModel.get('board'))
       @bindEvents()
 
+      # Render last moved cell shading
+      lastMove = @boardModel.get('last_move')
+      if lastMove
+        @$cells.filter("[data-x='#{lastMove.from.x}'][data-y='#{lastMove.from.y}']")
+          .addClass 'last-move-from'
+
+        @$cells.filter("[data-x='#{lastMove.to.x}'][data-y='#{lastMove.to.y}']")
+          .addClass 'last-move-to'
+
     bindEvents: ->
       @$cells  = @$el.find '.cell'
       @$pieces = @$el.find '.piece'

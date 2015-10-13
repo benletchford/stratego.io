@@ -128,3 +128,7 @@ define (require) ->
 
     flipTurn: ->
       @set 'turn', +!@get('turn')
+
+    setLastMove: (from, to) ->
+      lastMove = {from, to}
+      @set('last_move', lastMove)
