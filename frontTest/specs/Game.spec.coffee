@@ -127,7 +127,7 @@ define (require) ->
 
         for to in invalidMoves
           game = new Game()
-          game.setPiece from, @marshal
+          game.setPiece from, @scout
 
           expect(->
             game.canMove from, to

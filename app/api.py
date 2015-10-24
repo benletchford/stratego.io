@@ -24,7 +24,12 @@ class CreateHandler(webapp2.RequestHandler):
         new_game.red_hash = uuid.uuid4().hex[:6]
         new_game.blue_hash = uuid.uuid4().hex[:6]
         new_game.join_hash = uuid.uuid4().hex[:6]
+
         new_game.set_red_setup(board)
+
+        # Set the water.
+        new_game.set_blocks()
+
         new_game.put()
 
         game_dict = board_utils.get_sendable_game(new_game, 0)

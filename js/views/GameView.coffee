@@ -4,9 +4,9 @@ define (require) ->
   _        = require 'underscore'
   Backbone = require 'backbone'
 
-  GridView   = require './GridView'
-  AttackView = require './AttackView'
-  Game       = require '../models/Game'
+  GridView       = require './GridView'
+  GameDialogView = require './GameDialogView'
+  Game           = require '../models/Game'
 
   template = require '../../jade/game.jade'
 
@@ -29,8 +29,8 @@ define (require) ->
     render: (data) ->
       @$el.html template()
 
-      # attackView = new AttackView()
-      # @$el.append attackView.el
+      # gameDialogView = new GameDialogView()
+      # @$el.append gameDialogView.el
 
       @$gridContainer = @$ '.grid-container'
 

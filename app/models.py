@@ -2,6 +2,8 @@ import json
 
 from google.appengine.ext import ndb
 
+import move_types
+
 
 class BaseModel(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
@@ -18,8 +20,8 @@ class Game(BaseModel):
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 1, 1, 0, 0, 1, 1, 0, 0],
-            [0, 0, 1, 1, 0, 0, 1, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -36,11 +38,6 @@ class Game(BaseModel):
 
     # Is this game by invite only?
     private = ndb.BooleanProperty(default=True)
-
-    # def _pre_put_hook(self):
-    #     self.red_hash = uuid.uuid4().hex[:6]
-    #     self.blue_hash = uuid.uuid4().hex[:6]
-    #     self.join_hash = uuid.uuid4().hex[:6]
 
     def set_red_setup(self, red_setup):
         if not self.red_setup:
@@ -67,8 +64,22 @@ class Game(BaseModel):
 
             self.set_board(board)
             self.blue_setup = json.dumps(blue_setup)
+
         else:
             raise AttributeError('yeah see...')
+
+    def set_blocks(self):
+        board = self.get_board()
+
+        self.set_piece({'x': 3, 'y': 4}, 1, board)
+        self.set_piece({'x': 3, 'y': 4}, 1, board)
+        self.set_piece({'x': 4, 'y': 5}, 1, board)
+        self.set_piece({'x': 4, 'y': 5}, 1, board)
+
+        self.set_piece({'x': 6, 'y': 4}, 1, board)
+        self.set_piece({'x': 6, 'y': 4}, 1, board)
+        self.set_piece({'x': 7, 'y': 5}, 1, board)
+        self.set_piece({'x': 7, 'y': 5}, 1, board)
 
     def get_opponent_hash(self, player_hash):
         if player_hash == self.blue_hash:
@@ -79,8 +90,19 @@ class Game(BaseModel):
     def get_board(self):
         return json.loads(self.board)
 
+    def get_piece(self, board, pos):
+        return board[pos['y']][pos['x']]
+
     def set_board(self, board):
         self.board = json.dumps(board)
+
+    def set_piece(self, pos, piece, board = None):
+        if board is None:
+            board = self.get_board()
+
+        board[pos['y']][pos['x']] = piece
+
+        self.set_board(board)
 
     def set_last_move(self, fromPos, toPos):
         last_move = {
@@ -89,7 +111,7 @@ class Game(BaseModel):
         }
         self.last_move = json.dumps(last_move)
 
-    def move(self, fromPos, toPos):
+    def move_piece(self, fromPos, toPos):
         board = self.get_board()
         piece = board[fromPos['y']][fromPos['x']]
 
@@ -107,11 +129,118 @@ class Game(BaseModel):
 
         return True
 
-    def _canMove(fromPos, toPos):
-        pass
+    def check_move(self, fromPos, toPos):
+        board = self.get_board()
 
-    def _isPieceBetween(fromPos, toPos, diff):
-        pass
+        fromPiece = self.get_piece(board, fromPos)
+        toPiece = self.get_piece(board, toPos)
 
-    def _attack(fromPos, toPos):
-        pass
+        if fromPiece == 0 or fromPiece == 1:
+          raise Exception('No piece to move.')
+
+        if not fromPiece['side'] == self.turn:
+            raise Exception('Not your turn')
+
+        if self._cell_is_occupied(toPiece):
+            if toPiece == 1:
+                raise Exception('Can not move onto an unmoveable block.')
+            if fromPiece['side'] == toPiece['side']:
+                raise Exception('Can not move onto friendly piece.')
+
+        # Bombs and flags can't move.
+        if fromPiece['rank'] == 'B':
+            raise Exception('Bombs cannot be moved.')
+        if fromPiece['rank'] == 'F':
+            raise Exception('Flags cannot be moved.')
+
+        diff = {}
+        diff['x'] = abs(fromPos['x'] - toPos['x'])
+        diff['y'] = abs(fromPos['y'] - toPos['y'])
+
+        if diff['x'] == 0 and diff['y'] == 0:
+            raise Exception('Position has not changed.')
+
+        # We're either moving one square or we're a scout moving in a straight
+        # line.
+        # We can't move diagonally
+        if ((diff['x'] == 1) != (diff['y'] == 1) or (fromPiece['rank'] == '9')) and \
+            (diff['x'] == 0) != (diff['y'] == 0):
+
+            # If we're a scout we need to verify there's nothing between from and to
+            if fromPiece['rank'] == '9' and self._is_piece_between(board, fromPos, toPos, diff):
+                raise Exception('Can not jump over pieces.')
+
+            if self._cell_is_occupied(toPiece):
+                return self._check_attack(board, fromPiece, toPiece)
+
+            else:
+                return move_types.MOVE
+
+        else:
+            raise Exception('Illegal movement.')
+
+    def _is_piece_between(board, fromPos, toPos, diff):
+      # We must know at this point that we're not moving on multiple axis
+
+      # We're moving on the x axis
+      if diff['y'] is 0:
+        coefficient = 1 if fromPos['x'] < toPos['x'] else -1
+        for i in xrange(len(diff['x'])):
+            if self.get_piece(board, {'x': fromPos['x'] + (i * coefficient), 'y': fromPos['y']}) != 0:
+                return True
+
+        return False
+
+      # We're moving on the y axis
+      else:
+        coefficient = 1 if fromPos['y'] < toPos['y'] else -1
+        for i in range(len(diff['y'])):
+            if self.get_piece(board, {'x': fromPos['x'], 'y': fromPos['y'] + (i * coefficient)}) != 0:
+                return True
+
+        return False
+
+    def _check_attack(self, board, fromPiece, toPiece):
+
+        # Are we gonna draw?
+        if fromPiece['rank'] is toPiece['rank']:
+            return move_types.ATTACK_DRAW
+
+        # Any movable piece can capture the flag.
+        if toPiece['rank'] is 'F':
+            return move_types.CAPTURE
+
+        # Are we attacking a bomb?
+        if toPiece['rank'] is 'B':
+            if fromPiece['rank'] is '8':
+                return move_types.DISARM
+            else:
+                return move_types.ATTACK_LOST
+
+        # Everything wins attacking a spy.
+        if toPiece['rank'] is 'S':
+            return move_types.ATTACK_WON
+
+        # Are we a spy?
+        if fromPiece['rank'] is 'S':
+            if toPiece['rank'] is '1':
+                return move_types.ASSASINATION
+            else:
+                return move_types.ATTACK_LOST
+
+        fromRank = int(fromPiece['rank'])
+        toRank   = int(toPiece['rank'])
+
+        if toRank > fromRank:
+            return move_types.ATTACK_WON
+        else:
+            return move_types.ATTACK_LOST
+
+    def _cell_is_occupied(self, piece):
+        return not self._cell_is_empty(piece)
+
+    def _cell_is_empty(self, piece):
+        if piece == 0:
+            return True
+        else:
+            return False
