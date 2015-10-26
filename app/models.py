@@ -5,6 +5,10 @@ from google.appengine.ext import ndb
 import move_types
 
 
+class InvalidMove(Exception):
+    pass
+
+
 class BaseModel(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
     modified = ndb.DateTimeProperty(auto_now=True)
@@ -71,14 +75,14 @@ class Game(BaseModel):
     def set_blocks(self):
         board = self.get_board()
 
+        self.set_piece({'x': 2, 'y': 4}, 1, board)
+        self.set_piece({'x': 2, 'y': 5}, 1, board)
         self.set_piece({'x': 3, 'y': 4}, 1, board)
-        self.set_piece({'x': 3, 'y': 4}, 1, board)
-        self.set_piece({'x': 4, 'y': 5}, 1, board)
-        self.set_piece({'x': 4, 'y': 5}, 1, board)
+        self.set_piece({'x': 3, 'y': 5}, 1, board)
 
         self.set_piece({'x': 6, 'y': 4}, 1, board)
-        self.set_piece({'x': 6, 'y': 4}, 1, board)
-        self.set_piece({'x': 7, 'y': 5}, 1, board)
+        self.set_piece({'x': 6, 'y': 5}, 1, board)
+        self.set_piece({'x': 7, 'y': 4}, 1, board)
         self.set_piece({'x': 7, 'y': 5}, 1, board)
 
     def get_opponent_hash(self, player_hash):
@@ -96,7 +100,7 @@ class Game(BaseModel):
     def set_board(self, board):
         self.board = json.dumps(board)
 
-    def set_piece(self, pos, piece, board = None):
+    def set_piece(self, pos, piece, board=None):
         if board is None:
             board = self.get_board()
 
@@ -136,39 +140,40 @@ class Game(BaseModel):
         toPiece = self.get_piece(board, toPos)
 
         if fromPiece == 0 or fromPiece == 1:
-          raise Exception('No piece to move.')
+            raise InvalidMove('No piece to move.')
 
         if not fromPiece['side'] == self.turn:
-            raise Exception('Not your turn')
+            raise InvalidMove('Not your turn')
 
         if self._cell_is_occupied(toPiece):
             if toPiece == 1:
-                raise Exception('Can not move onto an unmoveable block.')
+                raise InvalidMove('Can not move onto an unmoveable block.')
             if fromPiece['side'] == toPiece['side']:
-                raise Exception('Can not move onto friendly piece.')
+                raise InvalidMove('Can not move onto friendly piece.')
 
         # Bombs and flags can't move.
         if fromPiece['rank'] == 'B':
-            raise Exception('Bombs cannot be moved.')
+            raise InvalidMove('Bombs cannot be moved.')
         if fromPiece['rank'] == 'F':
-            raise Exception('Flags cannot be moved.')
+            raise InvalidMove('Flags cannot be moved.')
 
         diff = {}
         diff['x'] = abs(fromPos['x'] - toPos['x'])
         diff['y'] = abs(fromPos['y'] - toPos['y'])
 
         if diff['x'] == 0 and diff['y'] == 0:
-            raise Exception('Position has not changed.')
+            raise InvalidMove('Position has not changed.')
 
         # We're either moving one square or we're a scout moving in a straight
         # line.
         # We can't move diagonally
         if ((diff['x'] == 1) != (diff['y'] == 1) or (fromPiece['rank'] == '9')) and \
-            (diff['x'] == 0) != (diff['y'] == 0):
+                (diff['x'] == 0) != (diff['y'] == 0):
 
-            # If we're a scout we need to verify there's nothing between from and to
+            # If we're a scout we need to verify there's nothing between from
+            # and to
             if fromPiece['rank'] == '9' and self._is_piece_between(board, fromPos, toPos, diff):
-                raise Exception('Can not jump over pieces.')
+                raise InvalidMove('Can not jump over pieces.')
 
             if self._cell_is_occupied(toPiece):
                 return self._check_attack(board, fromPiece, toPiece)
@@ -177,32 +182,32 @@ class Game(BaseModel):
                 return move_types.MOVE
 
         else:
-            raise Exception('Illegal movement.')
+            raise InvalidMove('Illegal movement.')
 
-    def _is_piece_between(board, fromPos, toPos, diff):
-      # We must know at this point that we're not moving on multiple axis
+    def _is_piece_between(self, board, fromPos, toPos, diff):
+        # We must know at this point that we're not moving on multiple axis
 
-      # We're moving on the x axis
-      if diff['y'] is 0:
-        coefficient = 1 if fromPos['x'] < toPos['x'] else -1
-        for i in xrange(len(diff['x'])):
-            if self.get_piece(board, {'x': fromPos['x'] + (i * coefficient), 'y': fromPos['y']}) != 0:
-                return True
+        # We're moving on the x axis
+        if diff['y'] is 0:
+            coefficient = 1 if fromPos['x'] < toPos['x'] else -1
+            for i in xrange(1, diff['x']):
+                if self.get_piece(board, {'x': fromPos['x'] + (i * coefficient), 'y': fromPos['y']}) != 0:
+                    return True
 
-        return False
+            return False
 
-      # We're moving on the y axis
-      else:
-        coefficient = 1 if fromPos['y'] < toPos['y'] else -1
-        for i in range(len(diff['y'])):
-            if self.get_piece(board, {'x': fromPos['x'], 'y': fromPos['y'] + (i * coefficient)}) != 0:
-                return True
+        # We're moving on the y axis
+        else:
+            coefficient = 1 if fromPos['y'] < toPos['y'] else -1
+            for i in xrange(1, diff['y']):
+                if self.get_piece(board, {'x': fromPos['x'], 'y': fromPos['y'] + (i * coefficient)}) != 0:
+                    return True
 
-        return False
+            return False
 
     def _check_attack(self, board, fromPiece, toPiece):
 
-        # Are we gonna draw?
+            # Are we gonna draw?
         if fromPiece['rank'] is toPiece['rank']:
             return move_types.ATTACK_DRAW
 
@@ -229,7 +234,7 @@ class Game(BaseModel):
                 return move_types.ATTACK_LOST
 
         fromRank = int(fromPiece['rank'])
-        toRank   = int(toPiece['rank'])
+        toRank = int(toPiece['rank'])
 
         if toRank > fromRank:
             return move_types.ATTACK_WON
