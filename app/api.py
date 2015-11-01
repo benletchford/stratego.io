@@ -8,6 +8,7 @@ from lib.pusher.pusher import Pusher
 from utils import status_codes, general, board_utils, pusher_utils
 
 import models
+import move_types
 
 
 class CreateHandler(webapp2.RequestHandler):
@@ -94,21 +95,31 @@ class MoveHandler(webapp2.RequestHandler):
 
         try:
             # Will raise if not valid.
-            game.check_move(fromPos, toPos)
+            move_type = game.check_move(fromPos, toPos)
 
-            game.move_piece(fromPos, toPos)
+            if move_type == move_types.MOVE:
+                game.move_piece(fromPos, toPos)
 
-            game.put()
+                game.put()
 
-            # Send move to opponent
-            pusher = Pusher(app_id=pusher_utils.APP_ID,
-                            key=pusher_utils.KEY,
-                            secret=pusher_utils.SECRET)
+                # Send move to opponent
+                pusher = Pusher(app_id=pusher_utils.APP_ID,
+                                key=pusher_utils.KEY,
+                                secret=pusher_utils.SECRET)
 
-            pusher.trigger(u'game-%s' % game.get_opponent_hash(player_hash),
-                           u'move',
-                           {u'from': fromPos,
-                            u'to': toPos})
+                pusher.trigger(u'game-%s' % game.get_opponent_hash(player_hash),
+                               u'move',
+                               {u'from': fromPos,
+                                u'to': toPos})
+
+            elif move_type == move_types.ATTACK_WON:
+                pass
+
+            elif move_type == move_types.ATTACK_LOST:
+                pass
+
+            elif move_type == move_types.ATTACK_DRAW:
+                pass
 
         except models.InvalidMove:
             self.response.set_status(status_codes.UNAUTHORIZED)

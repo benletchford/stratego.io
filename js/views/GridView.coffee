@@ -19,14 +19,24 @@ define (require) ->
       @$el.html template(board: @boardModel.get('board'))
       @bindEvents()
 
+      # Render attack pending
+      if @boardModel.get('pending_attack')
+        pendingAttack = @boardModel.get('pending_attack')
+        @$cells.filter("[data-x='#{pendingAttack.from.x}'][data-y='#{pendingAttack.from.y}']")
+          .addClass 'pending-attack-from'
+
+        @$cells.filter("[data-x='#{pendingAttack.to.x}'][data-y='#{pendingAttack.to.y}']")
+          .addClass 'pending-attack-to'
+
       # Render last moved cell shading
-      lastMove = @boardModel.get('last_move')
-      if lastMove
+      else if @boardModel.get('last_move')
+        lastMove = @boardModel.get('last_move')
         @$cells.filter("[data-x='#{lastMove.from.x}'][data-y='#{lastMove.from.y}']")
           .addClass 'last-move-from'
 
         @$cells.filter("[data-x='#{lastMove.to.x}'][data-y='#{lastMove.to.y}']")
           .addClass 'last-move-to'
+
 
     bindEvents: ->
       @$cells  = @$el.find '.cell'

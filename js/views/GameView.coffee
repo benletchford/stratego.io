@@ -7,6 +7,7 @@ define (require) ->
   GridView       = require './GridView'
   GameDialogView = require './GameDialogView'
   Game           = require '../models/Game'
+  moveTypes      = require '../moveTypes'
 
   template = require '../../jade/game.jade'
 
@@ -60,22 +61,31 @@ define (require) ->
       console.log 'from: ' + JSON.stringify(from)
       console.log 'to: ' + JSON.stringify(to)
 
-      move = @game.canMove(from, to)
+      move = @game.checkMove(from, to)
 
       # Flip the turn
       @game.flipTurn()
 
-      if move is 0
-        @game.movePiece from, to
-        @game.setLastMove from, to
+      switch move
+        when moveTypes.MOVE
+          # Clone to restore later if need be
+          clonedGameAttri = JSON.parse(JSON.stringify(@game.attributes))
 
-        if local
-          $.post('api/move',
-            player_hash: @hash
-            side       : @game.get('side')
-            from       : JSON.stringify from
-            to         : JSON.stringify to
-          )
+          @game.movePiece from, to
+          @game.setLastMove from, to
 
-      # else if move is 1
-      #   c
+          if local
+            $.post('api/move',
+              player_hash: @hash
+              side       : @game.get('side')
+              from       : JSON.stringify from
+              to         : JSON.stringify to
+            )
+            .fail =>
+              # Reset
+              @game.set(clonedGameAttri)
+
+        when moveTypes.ATTACK
+          @game.setPendingAttack from, to
+
+

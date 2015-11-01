@@ -5,7 +5,7 @@ define (require) ->
 
   class extends Backbone.Model
 
-    canMove: (from, to) ->
+    checkMove: (from, to) ->
       fromPiece = @getPiece from
       toPiece   = @getPiece to
 
@@ -45,7 +45,8 @@ define (require) ->
           throw new Error 'Can not jump over pieces.'
 
         if toPiece
-          return @_attack from, to
+          return moveTypes.ATTACK
+          # return @_attack from, to
 
         else
           return moveTypes.MOVE
@@ -132,3 +133,7 @@ define (require) ->
     setLastMove: (from, to) ->
       lastMove = {from, to}
       @set('last_move', lastMove)
+
+    setPendingAttack: (from, to) ->
+      pendingAttack = {from, to}
+      @set('pending_attack', pendingAttack)
