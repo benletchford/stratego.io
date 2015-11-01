@@ -19,8 +19,48 @@ MARSHAL = {
     'side': 0
 }
 
+GENERAL = {
+    'rank': '2',
+    'side': 0
+}
+
+COLONEL = {
+    'rank': '3',
+    'side': 0
+}
+
+MAJOR = {
+    'rank': '4',
+    'side': 0
+}
+
+CAPTAIN = {
+    'rank': '5',
+    'side': 0
+}
+
+LIEUTENANT = {
+    'rank': '6',
+    'side': 0
+}
+
+SERGEANT = {
+    'rank': '7',
+    'side': 0
+}
+
+MINER = {
+    'rank': '8',
+    'side': 0
+}
+
 SCOUT = {
     'rank': '9',
+    'side': 0
+}
+
+SPY = {
+    'rank': 'S',
     'side': 0
 }
 
@@ -201,3 +241,340 @@ class GameTest(unittest.TestCase):
             game.set_piece(notInTheWayPositions[i], FLAG)
 
             game.check_move(fromPos, toPositions[i])
+
+    def test_should_not_allow_movement_onto_unmovable_block(self):
+        fromPos = {
+            'x': 5,
+            'y': 5
+        }
+
+        block_pos = {'x': 6, 'y': 5}
+
+        game = models.Game()
+        game.set_piece(fromPos, MARSHAL)
+        game.set_piece(block_pos, 1)
+
+        self.assertRaisesRegexp(models.InvalidMove,
+                                'Can not move onto an unmoveable block.',
+                                game.check_move,
+                                fromPos, block_pos)
+
+    def test_attacking_marshall(self):
+        fromPos = {
+            'x': 5,
+            'y': 5
+        }
+        toPos = {
+            'x': 5,
+            'y': 6
+        }
+
+        rules = {
+            '1': move_types.ATTACK_DRAW,
+            '2': move_types.ATTACK_WON,
+            '3': move_types.ATTACK_WON,
+            '4': move_types.ATTACK_WON,
+            '5': move_types.ATTACK_WON,
+            '6': move_types.ATTACK_WON,
+            '7': move_types.ATTACK_WON,
+            '8': move_types.ATTACK_WON,
+            '9': move_types.ATTACK_WON,
+            'S': move_types.ATTACK_WON,
+            'B': move_types.ATTACK_LOST,
+            'F': move_types.CAPTURE
+        }
+
+        for key, result in rules.iteritems():
+            game = models.Game()
+            game.set_piece(fromPos, MARSHAL)
+            game.set_piece(toPos, {'rank': key, 'side': 1})
+
+            self.assertEqual(game.check_move(fromPos, toPos), result)
+
+    def test_attacking_general(self):
+        fromPos = {
+            'x': 5,
+            'y': 5
+        }
+        toPos = {
+            'x': 5,
+            'y': 6
+        }
+
+        rules = {
+            '1': move_types.ATTACK_LOST,
+            '2': move_types.ATTACK_DRAW,
+            '3': move_types.ATTACK_WON,
+            '4': move_types.ATTACK_WON,
+            '5': move_types.ATTACK_WON,
+            '6': move_types.ATTACK_WON,
+            '7': move_types.ATTACK_WON,
+            '8': move_types.ATTACK_WON,
+            '9': move_types.ATTACK_WON,
+            'S': move_types.ATTACK_WON,
+            'B': move_types.ATTACK_LOST,
+            'F': move_types.CAPTURE
+        }
+
+        for key, result in rules.iteritems():
+            game = models.Game()
+            game.set_piece(fromPos, GENERAL)
+            game.set_piece(toPos, {'rank': key, 'side': 1})
+
+            self.assertEqual(game.check_move(fromPos, toPos), result)
+
+    def test_attacking_colonel(self):
+        fromPos = {
+            'x': 5,
+            'y': 5
+        }
+        toPos = {
+            'x': 5,
+            'y': 6
+        }
+
+        rules = {
+            '1': move_types.ATTACK_LOST,
+            '2': move_types.ATTACK_LOST,
+            '3': move_types.ATTACK_DRAW,
+            '4': move_types.ATTACK_WON,
+            '5': move_types.ATTACK_WON,
+            '6': move_types.ATTACK_WON,
+            '7': move_types.ATTACK_WON,
+            '8': move_types.ATTACK_WON,
+            '9': move_types.ATTACK_WON,
+            'S': move_types.ATTACK_WON,
+            'B': move_types.ATTACK_LOST,
+            'F': move_types.CAPTURE
+        }
+
+        for key, result in rules.iteritems():
+            game = models.Game()
+            game.set_piece(fromPos, COLONEL)
+            game.set_piece(toPos, {'rank': key, 'side': 1})
+
+            self.assertEqual(game.check_move(fromPos, toPos), result)
+
+    def test_attacking_major(self):
+        fromPos = {
+            'x': 5,
+            'y': 5
+        }
+        toPos = {
+            'x': 5,
+            'y': 6
+        }
+
+        rules = {
+            '1': move_types.ATTACK_LOST,
+            '2': move_types.ATTACK_LOST,
+            '3': move_types.ATTACK_LOST,
+            '4': move_types.ATTACK_DRAW,
+            '5': move_types.ATTACK_WON,
+            '6': move_types.ATTACK_WON,
+            '7': move_types.ATTACK_WON,
+            '8': move_types.ATTACK_WON,
+            '9': move_types.ATTACK_WON,
+            'S': move_types.ATTACK_WON,
+            'B': move_types.ATTACK_LOST,
+            'F': move_types.CAPTURE
+        }
+
+        for key, result in rules.iteritems():
+            game = models.Game()
+            game.set_piece(fromPos, MAJOR)
+            game.set_piece(toPos, {'rank': key, 'side': 1})
+
+            self.assertEqual(game.check_move(fromPos, toPos), result)
+
+    def test_attacking_captain(self):
+        fromPos = {
+            'x': 5,
+            'y': 5
+        }
+        toPos = {
+            'x': 5,
+            'y': 6
+        }
+
+        rules = {
+            '1': move_types.ATTACK_LOST,
+            '2': move_types.ATTACK_LOST,
+            '3': move_types.ATTACK_LOST,
+            '4': move_types.ATTACK_LOST,
+            '5': move_types.ATTACK_DRAW,
+            '6': move_types.ATTACK_WON,
+            '7': move_types.ATTACK_WON,
+            '8': move_types.ATTACK_WON,
+            '9': move_types.ATTACK_WON,
+            'S': move_types.ATTACK_WON,
+            'B': move_types.ATTACK_LOST,
+            'F': move_types.CAPTURE
+        }
+
+        for key, result in rules.iteritems():
+            game = models.Game()
+            game.set_piece(fromPos, CAPTAIN)
+            game.set_piece(toPos, {'rank': key, 'side': 1})
+
+            self.assertEqual(game.check_move(fromPos, toPos), result)
+
+    def test_attacking_lieutenant(self):
+        fromPos = {
+            'x': 5,
+            'y': 5
+        }
+        toPos = {
+            'x': 5,
+            'y': 6
+        }
+
+        rules = {
+            '1': move_types.ATTACK_LOST,
+            '2': move_types.ATTACK_LOST,
+            '3': move_types.ATTACK_LOST,
+            '4': move_types.ATTACK_LOST,
+            '5': move_types.ATTACK_LOST,
+            '6': move_types.ATTACK_DRAW,
+            '7': move_types.ATTACK_WON,
+            '8': move_types.ATTACK_WON,
+            '9': move_types.ATTACK_WON,
+            'S': move_types.ATTACK_WON,
+            'B': move_types.ATTACK_LOST,
+            'F': move_types.CAPTURE
+        }
+
+        for key, result in rules.iteritems():
+            game = models.Game()
+            game.set_piece(fromPos, LIEUTENANT)
+            game.set_piece(toPos, {'rank': key, 'side': 1})
+
+            self.assertEqual(game.check_move(fromPos, toPos), result)
+
+    def test_attacking_sergeant(self):
+        fromPos = {
+            'x': 5,
+            'y': 5
+        }
+        toPos = {
+            'x': 5,
+            'y': 6
+        }
+
+        rules = {
+            '1': move_types.ATTACK_LOST,
+            '2': move_types.ATTACK_LOST,
+            '3': move_types.ATTACK_LOST,
+            '4': move_types.ATTACK_LOST,
+            '5': move_types.ATTACK_LOST,
+            '6': move_types.ATTACK_LOST,
+            '7': move_types.ATTACK_DRAW,
+            '8': move_types.ATTACK_WON,
+            '9': move_types.ATTACK_WON,
+            'S': move_types.ATTACK_WON,
+            'B': move_types.ATTACK_LOST,
+            'F': move_types.CAPTURE
+        }
+
+        for key, result in rules.iteritems():
+            game = models.Game()
+            game.set_piece(fromPos, SERGEANT)
+            game.set_piece(toPos, {'rank': key, 'side': 1})
+
+            self.assertEqual(game.check_move(fromPos, toPos), result)
+
+    def test_attacking_miner(self):
+        fromPos = {
+            'x': 5,
+            'y': 5
+        }
+        toPos = {
+            'x': 5,
+            'y': 6
+        }
+
+        rules = {
+            '1': move_types.ATTACK_LOST,
+            '2': move_types.ATTACK_LOST,
+            '3': move_types.ATTACK_LOST,
+            '4': move_types.ATTACK_LOST,
+            '5': move_types.ATTACK_LOST,
+            '6': move_types.ATTACK_LOST,
+            '7': move_types.ATTACK_LOST,
+            '8': move_types.ATTACK_DRAW,
+            '9': move_types.ATTACK_WON,
+            'S': move_types.ATTACK_WON,
+            'B': move_types.DISARM,
+            'F': move_types.CAPTURE
+        }
+
+        for key, result in rules.iteritems():
+            game = models.Game()
+            game.set_piece(fromPos, MINER)
+            game.set_piece(toPos, {'rank': key, 'side': 1})
+
+            self.assertEqual(game.check_move(fromPos, toPos), result)
+
+    def test_attacking_scout(self):
+        fromPos = {
+            'x': 5,
+            'y': 5
+        }
+        toPos = {
+            'x': 5,
+            'y': 6
+        }
+
+        rules = {
+            '1': move_types.ATTACK_LOST,
+            '2': move_types.ATTACK_LOST,
+            '3': move_types.ATTACK_LOST,
+            '4': move_types.ATTACK_LOST,
+            '5': move_types.ATTACK_LOST,
+            '6': move_types.ATTACK_LOST,
+            '7': move_types.ATTACK_LOST,
+            '8': move_types.ATTACK_LOST,
+            '9': move_types.ATTACK_DRAW,
+            'S': move_types.ATTACK_WON,
+            'B': move_types.ATTACK_LOST,
+            'F': move_types.CAPTURE
+        }
+
+        for key, result in rules.iteritems():
+            game = models.Game()
+            game.set_piece(fromPos, SCOUT)
+            game.set_piece(toPos, {'rank': key, 'side': 1})
+
+            self.assertEqual(game.check_move(fromPos, toPos), result)
+
+    def test_attacking_spy(self):
+        fromPos = {
+            'x': 5,
+            'y': 5
+        }
+        toPos = {
+            'x': 5,
+            'y': 6
+        }
+
+        rules = {
+            '1': move_types.ASSASINATION,
+            '2': move_types.ATTACK_LOST,
+            '3': move_types.ATTACK_LOST,
+            '4': move_types.ATTACK_LOST,
+            '5': move_types.ATTACK_LOST,
+            '6': move_types.ATTACK_LOST,
+            '7': move_types.ATTACK_LOST,
+            '8': move_types.ATTACK_LOST,
+            '9': move_types.ATTACK_LOST,
+            'S': move_types.ATTACK_DRAW,
+            'B': move_types.ATTACK_LOST,
+            'F': move_types.CAPTURE
+        }
+
+        for key, result in rules.iteritems():
+            game = models.Game()
+            game.set_piece(fromPos, SPY)
+            game.set_piece(toPos, {'rank': key, 'side': 1})
+
+            self.assertEqual(game.check_move(fromPos, toPos), result)

@@ -208,27 +208,27 @@ class Game(BaseModel):
     def _check_attack(self, board, fromPiece, toPiece):
 
             # Are we gonna draw?
-        if fromPiece['rank'] is toPiece['rank']:
+        if fromPiece['rank'] == toPiece['rank']:
             return move_types.ATTACK_DRAW
 
         # Any movable piece can capture the flag.
-        if toPiece['rank'] is 'F':
+        if toPiece['rank'] == 'F':
             return move_types.CAPTURE
 
         # Are we attacking a bomb?
-        if toPiece['rank'] is 'B':
-            if fromPiece['rank'] is '8':
+        if toPiece['rank'] == 'B':
+            if fromPiece['rank'] == '8':
                 return move_types.DISARM
             else:
                 return move_types.ATTACK_LOST
 
         # Everything wins attacking a spy.
-        if toPiece['rank'] is 'S':
+        if toPiece['rank'] == 'S':
             return move_types.ATTACK_WON
 
         # Are we a spy?
-        if fromPiece['rank'] is 'S':
-            if toPiece['rank'] is '1':
+        if fromPiece['rank'] == 'S':
+            if toPiece['rank'] == '1':
                 return move_types.ASSASINATION
             else:
                 return move_types.ATTACK_LOST
