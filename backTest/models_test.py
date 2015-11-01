@@ -79,132 +79,132 @@ class GameTest(unittest.TestCase):
     nosegae_datastore_v3 = True
 
     def test_should_allow_one_space_adjacent_move_not_diagonally(self):
-        fromPos = {
+        from_pos = {
             'x': 5,
             'y': 5
         }
 
-        validMoves = [
-            {'x': fromPos['x'] + 1, 'y': fromPos['y']},
-            {'x': fromPos['x'] - 1, 'y': fromPos['y']},
-            {'x': fromPos['x'], 'y': fromPos['y'] - 1},
-            {'x': fromPos['x'], 'y': fromPos['y'] + 1}
+        valid_moves = [
+            {'x': from_pos['x'] + 1, 'y': from_pos['y']},
+            {'x': from_pos['x'] - 1, 'y': from_pos['y']},
+            {'x': from_pos['x'], 'y': from_pos['y'] - 1},
+            {'x': from_pos['x'], 'y': from_pos['y'] + 1}
         ]
 
-        invalidMoves = [
-            {'x': fromPos['x'] - 1, 'y': fromPos['y'] + 1},
-            {'x': fromPos['x'] + 1, 'y': fromPos['y'] - 1},
-            {'x': fromPos['x'] + 1, 'y': fromPos['y'] + 1},
-            {'x': fromPos['x'] - 1, 'y': fromPos['y'] - 1},
-            {'x': fromPos['x'], 'y': fromPos['y'] + 2},
-            {'x': fromPos['x'] + 2, 'y': fromPos['y']}
+        invalid_moves = [
+            {'x': from_pos['x'] - 1, 'y': from_pos['y'] + 1},
+            {'x': from_pos['x'] + 1, 'y': from_pos['y'] - 1},
+            {'x': from_pos['x'] + 1, 'y': from_pos['y'] + 1},
+            {'x': from_pos['x'] - 1, 'y': from_pos['y'] - 1},
+            {'x': from_pos['x'], 'y': from_pos['y'] + 2},
+            {'x': from_pos['x'] + 2, 'y': from_pos['y']}
         ]
 
-        for toPos in validMoves:
+        for to_pos in valid_moves:
             game = models.Game()
-            game.set_piece(fromPos, MARSHAL)
+            game.set_piece(from_pos, MARSHAL)
 
-            move = game.check_move(fromPos, toPos)
+            move = game.check_move(from_pos, to_pos)
 
             self.assertEqual(move, move_types.MOVE)
 
-        for toPos in invalidMoves:
+        for to_pos in invalid_moves:
             game = models.Game()
-            game.set_piece(fromPos, MARSHAL)
+            game.set_piece(from_pos, MARSHAL)
 
             self.assertRaisesRegexp(models.InvalidMove,
                                     'Illegal movement.',
                                     game.check_move,
-                                    fromPos, toPos)
+                                    from_pos, to_pos)
 
     def test_should_allow_scouts_to_move_straight_in_any_direction(self):
-        fromPos = {
+        from_pos = {
             'x': 5,
             'y': 5
         }
 
-        validMoves = [
-            {'x': fromPos['x'] + 4, 'y': fromPos['y']},
-            {'x': fromPos['x'] - 5, 'y': fromPos['y']},
-            {'x': fromPos['x'], 'y': fromPos['y'] + 4},
-            {'x': fromPos['x'], 'y': fromPos['y'] - 5}
+        valid_moves = [
+            {'x': from_pos['x'] + 4, 'y': from_pos['y']},
+            {'x': from_pos['x'] - 5, 'y': from_pos['y']},
+            {'x': from_pos['x'], 'y': from_pos['y'] + 4},
+            {'x': from_pos['x'], 'y': from_pos['y'] - 5}
         ]
 
-        invalidMoves = [
-            {'x': fromPos['x'] + 4, 'y': fromPos['y'] + 1},
-            {'x': fromPos['x'] - 5, 'y': fromPos['y'] + 4},
-            {'x': fromPos['x'] - 2, 'y': fromPos['y'] + 4},
-            {'x': fromPos['x'] + 4, 'y': fromPos['y'] - 5}
+        invalid_moves = [
+            {'x': from_pos['x'] + 4, 'y': from_pos['y'] + 1},
+            {'x': from_pos['x'] - 5, 'y': from_pos['y'] + 4},
+            {'x': from_pos['x'] - 2, 'y': from_pos['y'] + 4},
+            {'x': from_pos['x'] + 4, 'y': from_pos['y'] - 5}
         ]
 
-        for toPos in validMoves:
+        for to_pos in valid_moves:
             game = models.Game()
-            game.set_piece(fromPos, SCOUT)
+            game.set_piece(from_pos, SCOUT)
 
-        for toPos in invalidMoves:
+        for to_pos in invalid_moves:
             game = models.Game()
-            game.set_piece(fromPos, SCOUT)
+            game.set_piece(from_pos, SCOUT)
 
             self.assertRaisesRegexp(models.InvalidMove,
                                     'Illegal movement.',
                                     game.check_move,
-                                    fromPos, toPos)
+                                    from_pos, to_pos)
 
     def test_should_not_allow_flags_to_move(self):
-        fromPos = {
+        from_pos = {
             'x': 5,
             'y': 5
         }
 
         game = models.Game()
-        game.set_piece(fromPos, FLAG)
+        game.set_piece(from_pos, FLAG)
 
         self.assertRaisesRegexp(models.InvalidMove,
                                 'Flags cannot be moved.',
                                 game.check_move,
-                                fromPos, {'x': fromPos['x'], 'y': fromPos['y'] + 1})
+                                from_pos, {'x': from_pos['x'], 'y': from_pos['y'] + 1})
 
     def test_should_not_allow_bombs_to_move(self):
-        fromPos = {
+        from_pos = {
             'x': 5,
             'y': 5
         }
 
         game = models.Game()
-        game.set_piece(fromPos, BOMB)
+        game.set_piece(from_pos, BOMB)
 
         self.assertRaisesRegexp(models.InvalidMove,
                                 'Bombs cannot be moved.',
                                 game.check_move,
-                                fromPos, {'x': fromPos['x'], 'y': fromPos['y'] + 1})
+                                from_pos, {'x': from_pos['x'], 'y': from_pos['y'] + 1})
 
     def test_should_not_allow_movement_onto_friendly_piece(self):
-        fromPos = {
+        from_pos = {
             'x': 5,
             'y': 5
         }
 
-        toPos = {
-            'x': fromPos['x'],
-            'y': fromPos['y'] + 1
+        to_pos = {
+            'x': from_pos['x'],
+            'y': from_pos['y'] + 1
         }
 
         game = models.Game()
-        game.set_piece(fromPos, MARSHAL)
-        game.set_piece(toPos, SCOUT)
+        game.set_piece(from_pos, MARSHAL)
+        game.set_piece(to_pos, SCOUT)
 
         self.assertRaisesRegexp(models.InvalidMove,
                                 'Can not move onto friendly piece.',
                                 game.check_move,
-                                fromPos, toPos)
+                                from_pos, to_pos)
 
     def test_should_not_allow_scouts_to_jump_over_pieces(self):
-        fromPos = {
+        from_pos = {
             'x': 5,
             'y': 5
         }
 
-        toPositions = [
+        to_positions = [
             {'x': 9, 'y': 5},
             {'x': 2, 'y': 5},
             {'x': 5, 'y': 8},
@@ -225,25 +225,25 @@ class GameTest(unittest.TestCase):
             {'x': 5, 'y': 0}
         ]
 
-        for i in xrange(len(toPositions)):
+        for i in xrange(len(to_positions)):
             game = models.Game()
-            game.set_piece(fromPos, SCOUT)
+            game.set_piece(from_pos, SCOUT)
             game.set_piece(inTheWayPositions[i], 1)
 
             self.assertRaisesRegexp(models.InvalidMove,
                                     'Can not jump over pieces.',
                                     game.check_move,
-                                    fromPos, toPositions[i])
+                                    from_pos, to_positions[i])
 
-        for i in xrange(len(toPositions)):
+        for i in xrange(len(to_positions)):
             game = models.Game()
-            game.set_piece(fromPos, SCOUT)
+            game.set_piece(from_pos, SCOUT)
             game.set_piece(notInTheWayPositions[i], FLAG)
 
-            game.check_move(fromPos, toPositions[i])
+            game.check_move(from_pos, to_positions[i])
 
     def test_should_not_allow_movement_onto_unmovable_block(self):
-        fromPos = {
+        from_pos = {
             'x': 5,
             'y': 5
         }
@@ -251,20 +251,20 @@ class GameTest(unittest.TestCase):
         block_pos = {'x': 6, 'y': 5}
 
         game = models.Game()
-        game.set_piece(fromPos, MARSHAL)
+        game.set_piece(from_pos, MARSHAL)
         game.set_piece(block_pos, 1)
 
         self.assertRaisesRegexp(models.InvalidMove,
                                 'Can not move onto an unmoveable block.',
                                 game.check_move,
-                                fromPos, block_pos)
+                                from_pos, block_pos)
 
     def test_attacking_marshall(self):
-        fromPos = {
+        from_pos = {
             'x': 5,
             'y': 5
         }
-        toPos = {
+        to_pos = {
             'x': 5,
             'y': 6
         }
@@ -286,17 +286,17 @@ class GameTest(unittest.TestCase):
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(fromPos, MARSHAL)
-            game.set_piece(toPos, {'rank': key, 'side': 1})
+            game.set_piece(from_pos, MARSHAL)
+            game.set_piece(to_pos, {'rank': key, 'side': 1})
 
-            self.assertEqual(game.check_move(fromPos, toPos), result)
+            self.assertEqual(game.check_move(from_pos, to_pos), result)
 
     def test_attacking_general(self):
-        fromPos = {
+        from_pos = {
             'x': 5,
             'y': 5
         }
-        toPos = {
+        to_pos = {
             'x': 5,
             'y': 6
         }
@@ -318,17 +318,17 @@ class GameTest(unittest.TestCase):
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(fromPos, GENERAL)
-            game.set_piece(toPos, {'rank': key, 'side': 1})
+            game.set_piece(from_pos, GENERAL)
+            game.set_piece(to_pos, {'rank': key, 'side': 1})
 
-            self.assertEqual(game.check_move(fromPos, toPos), result)
+            self.assertEqual(game.check_move(from_pos, to_pos), result)
 
     def test_attacking_colonel(self):
-        fromPos = {
+        from_pos = {
             'x': 5,
             'y': 5
         }
-        toPos = {
+        to_pos = {
             'x': 5,
             'y': 6
         }
@@ -350,17 +350,17 @@ class GameTest(unittest.TestCase):
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(fromPos, COLONEL)
-            game.set_piece(toPos, {'rank': key, 'side': 1})
+            game.set_piece(from_pos, COLONEL)
+            game.set_piece(to_pos, {'rank': key, 'side': 1})
 
-            self.assertEqual(game.check_move(fromPos, toPos), result)
+            self.assertEqual(game.check_move(from_pos, to_pos), result)
 
     def test_attacking_major(self):
-        fromPos = {
+        from_pos = {
             'x': 5,
             'y': 5
         }
-        toPos = {
+        to_pos = {
             'x': 5,
             'y': 6
         }
@@ -382,17 +382,17 @@ class GameTest(unittest.TestCase):
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(fromPos, MAJOR)
-            game.set_piece(toPos, {'rank': key, 'side': 1})
+            game.set_piece(from_pos, MAJOR)
+            game.set_piece(to_pos, {'rank': key, 'side': 1})
 
-            self.assertEqual(game.check_move(fromPos, toPos), result)
+            self.assertEqual(game.check_move(from_pos, to_pos), result)
 
     def test_attacking_captain(self):
-        fromPos = {
+        from_pos = {
             'x': 5,
             'y': 5
         }
-        toPos = {
+        to_pos = {
             'x': 5,
             'y': 6
         }
@@ -414,17 +414,17 @@ class GameTest(unittest.TestCase):
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(fromPos, CAPTAIN)
-            game.set_piece(toPos, {'rank': key, 'side': 1})
+            game.set_piece(from_pos, CAPTAIN)
+            game.set_piece(to_pos, {'rank': key, 'side': 1})
 
-            self.assertEqual(game.check_move(fromPos, toPos), result)
+            self.assertEqual(game.check_move(from_pos, to_pos), result)
 
     def test_attacking_lieutenant(self):
-        fromPos = {
+        from_pos = {
             'x': 5,
             'y': 5
         }
-        toPos = {
+        to_pos = {
             'x': 5,
             'y': 6
         }
@@ -446,17 +446,17 @@ class GameTest(unittest.TestCase):
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(fromPos, LIEUTENANT)
-            game.set_piece(toPos, {'rank': key, 'side': 1})
+            game.set_piece(from_pos, LIEUTENANT)
+            game.set_piece(to_pos, {'rank': key, 'side': 1})
 
-            self.assertEqual(game.check_move(fromPos, toPos), result)
+            self.assertEqual(game.check_move(from_pos, to_pos), result)
 
     def test_attacking_sergeant(self):
-        fromPos = {
+        from_pos = {
             'x': 5,
             'y': 5
         }
-        toPos = {
+        to_pos = {
             'x': 5,
             'y': 6
         }
@@ -478,17 +478,17 @@ class GameTest(unittest.TestCase):
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(fromPos, SERGEANT)
-            game.set_piece(toPos, {'rank': key, 'side': 1})
+            game.set_piece(from_pos, SERGEANT)
+            game.set_piece(to_pos, {'rank': key, 'side': 1})
 
-            self.assertEqual(game.check_move(fromPos, toPos), result)
+            self.assertEqual(game.check_move(from_pos, to_pos), result)
 
     def test_attacking_miner(self):
-        fromPos = {
+        from_pos = {
             'x': 5,
             'y': 5
         }
-        toPos = {
+        to_pos = {
             'x': 5,
             'y': 6
         }
@@ -510,17 +510,17 @@ class GameTest(unittest.TestCase):
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(fromPos, MINER)
-            game.set_piece(toPos, {'rank': key, 'side': 1})
+            game.set_piece(from_pos, MINER)
+            game.set_piece(to_pos, {'rank': key, 'side': 1})
 
-            self.assertEqual(game.check_move(fromPos, toPos), result)
+            self.assertEqual(game.check_move(from_pos, to_pos), result)
 
     def test_attacking_scout(self):
-        fromPos = {
+        from_pos = {
             'x': 5,
             'y': 5
         }
-        toPos = {
+        to_pos = {
             'x': 5,
             'y': 6
         }
@@ -542,17 +542,17 @@ class GameTest(unittest.TestCase):
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(fromPos, SCOUT)
-            game.set_piece(toPos, {'rank': key, 'side': 1})
+            game.set_piece(from_pos, SCOUT)
+            game.set_piece(to_pos, {'rank': key, 'side': 1})
 
-            self.assertEqual(game.check_move(fromPos, toPos), result)
+            self.assertEqual(game.check_move(from_pos, to_pos), result)
 
     def test_attacking_spy(self):
-        fromPos = {
+        from_pos = {
             'x': 5,
             'y': 5
         }
-        toPos = {
+        to_pos = {
             'x': 5,
             'y': 6
         }
@@ -574,7 +574,7 @@ class GameTest(unittest.TestCase):
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(fromPos, SPY)
-            game.set_piece(toPos, {'rank': key, 'side': 1})
+            game.set_piece(from_pos, SPY)
+            game.set_piece(to_pos, {'rank': key, 'side': 1})
 
-            self.assertEqual(game.check_move(fromPos, toPos), result)
+            self.assertEqual(game.check_move(from_pos, to_pos), result)
