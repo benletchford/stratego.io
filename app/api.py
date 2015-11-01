@@ -92,8 +92,12 @@ class MoveHandler(webapp2.RequestHandler):
                 models.Game.blue_hash == player_hash
             ).get()
 
-        worked = game.move(fromPos, toPos)
-        if worked:
+        try:
+            # Will raise if not valid.
+            game.check_move(fromPos, toPos)
+
+            game.move_piece(fromPos, toPos)
+
             game.put()
 
             # Send move to opponent
@@ -106,7 +110,7 @@ class MoveHandler(webapp2.RequestHandler):
                            {u'from': fromPos,
                             u'to': toPos})
 
-        else:
+        except models.InvalidMove:
             self.response.set_status(status_codes.UNAUTHORIZED)
 
 
