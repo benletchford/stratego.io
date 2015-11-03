@@ -43,6 +43,8 @@ class Game(BaseModel):
     # Is this game by invite only?
     private = ndb.BooleanProperty(default=True)
 
+    grave_yard = ndb.JsonProperty(default='[]')
+
     def set_red_setup(self, red_setup):
         if not self.red_setup:
             board = self.get_board()
@@ -94,25 +96,25 @@ class Game(BaseModel):
     def get_board(self):
         return json.loads(self.board)
 
-    def get_piece(self, board, pos):
+    def get_piece(self, pos):
+        board = self.get_board()
+
         return board[pos['y']][pos['x']]
 
-    def set_board(self, board):
-        self.board = json.dumps(board)
+    def set_board(self, new_board):
+        self.board = json.dumps(new_board)
 
-    def set_piece(self, pos, piece, board=None):
-        if board is None:
-            board = self.get_board()
+    def set_piece(self, pos, piece):
+        board = self.get_board()
 
         board[pos['y']][pos['x']] = piece
 
         self.set_board(board)
 
-    def set_last_move(self, fromPos, toPos):
-        last_move = {
-            'from': fromPos,
-            'to': toPos
-        }
+    def flip_turn(self):
+        game.turn = not game.turn
+
+    def set_last_move(self, last_move):
         self.last_move = json.dumps(last_move)
 
     def move_piece(self, fromPos, toPos):
@@ -125,19 +127,17 @@ class Game(BaseModel):
 
         self.set_board(board)
 
-        # Flip the turn
-        self.turn = not self.turn
+    def delete_piece(self, pos):
+        board = self.get_board()
+        piece = board[pos['y']][pos['x']]
 
-        # Set last moved
-        self.set_last_move(fromPos, toPos)
+        board[pos['y']][pos['x']] = 0
 
-        return True
+        self.set_board(board)
 
     def check_move(self, fromPos, toPos):
-        board = self.get_board()
-
-        fromPiece = self.get_piece(board, fromPos)
-        toPiece = self.get_piece(board, toPos)
+        fromPiece = self.get_piece(fromPos)
+        toPiece = self.get_piece(toPos)
 
         if fromPiece == 0 or fromPiece == 1:
             raise InvalidMove('No piece to move.')
@@ -172,11 +172,11 @@ class Game(BaseModel):
 
             # If we're a scout we need to verify there's nothing between from
             # and to
-            if fromPiece['rank'] == '9' and self._is_piece_between(board, fromPos, toPos, diff):
+            if fromPiece['rank'] == '9' and self._is_piece_between(fromPos, toPos, diff):
                 raise InvalidMove('Can not jump over pieces.')
 
             if self._cell_is_occupied(toPiece):
-                return self._check_attack(board, fromPiece, toPiece)
+                return self._check_attack(fromPiece, toPiece)
 
             else:
                 return move_types.MOVE
@@ -184,14 +184,16 @@ class Game(BaseModel):
         else:
             raise InvalidMove('Illegal movement.')
 
-    def _is_piece_between(self, board, fromPos, toPos, diff):
-        # We must know at this point that we're not moving on multiple axis
+    # We must know at this point that we're not moving on multiple axis
+    def _is_piece_between(self, fromPos, toPos, diff):
+
+        board = self.get_board()
 
         # We're moving on the x axis
         if diff['y'] is 0:
             coefficient = 1 if fromPos['x'] < toPos['x'] else -1
             for i in xrange(1, diff['x']):
-                if self.get_piece(board, {'x': fromPos['x'] + (i * coefficient), 'y': fromPos['y']}) != 0:
+                if self.get_piece({'x': fromPos['x'] + (i * coefficient), 'y': fromPos['y']}) != 0:
                     return True
 
             return False
@@ -200,14 +202,13 @@ class Game(BaseModel):
         else:
             coefficient = 1 if fromPos['y'] < toPos['y'] else -1
             for i in xrange(1, diff['y']):
-                if self.get_piece(board, {'x': fromPos['x'], 'y': fromPos['y'] + (i * coefficient)}) != 0:
+                if self.get_piece({'x': fromPos['x'], 'y': fromPos['y'] + (i * coefficient)}) != 0:
                     return True
 
             return False
 
-    def _check_attack(self, board, fromPiece, toPiece):
-
-            # Are we gonna draw?
+    def _check_attack(self, fromPiece, toPiece):
+        # Are we gonna draw?
         if fromPiece['rank'] == toPiece['rank']:
             return move_types.ATTACK_DRAW
 

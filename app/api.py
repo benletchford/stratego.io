@@ -99,18 +99,16 @@ class MoveHandler(webapp2.RequestHandler):
 
             if move_type == move_types.MOVE:
                 game.move_piece(fromPos, toPos)
-
+                game.flip_turn()
+                game.set_last_move({
+                                   'type': 'move',
+                                   'from': fromPos,
+                                   'to': toPos
+                                   })
                 game.put()
 
-                # Send move to opponent
-                pusher = Pusher(app_id=pusher_utils.APP_ID,
-                                key=pusher_utils.KEY,
-                                secret=pusher_utils.SECRET)
-
-                pusher.trigger(u'game-%s' % game.get_opponent_hash(player_hash),
-                               u'move',
-                               {u'from': fromPos,
-                                u'to': toPos})
+                pusher.trigger('game-%s' % game.get_opponent_hash(player_hash),
+                               {'command': 'refresh'})
 
             elif move_type == move_types.ATTACK_WON:
                 pass
@@ -119,7 +117,27 @@ class MoveHandler(webapp2.RequestHandler):
                 pass
 
             elif move_type == move_types.ATTACK_DRAW:
-                pass
+                # Since it is a draw they'll both be the same rank
+                piece_rank = game.get_piece(fromPos)['rank']
+
+                game.delete_piece(fromPos)
+                game.delete_piece(toPos)
+                game.flip_turn()
+                game.set_last_move({
+                                   'type': 'draw',
+                                   'rank': rank,
+                                   'from': fromPos,
+                                   'to': toPos
+                                   })
+                game.put()
+
+            # Tell clients to update
+            pusher = Pusher(app_id=pusher_utils.APP_ID,
+                            key=pusher_utils.KEY,
+                            secret=pusher_utils.SECRET)
+
+            pusher.trigger('game-%s' % game.get_opponent_hash(player_hash),
+                           {'command': 'refresh'})
 
         except models.InvalidMove:
             self.response.set_status(status_codes.UNAUTHORIZED)
