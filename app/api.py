@@ -110,7 +110,7 @@ class MoveHandler(webapp2.RequestHandler):
                 from_piece = game.get_piece(from_pos)
                 to_piece = game.get_piece(to_pos)
 
-                game.move_piece(from_piece, to_piece)
+                game.move_piece(from_pos, to_pos)
 
                 game.flip_turn()
                 game.set_last_move({
@@ -174,6 +174,11 @@ class MoveHandler(webapp2.RequestHandler):
             pusher.trigger('game-%s' % game.get_opponent_hash(player_hash),
                            'update',
                            {'command': 'refresh'})
+
+            game_dict = board_utils.get_sendable_game(game, side)
+
+            self.response.headers['Content-Type'] = 'text/json'
+            self.response.write(json.dumps(game_dict))
 
         except models.InvalidMove:
             self.response.set_status(status_codes.UNAUTHORIZED)

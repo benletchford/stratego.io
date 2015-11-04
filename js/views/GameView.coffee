@@ -22,10 +22,7 @@ define (require) ->
         delete window._response
 
       else
-        $.get('api/game',
-          player_hash: @hash
-        )
-          .done _.bind @render, @
+        @update()
 
     render: (data) ->
       @$el.html template()
@@ -54,38 +51,64 @@ define (require) ->
       @pusher = new Pusher 'fd2e668a4ea4f7e23ab6', encrypted: true
       @channel = @pusher.subscribe "game-#{@hash}"
 
-      @channel.bind 'move', (data) =>
-        @move(data.from, data.to, false)
+      @channel.bind 'update', (data) =>
+        $.get('api/game',
+          player_hash: @hash
+        )
+          .done _.bind @update, @
 
-    move: (from, to, local = true) ->
-      console.log 'from: ' + JSON.stringify(from)
-      console.log 'to: ' + JSON.stringify(to)
+    move: (from, to) ->
+      # move = @game.checkMove(from, to)
 
-      move = @game.checkMove(from, to)
+      # # Flip the turn
+      # @game.flipTurn()
 
-      # Flip the turn
-      @game.flipTurn()
+      # @game.movePiece from, to
+      # @game.setLastMove from, to
 
-      switch move
-        when moveTypes.MOVE
-          # Clone to restore later if need be
-          clonedGameAttri = JSON.parse(JSON.stringify(@game.attributes))
+      $.post('api/move',
+        player_hash: @hash
+        side       : @game.get('side')
+        from       : JSON.stringify from
+        to         : JSON.stringify to
+      )
+        .done _.bind @render, @
 
-          @game.movePiece from, to
-          @game.setLastMove from, to
+    update: ->
+      $.get('api/game',
+          player_hash: @hash
+        )
+          .done _.bind @render, @
 
-          if local
-            $.post('api/move',
-              player_hash: @hash
-              side       : @game.get('side')
-              from       : JSON.stringify from
-              to         : JSON.stringify to
-            )
-            .fail =>
-              # Reset
-              @game.set(clonedGameAttri)
+    # move: (from, to, local = true) ->
+    #   console.log 'from: ' + JSON.stringify(from)
+    #   console.log 'to: ' + JSON.stringify(to)
 
-        when moveTypes.ATTACK
-          @game.setPendingAttack from, to
+    #   move = @game.checkMove(from, to)
+
+    #   # Flip the turn
+    #   @game.flipTurn()
+
+    #   switch move
+    #     when moveTypes.MOVE
+    #       # Clone to restore later if need be
+    #       clonedGameAttri = JSON.parse(JSON.stringify(@game.attributes))
+
+    #       @game.movePiece from, to
+    #       @game.setLastMove from, to
+
+    #       if local
+    #         $.post('api/move',
+    #           player_hash: @hash
+    #           side       : @game.get('side')
+    #           from       : JSON.stringify from
+    #           to         : JSON.stringify to
+    #         )
+    #         .fail =>
+    #           # Reset
+    #           @game.set(clonedGameAttri)
+
+    #     when moveTypes.ATTACK
+    #       @game.setPendingAttack from, to
 
 

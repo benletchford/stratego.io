@@ -464,5 +464,53 @@ class MoveHandlerTest(unittest.TestCase):
             ]
         ])
 
+        self.assertEqual(json.loads(game.last_move), {
+            'type': 'draw',
+            'from': {
+                'piece': {u'side': 0, u'rank': u'4'},
+                'position': {'x': 5, 'y': 5}
+            },
+            'to': {
+                'piece': {u'side': 1, u'rank': u'4'},
+                'position': {'x': 5, 'y': 4}
+            }
+        })
+
         # Blue's turn
         self.assertEqual(game.turn, 1)
+
+    # @patch('lib.pusher.pusher.Pusher.trigger')
+    # def test_should_be_able_to_attack_and_lose(self, pusher):
+    #     app.post('/api/create', params={'board': fixtures.SETUP})
+
+    #     game = models.Game.query().get()
+
+    #     app.post('/api/join', params={
+    #         'board': fixtures.SETUP,
+    #         'join_hash': game.join_hash
+    #     })
+
+    #     app.post('/api/move', params={
+    #         'player_hash': game.red_hash,
+    #         'side': 0,
+    #         'from': json.dumps({'x': 5, 'y': 6}),
+    #         'to': json.dumps({'x': 5, 'y': 5})
+    #     })
+
+    #     app.post('/api/move', params={
+    #         'player_hash': game.blue_hash,
+    #         'side': 1,
+    #         'from': json.dumps({'x': 5, 'y': 3}),
+    #         'to': json.dumps({'x': 5, 'y': 4})
+    #     })
+
+    #     app.post('/api/move', params={
+    #         'player_hash': game.red_hash,
+    #         'side': 0,
+    #         'from': json.dumps({'x': 5, 'y': 5}),
+    #         'to': json.dumps({'x': 5, 'y': 4})
+    #     })
+
+    #     game = models.Game.query().get()
+
+    #     self.assertEqual(game.get_board(), [])
