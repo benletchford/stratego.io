@@ -2,77 +2,7 @@ import unittest
 
 import models
 import move_types
-
-
-MOVE_TYPE_TO_NAME = [
-    'move',
-    'attack and draw',
-    'attack and win',
-    'attack and lose',
-    'capture',
-    'disarm',
-    'assasinate'
-]
-
-MARSHAL = {
-    'rank': '1',
-    'side': 0
-}
-
-GENERAL = {
-    'rank': '2',
-    'side': 0
-}
-
-COLONEL = {
-    'rank': '3',
-    'side': 0
-}
-
-MAJOR = {
-    'rank': '4',
-    'side': 0
-}
-
-CAPTAIN = {
-    'rank': '5',
-    'side': 0
-}
-
-LIEUTENANT = {
-    'rank': '6',
-    'side': 0
-}
-
-SERGEANT = {
-    'rank': '7',
-    'side': 0
-}
-
-MINER = {
-    'rank': '8',
-    'side': 0
-}
-
-SCOUT = {
-    'rank': '9',
-    'side': 0
-}
-
-SPY = {
-    'rank': 'S',
-    'side': 0
-}
-
-FLAG = {
-    'rank': 'F',
-    'side': 0
-}
-
-BOMB = {
-    'rank': 'B',
-    'side': 0
-}
+import fixtures
 
 
 class GameTest(unittest.TestCase):
@@ -102,7 +32,7 @@ class GameTest(unittest.TestCase):
 
         for to_pos in valid_moves:
             game = models.Game()
-            game.set_piece(from_pos, MARSHAL)
+            game.set_piece(from_pos, fixtures.MARSHAL)
 
             move = game.check_move(from_pos, to_pos)
 
@@ -110,7 +40,7 @@ class GameTest(unittest.TestCase):
 
         for to_pos in invalid_moves:
             game = models.Game()
-            game.set_piece(from_pos, MARSHAL)
+            game.set_piece(from_pos, fixtures.MARSHAL)
 
             self.assertRaisesRegexp(models.InvalidMove,
                                     'Illegal movement.',
@@ -139,11 +69,11 @@ class GameTest(unittest.TestCase):
 
         for to_pos in valid_moves:
             game = models.Game()
-            game.set_piece(from_pos, SCOUT)
+            game.set_piece(from_pos, fixtures.SCOUT)
 
         for to_pos in invalid_moves:
             game = models.Game()
-            game.set_piece(from_pos, SCOUT)
+            game.set_piece(from_pos, fixtures.SCOUT)
 
             self.assertRaisesRegexp(models.InvalidMove,
                                     'Illegal movement.',
@@ -157,7 +87,7 @@ class GameTest(unittest.TestCase):
         }
 
         game = models.Game()
-        game.set_piece(from_pos, FLAG)
+        game.set_piece(from_pos, fixtures.FLAG)
 
         self.assertRaisesRegexp(models.InvalidMove,
                                 'Flags cannot be moved.',
@@ -171,7 +101,7 @@ class GameTest(unittest.TestCase):
         }
 
         game = models.Game()
-        game.set_piece(from_pos, BOMB)
+        game.set_piece(from_pos, fixtures.BOMB)
 
         self.assertRaisesRegexp(models.InvalidMove,
                                 'Bombs cannot be moved.',
@@ -190,8 +120,8 @@ class GameTest(unittest.TestCase):
         }
 
         game = models.Game()
-        game.set_piece(from_pos, MARSHAL)
-        game.set_piece(to_pos, SCOUT)
+        game.set_piece(from_pos, fixtures.MARSHAL)
+        game.set_piece(to_pos, fixtures.SCOUT)
 
         self.assertRaisesRegexp(models.InvalidMove,
                                 'Can not move onto friendly piece.',
@@ -227,7 +157,7 @@ class GameTest(unittest.TestCase):
 
         for i in xrange(len(to_positions)):
             game = models.Game()
-            game.set_piece(from_pos, SCOUT)
+            game.set_piece(from_pos, fixtures.SCOUT)
             game.set_piece(inTheWayPositions[i], 1)
 
             self.assertRaisesRegexp(models.InvalidMove,
@@ -237,8 +167,8 @@ class GameTest(unittest.TestCase):
 
         for i in xrange(len(to_positions)):
             game = models.Game()
-            game.set_piece(from_pos, SCOUT)
-            game.set_piece(notInTheWayPositions[i], FLAG)
+            game.set_piece(from_pos, fixtures.SCOUT)
+            game.set_piece(notInTheWayPositions[i], fixtures.FLAG)
 
             game.check_move(from_pos, to_positions[i])
 
@@ -251,7 +181,7 @@ class GameTest(unittest.TestCase):
         block_pos = {'x': 6, 'y': 5}
 
         game = models.Game()
-        game.set_piece(from_pos, MARSHAL)
+        game.set_piece(from_pos, fixtures.MARSHAL)
         game.set_piece(block_pos, 1)
 
         self.assertRaisesRegexp(models.InvalidMove,
@@ -286,7 +216,7 @@ class GameTest(unittest.TestCase):
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(from_pos, MARSHAL)
+            game.set_piece(from_pos, fixtures.MARSHAL)
             game.set_piece(to_pos, {'rank': key, 'side': 1})
 
             self.assertEqual(game.check_move(from_pos, to_pos), result)
@@ -318,7 +248,7 @@ class GameTest(unittest.TestCase):
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(from_pos, GENERAL)
+            game.set_piece(from_pos, fixtures.GENERAL)
             game.set_piece(to_pos, {'rank': key, 'side': 1})
 
             self.assertEqual(game.check_move(from_pos, to_pos), result)
@@ -350,7 +280,7 @@ class GameTest(unittest.TestCase):
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(from_pos, COLONEL)
+            game.set_piece(from_pos, fixtures.COLONEL)
             game.set_piece(to_pos, {'rank': key, 'side': 1})
 
             self.assertEqual(game.check_move(from_pos, to_pos), result)
@@ -382,7 +312,7 @@ class GameTest(unittest.TestCase):
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(from_pos, MAJOR)
+            game.set_piece(from_pos, fixtures.MAJOR)
             game.set_piece(to_pos, {'rank': key, 'side': 1})
 
             self.assertEqual(game.check_move(from_pos, to_pos), result)
@@ -414,7 +344,7 @@ class GameTest(unittest.TestCase):
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(from_pos, CAPTAIN)
+            game.set_piece(from_pos, fixtures.CAPTAIN)
             game.set_piece(to_pos, {'rank': key, 'side': 1})
 
             self.assertEqual(game.check_move(from_pos, to_pos), result)
@@ -446,7 +376,7 @@ class GameTest(unittest.TestCase):
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(from_pos, LIEUTENANT)
+            game.set_piece(from_pos, fixtures.LIEUTENANT)
             game.set_piece(to_pos, {'rank': key, 'side': 1})
 
             self.assertEqual(game.check_move(from_pos, to_pos), result)
@@ -478,7 +408,7 @@ class GameTest(unittest.TestCase):
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(from_pos, SERGEANT)
+            game.set_piece(from_pos, fixtures.SERGEANT)
             game.set_piece(to_pos, {'rank': key, 'side': 1})
 
             self.assertEqual(game.check_move(from_pos, to_pos), result)
@@ -510,7 +440,7 @@ class GameTest(unittest.TestCase):
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(from_pos, MINER)
+            game.set_piece(from_pos, fixtures.MINER)
             game.set_piece(to_pos, {'rank': key, 'side': 1})
 
             self.assertEqual(game.check_move(from_pos, to_pos), result)
@@ -542,7 +472,7 @@ class GameTest(unittest.TestCase):
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(from_pos, SCOUT)
+            game.set_piece(from_pos, fixtures.SCOUT)
             game.set_piece(to_pos, {'rank': key, 'side': 1})
 
             self.assertEqual(game.check_move(from_pos, to_pos), result)
@@ -574,7 +504,7 @@ class GameTest(unittest.TestCase):
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(from_pos, SPY)
+            game.set_piece(from_pos, fixtures.SPY)
             game.set_piece(to_pos, {'rank': key, 'side': 1})
 
             self.assertEqual(game.check_move(from_pos, to_pos), result)

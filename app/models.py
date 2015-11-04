@@ -75,17 +75,15 @@ class Game(BaseModel):
             raise AttributeError('yeah see...')
 
     def set_blocks(self):
-        board = self.get_board()
+        self.set_piece({'x': 2, 'y': 4}, 1)
+        self.set_piece({'x': 2, 'y': 5}, 1)
+        self.set_piece({'x': 3, 'y': 4}, 1)
+        self.set_piece({'x': 3, 'y': 5}, 1)
 
-        self.set_piece({'x': 2, 'y': 4}, 1, board)
-        self.set_piece({'x': 2, 'y': 5}, 1, board)
-        self.set_piece({'x': 3, 'y': 4}, 1, board)
-        self.set_piece({'x': 3, 'y': 5}, 1, board)
-
-        self.set_piece({'x': 6, 'y': 4}, 1, board)
-        self.set_piece({'x': 6, 'y': 5}, 1, board)
-        self.set_piece({'x': 7, 'y': 4}, 1, board)
-        self.set_piece({'x': 7, 'y': 5}, 1, board)
+        self.set_piece({'x': 6, 'y': 4}, 1)
+        self.set_piece({'x': 6, 'y': 5}, 1)
+        self.set_piece({'x': 7, 'y': 4}, 1)
+        self.set_piece({'x': 7, 'y': 5}, 1)
 
     def get_opponent_hash(self, player_hash):
         if player_hash == self.blue_hash:
@@ -112,7 +110,7 @@ class Game(BaseModel):
         self.set_board(board)
 
     def flip_turn(self):
-        game.turn = not game.turn
+        self.turn = not self.turn
 
     def set_last_move(self, last_move):
         self.last_move = json.dumps(last_move)

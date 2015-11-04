@@ -80,8 +80,8 @@ class MoveHandler(webapp2.RequestHandler):
 
         player_hash = self.request.get('player_hash')
         side = int(self.request.get('side'))
-        fromPos = json.loads(self.request.get('from'))
-        toPos = json.loads(self.request.get('to'))
+        from_pos = json.loads(self.request.get('from'))
+        to_pos = json.loads(self.request.get('to'))
 
         if side == 0:
             game = models.Game.query(
@@ -95,41 +95,76 @@ class MoveHandler(webapp2.RequestHandler):
 
         try:
             # Will raise if not valid.
-            move_type = game.check_move(fromPos, toPos)
+            move_type = game.check_move(from_pos, to_pos)
 
             if move_type == move_types.MOVE:
-                game.move_piece(fromPos, toPos)
+                game.move_piece(from_pos, to_pos)
                 game.flip_turn()
                 game.set_last_move({
-                                   'type': 'move',
-                                   'from': fromPos,
-                                   'to': toPos
-                                   })
-                game.put()
-
-                pusher.trigger('game-%s' % game.get_opponent_hash(player_hash),
-                               {'command': 'refresh'})
+                    'type': 'move',
+                    'from': from_pos,
+                    'to': to_pos
+                })
 
             elif move_type == move_types.ATTACK_WON:
-                pass
+                from_piece = game.get_piece(from_pos)
+                to_piece = game.get_piece(to_pos)
 
-            elif move_type == move_types.ATTACK_LOST:
-                pass
+                game.move_piece(from_piece, to_piece)
 
-            elif move_type == move_types.ATTACK_DRAW:
-                # Since it is a draw they'll both be the same rank
-                piece_rank = game.get_piece(fromPos)['rank']
-
-                game.delete_piece(fromPos)
-                game.delete_piece(toPos)
                 game.flip_turn()
                 game.set_last_move({
-                                   'type': 'draw',
-                                   'rank': rank,
-                                   'from': fromPos,
-                                   'to': toPos
-                                   })
-                game.put()
+                    'type': 'won',
+                    'from': {
+                        'piece': from_piece,
+                        'position': from_pos
+                    },
+                    'to': {
+                        'piece': to_piece,
+                        'position': to_pos
+                    }
+                })
+
+            elif move_type == move_types.ATTACK_LOST:
+                from_piece = game.get_piece(from_pos)
+                to_piece = game.get_piece(to_pos)
+
+                game.delete_piece(from_piece)
+
+                game.flip_turn()
+                game.set_last_move({
+                    'type': 'lost',
+                    'from': {
+                        'piece': from_piece,
+                        'position': from_pos
+                    },
+                    'to': {
+                        'piece': to_piece,
+                        'position': to_pos
+                    }
+                })
+
+            elif move_type == move_types.ATTACK_DRAW:
+                from_piece = game.get_piece(from_pos)
+                to_piece = game.get_piece(to_pos)
+
+                game.delete_piece(from_pos)
+                game.delete_piece(to_pos)
+
+                game.flip_turn()
+                game.set_last_move({
+                    'type': 'draw',
+                    'from': {
+                        'piece': from_piece,
+                        'position': from_pos
+                    },
+                    'to': {
+                        'piece': to_piece,
+                        'position': to_pos
+                    }
+                })
+
+            game.put()
 
             # Tell clients to update
             pusher = Pusher(app_id=pusher_utils.APP_ID,
@@ -137,6 +172,7 @@ class MoveHandler(webapp2.RequestHandler):
                             secret=pusher_utils.SECRET)
 
             pusher.trigger('game-%s' % game.get_opponent_hash(player_hash),
+                           'update',
                            {'command': 'refresh'})
 
         except models.InvalidMove:
