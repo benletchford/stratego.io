@@ -27,7 +27,7 @@
   }
 }
 
-.piece {
+.piece, .phantom-piece, .won-piece, .lost-piece {
   width: 100%;
   height: 100%;
 
@@ -153,7 +153,25 @@
       background-image: url('../graphics/pieces/blue/U.svg');
     }
   }
-  &[data-side='3'] {
-    color: @neutral-color;
-  }
+}
+
+.phantom-piece, .lost-piece {
+  opacity: 0.4;
+}
+
+.won-piece, .lost-piece {
+  position: absolute;
+}
+
+.won-piece {
+  width: 75%;
+  height: 75%;
+  bottom: 0;
+}
+
+.lost-piece {
+  width: 50%;
+  height: 50%;
+  top: 0;
+  right: 0;
 }

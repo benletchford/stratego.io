@@ -22,7 +22,7 @@ define (require) ->
         delete window._response
 
       else
-        @update()
+        @getLatest()
 
     render: (data) ->
       @$el.html template()
@@ -55,7 +55,7 @@ define (require) ->
         $.get('api/game',
           player_hash: @hash
         )
-          .done _.bind @update, @
+          .done _.bind @getLatest, @
 
     move: (from, to) ->
       # move = @game.checkMove(from, to)
@@ -72,13 +72,24 @@ define (require) ->
         from       : JSON.stringify from
         to         : JSON.stringify to
       )
-        .done _.bind @render, @
+        .done _.bind @update, @
 
-    update: ->
+    update: (data) ->
+      if @game
+        @game.set(
+          board: data.board
+          turn: +data.turn
+          side: data.side
+          last_move: data.last_move
+        )
+      else
+        @render(data)
+
+    getLatest: ->
       $.get('api/game',
           player_hash: @hash
         )
-          .done _.bind @render, @
+          .done _.bind @update, @
 
     # move: (from, to, local = true) ->
     #   console.log 'from: ' + JSON.stringify(from)

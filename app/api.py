@@ -102,8 +102,12 @@ class MoveHandler(webapp2.RequestHandler):
                 game.flip_turn()
                 game.set_last_move({
                     'type': 'move',
-                    'from': from_pos,
-                    'to': to_pos
+                    'from': {
+                        'position': from_pos
+                    },
+                    'to': {
+                        'position': to_pos
+                    }
                 })
 
             elif move_type == move_types.ATTACK_WON:
@@ -129,7 +133,7 @@ class MoveHandler(webapp2.RequestHandler):
                 from_piece = game.get_piece(from_pos)
                 to_piece = game.get_piece(to_pos)
 
-                game.delete_piece(from_piece)
+                game.delete_piece(from_pos)
 
                 game.flip_turn()
                 game.set_last_move({

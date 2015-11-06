@@ -4,7 +4,11 @@ define (require) ->
   _        = require 'underscore'
   Backbone = require 'backbone'
 
-  template = require '../../jade/grid.jade'
+  template     = require '../../jade/grid.jade'
+  piece        = require '../../jade/piece.jade'
+  phantomPiece = require '../../jade/phantomPiece.jade'
+  wonPiece     = require '../../jade/wonPiece.jade'
+  lostPiece    = require '../../jade/lostPiece.jade'
 
   require '../../css/grid.less'
 
@@ -19,28 +23,40 @@ define (require) ->
       @$el.html template(board: @boardModel.get('board'))
       @bindEvents()
 
-      # Render attack pending
-      if @boardModel.get('pending_attack')
-        pendingAttack = @boardModel.get('pending_attack')
-        @$cells.filter("[data-x='#{pendingAttack.from.x}'][data-y='#{pendingAttack.from.y}']")
-          .addClass 'pending-attack-from'
-
-        @$cells.filter("[data-x='#{pendingAttack.to.x}'][data-y='#{pendingAttack.to.y}']")
-          .addClass 'pending-attack-to'
-
       # Render last moved cell shading
-      else if @boardModel.get('last_move')
+      if @boardModel.get('last_move')
         lastMove = @boardModel.get('last_move')
-        @$cells.filter("[data-x='#{lastMove.from.x}'][data-y='#{lastMove.from.y}']")
-          .addClass 'last-move-from'
 
-        @$cells.filter("[data-x='#{lastMove.to.x}'][data-y='#{lastMove.to.y}']")
-          .addClass 'last-move-to'
+        fromCell = @$cells.filter("[data-x='#{lastMove.from.position.x}'][data-y='#{lastMove.from.position.y}']")
+        toCell   = @$cells.filter("[data-x='#{lastMove.to.position.x}'][data-y='#{lastMove.to.position.y}']")
 
+        fromCell.addClass('last-move-from')
+        toCell.addClass('last-move-to')
+
+        switch lastMove.type
+          when 'draw'
+            fromCell.html phantomPiece(lastMove.from.piece)
+            toCell.html phantomPiece(lastMove.to.piece)
+
+          when 'lost'
+            fromCell.html phantomPiece(lastMove.from.piece)
+            toCell.html piece(lastMove.to.piece)
+
+          when 'won'
+            toCell
+              .empty()
+              .append piece(lastMove.from.piece)
+              .append lostPiece(lastMove.to.piece)
 
     bindEvents: ->
       @$cells  = @$el.find '.cell'
       @$pieces = @$el.find '.piece'
+
+      side = @boardModel.get('side')
+      @$pieces.filter("[data-side='#{side}']").attr('draggable', 'true')
+
+      # For setup reasons...
+      @$pieces.filter("[data-side='3']").attr('draggable', 'true')
 
       @$cells.on 'click', _.bind @_clickCell, @
       @$cells.on 'mouseover', _.bind @_hoverInCell, @
