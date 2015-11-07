@@ -48,6 +48,9 @@ define (require) ->
               .append piece(lastMove.from.piece)
               .append lostPiece(lastMove.to.piece)
 
+        # We have to rebind the events cos we changed stuff
+        @bindEvents()
+
     bindEvents: ->
       @$cells  = @$el.find '.cell'
       @$pieces = @$el.find '.piece'
