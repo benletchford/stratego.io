@@ -21,14 +21,16 @@ define (require) ->
 
     render: ->
       @$el.html template(board: @boardModel.get('board'))
-      @bindEvents()
+
 
       # Render last moved cell shading
       if @boardModel.get('last_move')
         lastMove = @boardModel.get('last_move')
 
-        fromCell = @$cells.filter("[data-x='#{lastMove.from.position.x}'][data-y='#{lastMove.from.position.y}']")
-        toCell   = @$cells.filter("[data-x='#{lastMove.to.position.x}'][data-y='#{lastMove.to.position.y}']")
+        $cells  = @$el.find '.cell'
+
+        fromCell = $cells.filter("[data-x='#{lastMove.from.position.x}'][data-y='#{lastMove.from.position.y}']")
+        toCell   = $cells.filter("[data-x='#{lastMove.to.position.x}'][data-y='#{lastMove.to.position.y}']")
 
         fromCell.addClass('last-move-from')
         toCell.addClass('last-move-to')
@@ -48,8 +50,7 @@ define (require) ->
               .append piece(lastMove.from.piece)
               .append lostPiece(lastMove.to.piece)
 
-        # We have to rebind the events cos we changed stuff
-        @bindEvents()
+      @bindEvents()
 
     bindEvents: ->
       @$cells  = @$el.find '.cell'
