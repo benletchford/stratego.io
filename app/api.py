@@ -219,9 +219,41 @@ class GameHandler(webapp2.RequestHandler):
         self.response.write(json.dumps(game_dict))
 
 
+# class GameHandler(webapp2.RequestHandler):
+
+#     def post(self):
+#         player_hash = self.request.get('player_hash')
+
+#         if not player_hash:
+#             self.response.set_status(status_codes.UNAUTHORIZED)
+#             return
+
+#         game = models.Game.query(
+#             models.Game.red_hash == player_hash
+#         ).get()
+#         side = 0
+
+#         if not game:
+#             game = models.Game.query(
+#                 models.Game.blue_hash == player_hash
+#             ).get()
+#             side = 1
+
+#         # If still not ;)
+#         if not game:
+#             self.response.set_status(status_codes.NOT_FOUND)
+#             return
+
+#         game_dict = board_utils.get_sendable_game(game, side)
+
+#         self.response.headers['Content-Type'] = 'text/json'
+#         self.response.write(json.dumps(game_
+
+
 app = webapp2.WSGIApplication([
     ('/api/create', CreateHandler),
     ('/api/join', JoinHandler),
     ('/api/move', MoveHandler),
     ('/api/game', GameHandler),
+    # ('/api/pool', PoolHandler),
 ], debug=True)
