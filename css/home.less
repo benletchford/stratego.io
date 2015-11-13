@@ -1,0 +1,21 @@
+.home-view {
+  &.panel {
+    width: 80%;
+    height: 50%;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+
+    @media (max-width: @mobile-width), (max-height: @mobile-width) {
+      padding: 0;
+      width: 95%;
+      height: 95%;
+    }
+
+    // .panel-option {
+    //   @media (max-width: @mobile-width), (max-height: @mobile-width) {
+    //     padding: 5px;
+    //   }
+    // }
+  }
+}

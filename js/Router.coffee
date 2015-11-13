@@ -10,10 +10,12 @@ define (require) ->
 
   class extends Backbone.Router
     routes:
-      'create/setup': 'create'
-      'play/:hash'  : 'play'
-      'join/:hash'  : 'join'
-      ''            : 'home'
+      'setup/create'    : 'create'
+      'setup/pool'      : 'pool'
+      'setup/join/:hash': 'join'
+
+      'play/:hash'      : 'play'
+      ''                : 'home'
 
     initialize: ->
       @consoleView = new ConsoleView()
@@ -27,20 +29,27 @@ define (require) ->
       homeView = new HomeView()
       @boardView.$overboard.html homeView.el
 
-    create: ->
-      @boardView.$overboard.empty()
-
-      setupView = new SetupView()
-      @boardView.$overboard.html setupView.el
-
-    join: (hash) ->
-      @boardView.$overboard.empty()
-
-      setupView = new SetupView(hash: hash)
-      @boardView.$overboard.html setupView.el
-
     play: (hash) ->
       @boardView.$overboard.empty()
 
       gameView = new GameView(hash)
       @boardView.$overboard.html gameView.el
+
+    pool: ->
+      @_setup
+        type: 'pool'
+
+    create: ->
+      @_setup
+        type: 'create'
+
+    join: (hash) ->
+      @_setup
+        type: 'join'
+        hash: hash
+
+    _setup: (options = {}) ->
+      @boardView.$overboard.empty()
+
+      setupView = new SetupView(options)
+      @boardView.$overboard.html setupView.el

@@ -54,14 +54,16 @@ define (require) ->
       data =
         board: JSON.stringify @setup.get('board')
 
-      # We're joining a game...
-      if @options?.hash
-        api_location = 'api/join'
-        data['join_hash'] = @options.hash
+      switch @options.type
+        when 'join'
+          api_location = 'api/join'
+          data['join_hash'] = @options.hash
 
-      # We're creating a game...
-      else
-        api_location = 'api/create'
+        when 'create'
+          api_location = 'api/create'
+
+        when 'pool'
+          api_location = 'api/pool'
 
       $.post(api_location, data)
         .done (response) =>
