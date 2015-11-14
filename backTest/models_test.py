@@ -434,7 +434,7 @@ class GameTest(unittest.TestCase):
             '8': move_types.ATTACK_DRAW,
             '9': move_types.ATTACK_WON,
             'S': move_types.ATTACK_WON,
-            'B': move_types.DISARM,
+            'B': move_types.ATTACK_WON,
             'F': move_types.CAPTURE
         }
 
@@ -488,7 +488,7 @@ class GameTest(unittest.TestCase):
         }
 
         rules = {
-            '1': move_types.ASSASINATION,
+            '1': move_types.ATTACK_WON,
             '2': move_types.ATTACK_LOST,
             '3': move_types.ATTACK_LOST,
             '4': move_types.ATTACK_LOST,

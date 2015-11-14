@@ -217,7 +217,7 @@ class Game(BaseModel):
         # Are we attacking a bomb?
         if toPiece['rank'] == 'B':
             if fromPiece['rank'] == '8':
-                return move_types.DISARM
+                return move_types.ATTACK_WON
             else:
                 return move_types.ATTACK_LOST
 
@@ -228,7 +228,7 @@ class Game(BaseModel):
         # Are we a spy?
         if fromPiece['rank'] == 'S':
             if toPiece['rank'] == '1':
-                return move_types.ASSASINATION
+                return move_types.ATTACK_WON
             else:
                 return move_types.ATTACK_LOST
 
