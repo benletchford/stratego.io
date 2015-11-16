@@ -1,13 +1,16 @@
 define (require) ->
 
-    Backbone = require 'backbone'
-
     ranks = require '../ranks'
 
     class extends Backbone.Model
 
         initialize: ->
-            @setDefault()
+            lastBoard = Cookies.getJSON('lastBoard')
+
+            if lastBoard
+                @set('board', lastBoard)
+            else
+                @setDefault()
 
         setDefault: ->
             pieces = []

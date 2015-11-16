@@ -31,17 +31,21 @@ webpackBase =
     backbone  : 'Backbone'
     underscore: '_'
     pusher    : 'Pusher'
+    Cookies   : 'Cookies'
   plugins: [
     new webpack.ProvidePlugin({
-        $: 'jquery',
-        jQuery: 'jquery',
+        $: 'jquery'
+        jQuery: 'jquery'
         'window.jQuery': 'jquery'
     })
     new webpack.ProvidePlugin({
-        Backbone: 'backbone',
+        Backbone: 'backbone'
     })
     new webpack.ProvidePlugin({
-        _: 'underscore',
+        _: 'underscore'
+    })
+    new webpack.ProvidePlugin({
+        Cookies: 'Cookies'
     })
   ]
   debug: true

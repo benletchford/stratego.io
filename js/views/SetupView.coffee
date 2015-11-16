@@ -63,6 +63,8 @@ define (require) ->
 
       $.post(api_location, data)
         .done (response) =>
+          Cookies.set 'lastBoard', @setup.get('board')
+
           # TODO, do this better...
           window._response = response
           window.location.hash = "play/#{response.player_hash}"
