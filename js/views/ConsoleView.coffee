@@ -5,7 +5,8 @@ define (require) ->
   Backbone = require 'backbone'
 
   class extends Backbone.View
-    tagName  : 'img'
+    tagName  : 'div'
+    # tagName  : 'img'
     className: 'console-view'
 
     initialize: ->

@@ -31,16 +31,15 @@ webpackBase =
     backbone  : 'Backbone'
     underscore: '_'
     pusher    : 'Pusher'
-    sortable  : 'Sortable'
   plugins: [
     new webpack.ProvidePlugin({
         $: 'jquery',
         jQuery: 'jquery',
         'window.jQuery': 'jquery'
     })
-    # new webpack.ProvidePlugin({
-    #     'underscore': '_',
-    # })
+    new webpack.ProvidePlugin({
+        Backbone: 'Backbone',
+    })
   ]
   debug: true
 
@@ -57,11 +56,6 @@ module.exports = (grunt) ->
     pkg: grunt.file.readJSON 'package.json'
 
     clean: ['js/**/*.js', 'app/static']
-
-    copy:
-      app:
-        src: 'bower_components/dragula.js/dist/dragula.min.js'
-        dest: 'app/static/dragula.min.js'
 
     htmlmin:
       app:
@@ -102,12 +96,6 @@ module.exports = (grunt) ->
         }, webpackBase)
 
     watch:
-      # webpack:
-      #   files: ['fe/**/*.coffee', 'fe/**/*.jade']
-      #   tasks: ['webpack']
-      # less:
-      #   files: ['css/**/*']
-      #   tasks: ['less']
       html:
         files: ['html/**/*']
         tasks: ['htmlmin']
@@ -119,7 +107,6 @@ module.exports = (grunt) ->
     'clean'
     'htmlmin'
     'webpack:app'
-    'copy'
   ]
 
   grunt.registerTask 'build:tests', [

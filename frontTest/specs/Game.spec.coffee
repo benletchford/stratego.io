@@ -226,6 +226,7 @@ define (require) ->
           game.checkMove from, {x: 6, y: 5}
         ).to.throw()
 
+      # All this is now done on the server end.
       describe.skip 'attacking', ->
 
         beforeEach ->
