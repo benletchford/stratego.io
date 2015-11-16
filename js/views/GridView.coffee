@@ -1,9 +1,5 @@
 define (require) ->
 
-  $        = require 'jquery'
-  _        = require 'underscore'
-  Backbone = require 'backbone'
-
   template     = require '../../jade/grid.jade'
   piece        = require '../../jade/piece.jade'
   phantomPiece = require '../../jade/phantomPiece.jade'

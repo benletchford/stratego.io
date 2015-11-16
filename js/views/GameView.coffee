@@ -1,9 +1,5 @@
 define (require) ->
 
-  $        = require 'jquery'
-  _        = require 'underscore'
-  Backbone = require 'backbone'
-
   GridView       = require './GridView'
   GameDialogView = require './GameDialogView'
   Game           = require '../models/Game'

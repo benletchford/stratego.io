@@ -1,9 +1,5 @@
 define (require) ->
 
-  $        = require 'jquery'
-  _        = require 'underscore'
-  Backbone = require 'backbone'
-
   Router = require './Router'
 
   require '../css/main.less'

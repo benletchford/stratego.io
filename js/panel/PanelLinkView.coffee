@@ -1,9 +1,5 @@
 define (require) ->
 
-  $        = require 'jquery'
-  _        = require 'underscore'
-  Backbone = require 'backbone'
-
   template = require '../../jade/panelOption.jade'
 
   class extends Backbone.View

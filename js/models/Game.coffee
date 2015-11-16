@@ -1,6 +1,5 @@
 define (require) ->
 
-  Backbone = require 'backbone'
   moveTypes = require '../moveTypes'
 
   class extends Backbone.Model

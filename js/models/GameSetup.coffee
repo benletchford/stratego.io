@@ -7,21 +7,17 @@ define (require) ->
     class extends Backbone.Model
 
         initialize: ->
+            @setDefault()
+
+        setDefault: ->
             pieces = []
             for pieceRank, pieceDetails of ranks
                 for [1..pieceDetails.amount]
                     pieces.push rank: pieceRank, side: 3
 
+            @set('board', [])
             for i in [0..3]
-                @get('board')[i] = pieces.splice(0, 10)
-
-        defaults: ->
-            board: [
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-            ]
+                @get('board').push pieces.splice(0, 10)
 
         setPiece: ({x, y}, piece) ->
             @get('board')[y][x] = piece

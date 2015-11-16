@@ -38,7 +38,10 @@ webpackBase =
         'window.jQuery': 'jquery'
     })
     new webpack.ProvidePlugin({
-        Backbone: 'Backbone',
+        Backbone: 'backbone',
+    })
+    new webpack.ProvidePlugin({
+        _: 'underscore',
     })
   ]
   debug: true
