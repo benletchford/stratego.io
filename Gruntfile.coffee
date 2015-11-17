@@ -32,6 +32,7 @@ webpackBase =
     underscore: '_'
     pusher    : 'Pusher'
     Cookies   : 'Cookies'
+    Spinner   : 'Spinner'
   plugins: [
     new webpack.ProvidePlugin({
         $: 'jquery'
@@ -46,6 +47,9 @@ webpackBase =
     })
     new webpack.ProvidePlugin({
         Cookies: 'Cookies'
+    })
+    new webpack.ProvidePlugin({
+        Spinner: 'Spinner'
     })
   ]
   debug: true
@@ -63,6 +67,11 @@ module.exports = (grunt) ->
     pkg: grunt.file.readJSON 'package.json'
 
     clean: ['js/**/*.js', 'app/static']
+
+    copy:
+      favicon:
+        src: 'graphics/favicon.ico'
+        dest: 'app/static/favicon.ico'
 
     htmlmin:
       app:
@@ -114,6 +123,7 @@ module.exports = (grunt) ->
     'clean'
     'htmlmin'
     'webpack:app'
+    'copy:favicon'
   ]
 
   grunt.registerTask 'build:tests', [

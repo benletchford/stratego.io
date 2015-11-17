@@ -7,6 +7,7 @@ define (require) ->
   SetupView   = require './views/SetupView'
   HomeView    = require './views/HomeView'
   GameView    = require './views/GameView'
+  LoadingView = require './views/LoadingView'
 
   class extends Backbone.Router
     routes:
@@ -14,8 +15,10 @@ define (require) ->
       'setup/pool'      : 'pool'
       'setup/join/:hash': 'join'
 
-      'play/:hash'      : 'play'
-      ''                : 'home'
+      'load': 'load'
+
+      'play/:hash': 'play'
+      ''          : 'home'
 
     initialize: ->
       @consoleView = new ConsoleView()
@@ -53,3 +56,9 @@ define (require) ->
 
       setupView = new SetupView(options)
       @boardView.$overboard.html setupView.el
+
+    load: ->
+      @boardView.$overboard.empty()
+
+      loadingView = new LoadingView()
+      @boardView.$overboard.html loadingView.el
