@@ -3,6 +3,7 @@ import json
 from google.appengine.ext import ndb
 
 import move_types
+import game_states
 
 
 class InvalidMove(Exception):
@@ -42,6 +43,8 @@ class Game(BaseModel):
 
     # Is this game by invite only?
     private = ndb.BooleanProperty(default=True)
+
+    game_state = ndb.IntegerProperty(default=0)
 
     grave_yard = ndb.JsonProperty(default='[]')
 

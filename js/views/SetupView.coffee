@@ -1,10 +1,8 @@
 define (require) ->
 
   GameSetup = require '../models/GameSetup'
-
-  template = require '../../jade/setup.jade'
-
-  ranks = require '../ranks'
+  template  = require '../../jade/setup.jade'
+  ranks     = require '../ranks'
 
   GridView        = require './GridView'
   PanelLinkView   = require '../panel/PanelLinkView'

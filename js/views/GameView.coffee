@@ -1,9 +1,10 @@
 define (require) ->
 
   GridView       = require './GridView'
-  GameDialogView = require './GameDialogView'
+  LoadingView    = require './LoadingView'
   Game           = require '../models/Game'
   moveTypes      = require '../moveTypes'
+  gameStates     = require '../gameStates'
 
   template = require '../../jade/game.jade'
 
@@ -11,14 +12,36 @@ define (require) ->
     className: 'game-view'
 
     initialize: (@hash) ->
-      # TODO, do this better... no need to send ajax request when we already
-      # know the data from setup.
-      if window._response
-        @render(window._response)
-        delete window._response
+      @loadingView = new LoadingView(
+        text: 'Connecting to game...'
+      )
+      @$el.html @loadingView.el
 
-      else
-        @getLatest()
+      $.get('api/game',
+          player_hash: @hash
+        )
+          .done (response) =>
+            @connectToPusher()
+            @checkRender(response)
+
+      # # TODO, do this better... no need to send ajax request when we already
+      # # know the data from setup.
+      # if window._response
+      #   @render(window._response)
+      #   delete window._response
+
+      # else
+      #   @getLatest()
+
+    connectToPusher: ->
+      @pusher = new Pusher 'fd2e668a4ea4f7e23ab6', encrypted: true
+      @channel = @pusher.subscribe "game-#{@hash}"
+
+
+    checkRender: (data) ->
+      switch data.game_state
+        when 0
+          @loadingView.$loadingText.text('Waiting for opponent...')
 
     render: (data) ->
       @$el.html template()
@@ -42,10 +65,6 @@ define (require) ->
 
       if data.side is 0
         console.log "Join hash: #{data.join_hash}"
-
-      # Connect to pusher...
-      @pusher = new Pusher 'fd2e668a4ea4f7e23ab6', encrypted: true
-      @channel = @pusher.subscribe "game-#{@hash}"
 
       @channel.bind 'update', (data) =>
         $.get('api/game',

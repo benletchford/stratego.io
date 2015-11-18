@@ -5,7 +5,7 @@ define (require) ->
   class extends Backbone.View
     className:  'loading-view'
 
-    initialize: ->
+    initialize: (@options) ->
       @$el.html template()
 
       @$spinnerContainer = @$ '.spinner-container'
@@ -14,7 +14,7 @@ define (require) ->
       spinner = new Spinner().spin()
       @$spinnerContainer.html spinner.el
 
-      @setLoadingText('Loading...')
+      _.defaults @options,
+        text: 'Loading...'
 
-    setLoadingText: (text) ->
-      @$loadingText.text(text)
+      @$loadingText.text @options.text
