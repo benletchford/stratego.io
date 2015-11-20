@@ -26,7 +26,11 @@ define (require) ->
         title: 'Start'
         description: 'Once you\'re happy with the setup click here to start the game.'
       )
-      startBtn.$el.on 'click', _.bind @clickStart, @
+      startBtn.$el.on 'click', =>
+        Cookies.set 'lastBoard', @setup.get('board')
+
+        @trigger 'ready',
+          board: @setup.get('board')
 
       @$panel.append startBtn.el
 
@@ -44,26 +48,30 @@ define (require) ->
       @setup.setPiece from, toPiece
       @setup.setPiece to, fromPiece
 
-    clickStart: ->
-      data =
-        board: JSON.stringify @setup.get('board')
+    # clickStart: ->
+    #   @trigger 'move', data.from, to
 
-      switch @options.type
-        when 'join'
-          api_location = 'api/join'
-          data['join_hash'] = @options.hash
+      # data =
+      #   board: JSON.stringify @setup.get('board')
 
-        when 'create'
-          api_location = 'api/create'
+      # switch @options.type
+      #   when 'join'
+      #     api_location = 'api/join'
+      #     data['join_hash'] = @options.hash
 
-        when 'pool'
-          api_location = 'api/pool'
+      #   when 'create'
+      #     api_location = 'api/create'
 
-      $.post(api_location, data)
-        .done (response) =>
-          Cookies.set 'lastBoard', @setup.get('board')
+      #   when 'pool'
+      #     api_location = 'api/pool'
 
-          # TODO, do this better...
-          window._response = response
-          window.location.hash = "play/#{response.player_hash}"
+      # $.post(api_location, data)
+      #   .done (game) =>
+      #     Cookies.set 'lastBoard', @setup.get('board')
+
+      #     # TODO, do this better... don't use global variables.
+      #     # In this case it's hard to avoid as we're using routers and we don't
+      #     # want to pass information via the URL or via cookies/local storage.
+      #     window._game = game
+      #     window.location.hash = "play/#{game.player_hash}"
 

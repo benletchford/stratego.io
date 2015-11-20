@@ -1,7 +1,5 @@
 define (require) ->
 
-  Backbone = require 'backbone'
-
   BoardView   = require './views/BoardView'
   ConsoleView = require './views/ConsoleView'
   SetupView   = require './views/SetupView'
@@ -9,16 +7,15 @@ define (require) ->
   GameView    = require './views/GameView'
   LoadingView = require './views/LoadingView'
 
+  gameStates = require './gameStates'
+
   class extends Backbone.Router
     routes:
+      'play/:hash'      : 'play'
       'setup/create'    : 'create'
-      'setup/pool'      : 'pool'
       'setup/join/:hash': 'join'
-
-      'load': 'load'
-
-      'play/:hash': 'play'
-      ''          : 'home'
+      'setup/pool'      : 'pool'
+      ''                : 'home'
 
     initialize: ->
       @consoleView = new ConsoleView()
@@ -27,16 +24,19 @@ define (require) ->
       $(document.body).append @boardView.el
 
     home: ->
-      @boardView.$overboard.empty()
-
       homeView = new HomeView()
-      @boardView.$overboard.html homeView.el
+      @setContent homeView.el
 
     play: (hash) ->
-      @boardView.$overboard.empty()
+      loadingView = new LoadingView text: 'Loading game...'
+      @setContent loadingView.el
 
-      gameView = new GameView(hash)
-      @boardView.$overboard.html gameView.el
+      $.get('api/game',
+          player_hash: hash
+        )
+          .done (game) =>
+            gameView = new GameView(game)
+            @_checkGameRender gameView, loadingView
 
     pool: ->
       @_setup
@@ -45,20 +45,66 @@ define (require) ->
     create: ->
       @_setup
         type: 'create'
+      ,
+        'Creating game...'
 
     join: (hash) ->
       @_setup
         type: 'join'
         hash: hash
+      ,
+        'Joining game...'
 
-    _setup: (options = {}) ->
-      @boardView.$overboard.empty()
+    setContent: (html) ->
+      @_clear()
+      @boardView.$contentContainer.html html
 
-      setupView = new SetupView(options)
-      @boardView.$overboard.html setupView.el
+    _checkGameRender: (gameView, loadingView) ->
+      # Loading view should already be visible when calling
 
-    load: ->
-      @boardView.$overboard.empty()
+      switch gameView.game.get('game_state')
+        when gameStates.WAITING_FOR_OPPONENT
+          loadingView.setText 'Waiting for opponent...'
 
-      loadingView = new LoadingView()
-      @boardView.$overboard.html loadingView.el
+          gameView.channel.bind 'blue_ready', =>
+            @setContent gameView.el
+            gameView.channel.unbind 'blue_ready'
+
+        when gameStates.PLAYING
+          @setContent gameView.el
+
+    _clear: ->
+      @boardView.$contentContainer.empty()
+
+      # Remove all registered callbacks
+      @stopListening()
+
+    _setup: (setupOptions = {}, loadingText) ->
+      setupView = new SetupView(setupOptions)
+      @setContent setupView.el
+
+      @listenToOnce setupView, 'ready', (data) =>
+        loadingView = new LoadingView text: loadingText
+        @setContent loadingView.el
+
+        data.board = JSON.stringify data.board
+
+        switch setupOptions.type
+          when 'join'
+            api_location = 'api/join'
+            data['join_hash'] = setupOptions.hash
+
+          when 'create'
+            api_location = 'api/create'
+
+          when 'pool'
+            api_location = 'api/pool'
+
+        $.post(api_location, data)
+          .done (game) =>
+            gameView = new GameView(game)
+            @_checkGameRender gameView, loadingView
+
+            @navigate "play/#{game.player_hash}"
+
+

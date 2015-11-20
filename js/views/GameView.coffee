@@ -1,61 +1,31 @@
 define (require) ->
 
   GridView       = require './GridView'
-  LoadingView    = require './LoadingView'
   Game           = require '../models/Game'
   moveTypes      = require '../moveTypes'
-  gameStates     = require '../gameStates'
 
   template = require '../../jade/game.jade'
 
   class extends Backbone.View
     className: 'game-view'
 
-    initialize: (@hash) ->
-      @loadingView = new LoadingView(
-        text: 'Connecting to game...'
-      )
-      @$el.html @loadingView.el
-
-      $.get('api/game',
-          player_hash: @hash
-        )
-          .done (response) =>
-            @connectToPusher()
-            @checkRender(response)
-
-      # # TODO, do this better... no need to send ajax request when we already
-      # # know the data from setup.
-      # if window._response
-      #   @render(window._response)
-      #   delete window._response
-
-      # else
-      #   @getLatest()
-
-    connectToPusher: ->
+    initialize: (game) ->
       @pusher = new Pusher 'fd2e668a4ea4f7e23ab6', encrypted: true
-      @channel = @pusher.subscribe "game-#{@hash}"
+      @channel = @pusher.subscribe "game-#{game.player_hash}"
 
+      @render(game)
 
-    checkRender: (data) ->
-      switch data.game_state
-        when 0
-          @loadingView.$loadingText.text('Waiting for opponent...')
-
-    render: (data) ->
+    render: (game) ->
       @$el.html template()
-
-      # gameDialogView = new GameDialogView()
-      # @$el.append gameDialogView.el
 
       @$gridContainer = @$ '.grid-container'
 
       @game = new Game(
-        board: data.board
-        turn: +data.turn
-        side: data.side
-        last_move: data.last_move
+        board: game.board
+        turn: +game.turn
+        side: game.side
+        last_move: game.last_move
+        game_state: game.game_state
       )
 
       @grid = new GridView @game
@@ -63,24 +33,16 @@ define (require) ->
 
       @listenTo @grid, 'move', _.bind(@move, @)
 
-      if data.side is 0
-        console.log "Join hash: #{data.join_hash}"
+      if game.side is 0
+        console.log "Join hash: #{game.join_hash}"
 
-      @channel.bind 'update', (data) =>
+      @channel.bind 'update', =>
         $.get('api/game',
           player_hash: @hash
         )
           .done _.bind @getLatest, @
 
     move: (from, to) ->
-      # move = @game.checkMove(from, to)
-
-      # # Flip the turn
-      # @game.flipTurn()
-
-      # @game.movePiece from, to
-      # @game.setLastMove from, to
-
       $.post('api/move',
         player_hash: @hash
         side       : @game.get('side')
@@ -89,16 +51,16 @@ define (require) ->
       )
         .done _.bind @update, @
 
-    update: (data) ->
+    update: (game) ->
       if @game
         @game.set(
-          board: data.board
-          turn: +data.turn
-          side: data.side
-          last_move: data.last_move
+          board: game.board
+          turn: +game.turn
+          side: game.side
+          last_move: game.last_move
         )
       else
-        @render(data)
+        @render(game)
 
     getLatest: ->
       $.get('api/game',

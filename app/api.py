@@ -9,6 +9,7 @@ from utils import status_codes, general, board_utils, pusher_utils
 
 import models
 import move_types
+import game_states
 
 
 class CreateHandler(webapp2.RequestHandler):
@@ -59,7 +60,17 @@ class JoinHandler(webapp2.RequestHandler):
 
         if game:
             game.set_blue_setup(board)
+            game.game_state = game_states.READY
             game.put()
+
+            # Tell red we're ready.
+            pusher = Pusher(app_id=pusher_utils.APP_ID,
+                            key=pusher_utils.KEY,
+                            secret=pusher_utils.SECRET)
+
+            pusher.trigger('game-%s' % game.red_hash,
+                           'blue_ready',
+                           {})
 
             game_dict = board_utils.get_sendable_game(game, 1)
 

@@ -11,10 +11,16 @@ define (require) ->
       @$spinnerContainer = @$ '.spinner-container'
       @$loadingText      = @$ '.loading-text'
 
-      spinner = new Spinner().spin()
-      @$spinnerContainer.html spinner.el
+      @spinner = new Spinner().spin()
+      @$spinnerContainer.html @spinner.el
 
       _.defaults @options,
         text: 'Loading...'
 
-      @$loadingText.text @options.text
+      @setText @options.text
+
+    setText: (text) ->
+      @$loadingText.text text
+
+    stop: ->
+      @spinner.stop()

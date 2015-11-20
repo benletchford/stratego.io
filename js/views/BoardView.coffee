@@ -1,5 +1,7 @@
 define (require) ->
 
+  template = require '../../jade/board.jade'
+
   MIN_WIDTH = 320
 
   class extends Backbone.View
@@ -9,9 +11,9 @@ define (require) ->
       @_resize()
       $(window).on 'resize', _.debounce _.bind(@_resize, @), 100
 
-      @$el.html '<div class="over-board-container"></div>'
+      @$el.html template()
 
-      @$overboard = @$el.find '.over-board-container'
+      @$contentContainer = @$el.find '.content-container'
 
     _resize: ->
       w = $(window).width()
