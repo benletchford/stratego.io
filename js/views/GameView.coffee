@@ -26,6 +26,7 @@ define (require) ->
         side: game.side
         last_move: game.last_move
         game_state: game.game_state
+        player_hash: game.player_hash
       )
 
       @grid = new GridView @game
@@ -36,67 +37,29 @@ define (require) ->
       if game.side is 0
         console.log "Join hash: #{game.join_hash}"
 
-      @channel.bind 'update', =>
-        $.get('api/game',
-          player_hash: @hash
-        )
-          .done _.bind @getLatest, @
+      @channel.bind 'update', _.bind @getLatest, @
 
     move: (from, to) ->
       $.post('api/move',
-        player_hash: @hash
+        player_hash: @game.get('player_hash')
         side       : @game.get('side')
         from       : JSON.stringify from
         to         : JSON.stringify to
       )
-        .done _.bind @update, @
-
-    update: (game) ->
-      if @game
-        @game.set(
-          board: game.board
-          turn: +game.turn
-          side: game.side
-          last_move: game.last_move
-        )
-      else
-        @render(game)
+        .done _.bind @setGame, @
 
     getLatest: ->
       $.get('api/game',
-          player_hash: @hash
+          player_hash: @game.get('player_hash')
         )
-          .done _.bind @update, @
+          .done _.bind @setGame, @
 
-    # move: (from, to, local = true) ->
-    #   console.log 'from: ' + JSON.stringify(from)
-    #   console.log 'to: ' + JSON.stringify(to)
-
-    #   move = @game.checkMove(from, to)
-
-    #   # Flip the turn
-    #   @game.flipTurn()
-
-    #   switch move
-    #     when moveTypes.MOVE
-    #       # Clone to restore later if need be
-    #       clonedGameAttri = JSON.parse(JSON.stringify(@game.attributes))
-
-    #       @game.movePiece from, to
-    #       @game.setLastMove from, to
-
-    #       if local
-    #         $.post('api/move',
-    #           player_hash: @hash
-    #           side       : @game.get('side')
-    #           from       : JSON.stringify from
-    #           to         : JSON.stringify to
-    #         )
-    #         .fail =>
-    #           # Reset
-    #           @game.set(clonedGameAttri)
-
-    #     when moveTypes.ATTACK
-    #       @game.setPendingAttack from, to
-
-
+    setGame: (game) ->
+      @game.set(
+        board: game.board
+        turn: +game.turn
+        side: game.side
+        last_move: game.last_move
+        game_state: game.game_state
+        player_hash: game.player_hash
+      )
