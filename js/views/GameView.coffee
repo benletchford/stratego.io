@@ -1,8 +1,9 @@
 define (require) ->
 
-  GridView       = require './GridView'
-  Game           = require '../models/Game'
-  moveTypes      = require '../moveTypes'
+  GridView      = require './GridView'
+  Game          = require '../models/Game'
+  moveTypes     = require '../moveTypes'
+  pusherWrapper = require '../pusherWrapper'
 
   template = require '../../jade/game.jade'
 
@@ -10,8 +11,8 @@ define (require) ->
     className: 'game-view'
 
     initialize: (game) ->
-      @pusher = new Pusher 'fd2e668a4ea4f7e23ab6', encrypted: true
-      @channel = @pusher.subscribe "game-#{game.player_hash}"
+      # We should be connected to pusher at this point...
+      @channel = pusherWrapper.pusher.subscribe "game-#{game.player_hash}"
 
       @render(game)
 
@@ -37,6 +38,7 @@ define (require) ->
       if game.side is 0
         console.log "Join hash: #{game.join_hash}"
 
+      # @listenTo @channel, 'update', _.bind @getLatest, @
       @channel.bind 'update', _.bind @getLatest, @
 
     move: (from, to) ->

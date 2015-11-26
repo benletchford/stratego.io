@@ -7,7 +7,8 @@ define (require) ->
   GameView    = require './views/GameView'
   LoadingView = require './views/LoadingView'
 
-  gameStates = require './gameStates'
+  gameStates    = require './gameStates'
+  pusherWrapper = require './pusherWrapper'
 
   class extends Backbone.Router
     routes:
@@ -35,12 +36,13 @@ define (require) ->
           player_hash: hash
         )
           .done (game) =>
-            gameView = new GameView(game)
-            @_checkGameRender gameView, loadingView
+            @_checkGameRender game, loadingView
 
     pool: ->
       @_setup
         type: 'pool'
+      ,
+        'Connecting to pool...'
 
     create: ->
       @_setup
@@ -59,25 +61,47 @@ define (require) ->
       @_clear()
       @boardView.$contentContainer.html html
 
-    _checkGameRender: (gameView, loadingView) ->
+    _checkGameRender: (game, loadingView) ->
       # Loading view should already be visible when calling
 
-      switch gameView.game.get('game_state')
-        when gameStates.WAITING_FOR_OPPONENT
-          loadingView.setText 'Waiting for opponent...'
+      loadingView.setText 'Connecting to websocket...'
+      pusherWrapper.connect()
+        .done =>
+          gameView = new GameView(game)
 
-          gameView.channel.bind 'blue_ready', =>
-            @setContent gameView.el
-            gameView.channel.unbind 'blue_ready'
+          switch gameView.game.get('game_state')
+            when gameStates.WAITING_FOR_OPPONENT
+              loadingView.setText 'Waiting for opponent...'
 
-        when gameStates.PLAYING
-          @setContent gameView.el
+              gameView.channel.bind 'blue_ready', =>
+                @setContent gameView.el
+                gameView.channel.unbind 'blue_ready'
+
+            when gameStates.PLAYING
+              @setContent gameView.el
 
     _clear: ->
       @boardView.$contentContainer.empty()
 
       # Remove all registered callbacks
       @stopListening()
+
+      # Unsubscribe from all channels and unbind all events...
+      pusherWrapper.unsubscribeAll()
+
+    _joinPool: (board, loadingView) ->
+      # Loading view should already be visible when calling
+
+      pusherWrapper.connect()
+        .done =>
+          loadingView.setText 'Connected to pool, setting up match...'
+
+          $.post('api/pool/join',
+            board: board
+            socket_id: pusherWrapper.pusher.connection.socket_id
+          )
+            .done (game) =>
+              loadingView.setText 'In pool, waiting for an opponent...'
 
     _setup: (setupOptions = {}, loadingText) ->
       setupView = new SetupView(setupOptions)
@@ -88,23 +112,16 @@ define (require) ->
         @setContent loadingView.el
 
         data.board = JSON.stringify data.board
+        if setupOptions.type is 'join'
+          data.join_hash = setupOptions.hash
 
         switch setupOptions.type
-          when 'join'
-            api_location = 'api/join'
-            data['join_hash'] = setupOptions.hash
+          when 'create', 'join'
+            $.post("api/#{setupOptions.type}", data)
+              .done (game) =>
+                @_checkGameRender game, loadingView
 
-          when 'create'
-            api_location = 'api/create'
+                @navigate "play/#{game.player_hash}"
 
           when 'pool'
-            api_location = 'api/pool'
-
-        $.post(api_location, data)
-          .done (game) =>
-            gameView = new GameView(game)
-            @_checkGameRender gameView, loadingView
-
-            @navigate "play/#{game.player_hash}"
-
-
+            @_joinPool data.board, loadingView

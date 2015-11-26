@@ -2,6 +2,8 @@ import json
 import webapp2
 import uuid
 
+from google.appengine.api import taskqueue
+
 from lib import ndb_json
 from lib.pusher.pusher import Pusher
 
@@ -230,35 +232,67 @@ class GameHandler(webapp2.RequestHandler):
         self.response.write(json.dumps(game_dict))
 
 
-# class GameHandler(webapp2.RequestHandler):
+class JoinPoolHandler(webapp2.RequestHandler):
 
-#     def post(self):
-#         player_hash = self.request.get('player_hash')
+    def post(self):
+        if not general.array_has_values(self.request.arguments(), ['board', 'socket_id']):
+            self.response.set_status(status_codes.INTERNAL_ERROR)
+            return
 
-#         if not player_hash:
-#             self.response.set_status(status_codes.UNAUTHORIZED)
-#             return
+        board = self.request.get('board')
+        socket_id = self.request.get('socket_id')
 
-#         game = models.Game.query(
-#             models.Game.red_hash == player_hash
-#         ).get()
-#         side = 0
+        models.Pool(
+            setup=board,
+            socket_id=socket_id
+        ).put()
 
-#         if not game:
-#             game = models.Game.query(
-#                 models.Game.blue_hash == player_hash
-#             ).get()
-#             side = 1
+        params = {
+            'board': board,
+            'socket_id': socket_id
+        }
 
-#         # If still not ;)
-#         if not game:
-#             self.response.set_status(status_codes.NOT_FOUND)
-#             return
+        q = taskqueue.Queue('pool')
+        q.add(
+            taskqueue.Task(url='/api/pool/process', params=params, method='post'))
 
-#         game_dict = board_utils.get_sendable_game(game, side)
+        self.response.set_status(200)
 
-#         self.response.headers['Content-Type'] = 'text/json'
-#         self.response.write(json.dumps(game_
+
+class ProcessPoolHandler(webapp2.RequestHandler):
+
+    def post(self):
+        if not general.array_has_values(self.request.arguments(), ['board']):
+            self.response.set_status(status_codes.INTERNAL_ERROR)
+            return
+
+        # Get the oldest...
+        host = models.Pool.query().order(-models.Pool.created).get()
+
+        # We try to join the hosts game...
+        if host:
+            pass
+
+        # We become the host for the next guy...
+        else:
+            pass
+
+
+class PusherAuthHandler(webapp2.RequestHandler):
+
+    def post(self):
+        if not general.array_has_values(self.request.arguments(), ['channel_name', 'socket_id']):
+            self.response.set_status(status_codes.INTERNAL_ERROR)
+            return
+
+        auth = pusher.authenticate(
+            channel=request.form['channel_name'],
+            socket_id=request.form['socket_id'],
+            custom_data={}
+        )
+
+        self.response.headers['Content-Type'] = 'text/json'
+        self.response.write(json.dumps(auth))
 
 
 app = webapp2.WSGIApplication([
@@ -266,5 +300,7 @@ app = webapp2.WSGIApplication([
     ('/api/join', JoinHandler),
     ('/api/move', MoveHandler),
     ('/api/game', GameHandler),
-    # ('/api/pool', PoolHandler),
+    ('/api/pool/join', JoinPoolHandler),
+    ('/api/pool/process', ProcessPoolHandler),
+    ('/pusher/auth', PusherAuthHandler)
 ], debug=True)

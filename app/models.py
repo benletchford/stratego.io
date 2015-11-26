@@ -15,6 +15,11 @@ class BaseModel(ndb.Model):
     modified = ndb.DateTimeProperty(auto_now=True)
 
 
+class Pool(BaseModel):
+    socket_id = ndb.StringProperty(required=True)
+    setup = ndb.JsonProperty(required=True)
+
+
 class Game(BaseModel):
     red_hash = ndb.StringProperty()
     blue_hash = ndb.StringProperty()

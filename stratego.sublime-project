@@ -9,12 +9,12 @@
         "1.test"
       ],
       "file_exclude_patterns": [
-        // "*.sublime-project",
         "gae.auth",
         "js/*.js",
         "test/testBundle.js",
         "test/specs/*.js",
-        "1.*.js"
+        "1.*.js",
+        "__init__.py"
       ]
 		}
 	]

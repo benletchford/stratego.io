@@ -1,0 +1,4 @@
+queue:
+- name: pool
+  rate: 20/m
+  max_concurrent_requests: 1
