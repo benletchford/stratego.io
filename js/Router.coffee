@@ -96,12 +96,18 @@ define (require) ->
         .done =>
           loadingView.setText 'Connected to pool, setting up match...'
 
+          socketId = pusherWrapper.pusher.connection.socket_id
+
           $.post('api/pool/join',
             board: board
-            socket_id: pusherWrapper.pusher.connection.socket_id
+            socket_id: socketId
           )
             .done (game) =>
               loadingView.setText 'In pool, waiting for an opponent...'
+
+              channel = pusherWrapper.pusher.subscribe("public-pool-#{socketId}")
+              channel.bind 'opponent_found', (data) =>
+                @navigate "play/#{data.player_hash}", trigger: true
 
     _setup: (setupOptions = {}, loadingText) ->
       setupView = new SetupView(setupOptions)

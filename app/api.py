@@ -14,29 +14,54 @@ import move_types
 import game_states
 
 
+def _create_game(setup):
+    for row in setup:
+        for piece in row:
+            piece['side'] = 0
+
+    new_game = models.Game()
+    new_game.red_hash = uuid.uuid4().hex[:6]
+    new_game.blue_hash = uuid.uuid4().hex[:6]
+    new_game.join_hash = uuid.uuid4().hex[:6]
+
+    new_game.set_red_setup(setup)
+
+    # Set the water.
+    new_game.set_blocks()
+
+    new_game.put()
+
+    return new_game
+
+
+def _join_game(setup, join_hash, game=None):
+    for row in setup:
+        for piece in row:
+            piece['side'] = 1
+
+    if not game:
+        game = models.Game.query(
+            models.Game.join_hash == join_hash
+        ).get()
+
+    if game:
+        game.set_blue_setup(setup)
+        game.game_state = game_states.READY
+        game.put()
+
+    else:
+        raise Exception("Can't find that game to join.")
+
+    return game
+
+
 class CreateHandler(webapp2.RequestHandler):
 
     def post(self):
         json_board = self.request.get('board')
         board = json.loads(json_board)
 
-        for row in board:
-            for piece in row:
-                piece['side'] = 0
-
-        new_game = models.Game()
-        new_game.red_hash = uuid.uuid4().hex[:6]
-        new_game.blue_hash = uuid.uuid4().hex[:6]
-        new_game.join_hash = uuid.uuid4().hex[:6]
-
-        new_game.set_red_setup(board)
-
-        # Set the water.
-        new_game.set_blocks()
-
-        new_game.put()
-
-        game_dict = board_utils.get_sendable_game(new_game, 0)
+        game_dict = board_utils.get_sendable_game(_create_game(board), 0)
 
         self.response.headers['Content-Type'] = 'text/json'
         self.response.write(json.dumps(game_dict))
@@ -242,13 +267,8 @@ class JoinPoolHandler(webapp2.RequestHandler):
         board = self.request.get('board')
         socket_id = self.request.get('socket_id')
 
-        models.Pool(
-            setup=board,
-            socket_id=socket_id
-        ).put()
-
         params = {
-            'board': board,
+            'setup': board,
             'socket_id': socket_id
         }
 
@@ -262,20 +282,57 @@ class JoinPoolHandler(webapp2.RequestHandler):
 class ProcessPoolHandler(webapp2.RequestHandler):
 
     def post(self):
-        if not general.array_has_values(self.request.arguments(), ['board']):
-            self.response.set_status(status_codes.INTERNAL_ERROR)
-            return
+        setup = self.request.get('setup')
+        socket_id = self.request.get('socket_id')
+
+        pusher = Pusher(app_id=pusher_utils.APP_ID,
+                        key=pusher_utils.KEY,
+                        secret=pusher_utils.SECRET)
 
         # Get the oldest...
-        host = models.Pool.query().order(-models.Pool.created).get()
+        oldest_game = models.Pool.query().order(-models.Pool.created).get()
 
-        # We try to join the hosts game...
-        if host:
-            pass
+        if oldest_game:
+            channel_info = pusher.channel_info(
+                'public-pool-%s' % oldest_game.socket_id, ['occupied'])
+
+            # We connect these two guys and create a game with the oldest game as
+            # red.
+            if channel_info['occupied']:
+                red_game = _create_game(json.loads(oldest_game.setup))
+
+                blue_game = _join_game(json.loads(setup),
+                                       red_game.join_hash,
+                                       red_game)
+
+                pusher.trigger('public-pool-%s' % oldest_game.socket_id,
+                               'opponent_found',
+                               {'player_hash': red_game.red_hash})
+
+                pusher.trigger('public-pool-%s' % socket_id,
+                               'opponent_found',
+                               {'player_hash': blue_game.blue_hash})
+
+            # We become the host for the next guy...
+            else:
+                models.Pool(
+                    setup=setup,
+                    socket_id=socket_id
+                ).put()
+
+                self.response.set_status(200)
+
+            # Delete the oldest game as it should no longer be in the pool.
+            oldest_game.key.delete()
 
         # We become the host for the next guy...
         else:
-            pass
+            models.Pool(
+                setup=setup,
+                socket_id=socket_id
+            ).put()
+
+            self.response.set_status(200)
 
 
 class PusherAuthHandler(webapp2.RequestHandler):
@@ -285,9 +342,16 @@ class PusherAuthHandler(webapp2.RequestHandler):
             self.response.set_status(status_codes.INTERNAL_ERROR)
             return
 
+        channel_name = self.request.get('channel_name')
+        socket_id = self.request.get('socket_id')
+
+        pusher = Pusher(app_id=pusher_utils.APP_ID,
+                        key=pusher_utils.KEY,
+                        secret=pusher_utils.SECRET)
+
         auth = pusher.authenticate(
-            channel=request.form['channel_name'],
-            socket_id=request.form['socket_id'],
+            channel=channel_name,
+            socket_id=socket_id,
             custom_data={}
         )
 
@@ -302,5 +366,5 @@ app = webapp2.WSGIApplication([
     ('/api/game', GameHandler),
     ('/api/pool/join', JoinPoolHandler),
     ('/api/pool/process', ProcessPoolHandler),
-    ('/pusher/auth', PusherAuthHandler)
+    ('/api/pusher/auth', PusherAuthHandler)
 ], debug=True)

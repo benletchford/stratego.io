@@ -16,8 +16,8 @@ class BaseModel(ndb.Model):
 
 
 class Pool(BaseModel):
-    socket_id = ndb.StringProperty(required=True)
     setup = ndb.JsonProperty(required=True)
+    socket_id = ndb.StringProperty(required=True)
 
 
 class Game(BaseModel):

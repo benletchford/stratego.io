@@ -12,7 +12,10 @@ define (require) ->
       if not @pusher
         @connectionPromise = $.Deferred()
 
-        @pusher = new Pusher 'fd2e668a4ea4f7e23ab6', encrypted: true
+        @pusher = new Pusher 'fd2e668a4ea4f7e23ab6',
+          encrypted: true
+          authEndpoint: '/api/pusher/auth'
+
         @pusher.connection.bind 'connected', =>
           @connectionPromise.resolve()
 
