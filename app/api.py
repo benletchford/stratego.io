@@ -95,7 +95,7 @@ class JoinHandler(webapp2.RequestHandler):
                             key=pusher_utils.KEY,
                             secret=pusher_utils.SECRET)
 
-            pusher.trigger('game-%s' % game.red_hash,
+            pusher.trigger('public-game-%s' % game.red_hash,
                            'blue_ready',
                            {})
 
@@ -213,7 +213,7 @@ class MoveHandler(webapp2.RequestHandler):
                             key=pusher_utils.KEY,
                             secret=pusher_utils.SECRET)
 
-            pusher.trigger('game-%s' % game.get_opponent_hash(player_hash),
+            pusher.trigger('public-game-%s' % game.get_opponent_hash(player_hash),
                            'update',
                            {'command': 'refresh'})
 

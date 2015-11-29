@@ -21,11 +21,13 @@ define (require) ->
 
       @connectionPromise
 
-    unsubscribeAll: ->
+    unsubscribeAll: (exceptedChannelNames = []) ->
       if @pusher
         channels = @pusher.allChannels()
 
         for channel in channels
+          if exceptedChannelNames.indexOf(channel.name) > -1 then continue
+
           channel.unbind()
           @pusher.unsubscribe(channel.name)
 

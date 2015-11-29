@@ -57,8 +57,8 @@ define (require) ->
       ,
         'Joining game...'
 
-    setContent: (html) ->
-      @_clear()
+    setContent: (html, exceptedChannelNames = []) ->
+      @_clear(exceptedChannelNames)
       @boardView.$contentContainer.html html
 
     _checkGameRender: (game, loadingView) ->
@@ -74,20 +74,21 @@ define (require) ->
               loadingView.setText 'Waiting for opponent...'
 
               gameView.channel.bind 'blue_ready', =>
-                @setContent gameView.el
+                @setContent gameView.el, [gameView.channelName]
                 gameView.channel.unbind 'blue_ready'
 
             when gameStates.PLAYING
-              @setContent gameView.el
+              @setContent gameView.el, [gameView.channelName]
 
-    _clear: ->
+    _clear: (exceptedChannelNames)->
       @boardView.$contentContainer.empty()
 
       # Remove all registered callbacks
       @stopListening()
 
-      # Unsubscribe from all channels and unbind all events...
-      pusherWrapper.unsubscribeAll()
+      # Unsubscribe from all channels (except those passed) and unbind all
+      # events...
+      pusherWrapper.unsubscribeAll exceptedChannelNames
 
     _joinPool: (board, loadingView) ->
       # Loading view should already be visible when calling

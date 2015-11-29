@@ -11,10 +11,9 @@ define (require) ->
     className: 'game-view'
 
     initialize: (game) ->
-      debugger
-
+      @channelName = "public-game-#{game.player_hash}"
       # We should be connected to pusher at this point...
-      @channel = pusherWrapper.pusher.subscribe "game-#{game.player_hash}"
+      @channel = pusherWrapper.pusher.subscribe @channelName
 
       @render(game)
 
