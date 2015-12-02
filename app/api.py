@@ -313,14 +313,9 @@ class ProcessPoolHandler(webapp2.RequestHandler):
                                'opponent_found',
                                {'player_hash': blue_game.blue_hash})
 
-            # We become the host for the next guy...
+            # We fail
             else:
-                models.Pool(
-                    setup=setup,
-                    socket_id=socket_id
-                ).put()
-
-                self.response.set_status(200)
+                self.response.set_status(status_codes.NOT_FOUND)
 
             # Delete the oldest game as it should no longer be in the pool.
             oldest_game.key.delete()
@@ -332,7 +327,7 @@ class ProcessPoolHandler(webapp2.RequestHandler):
                 socket_id=socket_id
             ).put()
 
-            self.response.set_status(200)
+            self.response.set_status(status_codes.OK)
 
 
 class PusherAuthHandler(webapp2.RequestHandler):
