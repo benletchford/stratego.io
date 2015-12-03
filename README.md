@@ -10,7 +10,6 @@ While this only supports the most basic gameplay, hopefully it'll get a lot bett
 
 Contributing
 ======
-
 Contrubutions are always welcome.
 
 To setup your local instance you'll need the [Google App Engine SDK](https://cloud.google.com/appengine/downloads?hl=en).
@@ -35,3 +34,7 @@ You can build the app with:
 You can deploy the app to App Engine by doing (the grunt task will look for a gae.auth file which you must create yourself, see [grunt-gae](https://github.com/maciejzasada/grunt-gae)):
 
     $ grunt deploy
+
+Issues
+======
+Any bugs or issues, please open an issue through github.
