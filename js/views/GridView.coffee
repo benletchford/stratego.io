@@ -46,6 +46,12 @@ define (require) ->
               .append piece(lastMove.from.piece)
               .append lostPiece(lastMove.to.piece)
 
+          when 'capture'
+            toCell
+              .empty()
+              .append piece(lastMove.from.piece)
+              .append lostPiece(lastMove.to.piece)
+
       @bindEvents()
 
     bindEvents: ->

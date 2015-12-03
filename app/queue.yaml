@@ -4,4 +4,4 @@ queue:
   max_concurrent_requests: 1
   retry_parameters:
     max_doublings: 0
-    min_backoff_seconds: 10
+    min_backoff_seconds: 3

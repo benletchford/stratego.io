@@ -123,6 +123,20 @@ class Game(BaseModel):
     def set_last_move(self, last_move):
         self.last_move = json.dumps(last_move)
 
+    def get_last_move(self):
+        if self.last_move:
+            return json.loads(self.last_move)
+        else:
+            return {}
+
+    def has_ended(self):
+        last_move = self.get_last_move()
+
+        if last_move and last_move['type'] == 'capture':
+            return True
+        else:
+            return False
+
     def move_piece(self, fromPos, toPos):
         board = self.get_board()
         piece = board[fromPos['y']][fromPos['x']]

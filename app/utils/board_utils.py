@@ -33,6 +33,10 @@ def get_sendable_game(game, side):
 def get_sendable_board(game, side):
     board = game.get_board()
 
+    # Only continue if the game hasn't finished
+    if game.has_ended():
+        return board
+
     if side == 0 and not game.blue_setup:
         board[0] = unknown_row(side)
         board[1] = unknown_row(side)

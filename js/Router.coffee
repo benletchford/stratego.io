@@ -29,7 +29,7 @@ define (require) ->
       @setContent homeView.el
 
     play: (hash) ->
-      loadingView = new LoadingView text: 'Loading game...'
+      loadingView = new LoadingView html: 'Loading game...'
       @setContent loadingView.el
 
       $.get('api/game',
@@ -64,14 +64,19 @@ define (require) ->
     _checkGameRender: (game, loadingView) ->
       # Loading view should already be visible when calling
 
-      loadingView.setText 'Connecting to websocket...'
+      loadingView.setHtml 'Connecting to websocket...'
       pusherWrapper.connect()
         .done =>
           gameView = new GameView(game)
 
           switch gameView.game.get('game_state')
             when gameStates.WAITING_FOR_OPPONENT
-              loadingView.setText 'Waiting for opponent...'
+              joinUrl = location.protocol + '//' + location.host \
+                + "#setup/join/#{game.join_hash}"
+
+              loadingView.setHtml(
+                "Waiting for opponent...<br /><br /> #{joinUrl}"
+              )
 
               gameView.channel.bind 'blue_ready', =>
                 @setContent gameView.el, [gameView.channelName]
@@ -95,7 +100,7 @@ define (require) ->
 
       pusherWrapper.connect()
         .done =>
-          loadingView.setText 'Connected to pool, setting up match...'
+          loadingView.setHtml 'Connected to pool, setting up match...'
 
           socketId = pusherWrapper.pusher.connection.socket_id
 
@@ -104,18 +109,18 @@ define (require) ->
             socket_id: socketId
           )
             .done (game) =>
-              loadingView.setText 'In pool, waiting for an opponent...'
+              loadingView.setHtml 'In pool, waiting for an opponent...'
 
               channel = pusherWrapper.pusher.subscribe("public-pool-#{socketId}")
               channel.bind 'opponent_found', (data) =>
                 @navigate "play/#{data.player_hash}", trigger: true
 
-    _setup: (setupOptions = {}, loadingText) ->
+    _setup: (setupOptions = {}, loadingHtml) ->
       setupView = new SetupView(setupOptions)
       @setContent setupView.el
 
       @listenToOnce setupView, 'ready', (data) =>
-        loadingView = new LoadingView text: loadingText
+        loadingView = new LoadingView html: loadingHtml
         @setContent loadingView.el
 
         data.board = JSON.stringify data.board

@@ -131,6 +131,10 @@ class MoveHandler(webapp2.RequestHandler):
                 models.Game.blue_hash == player_hash
             ).get()
 
+        if game.has_ended():
+            self.response.set_status(status_codes.UNAUTHORIZED)
+            return
+
         try:
             # Will raise if not valid.
             move_type = game.check_move(from_pos, to_pos)
@@ -196,6 +200,24 @@ class MoveHandler(webapp2.RequestHandler):
                 game.flip_turn()
                 game.set_last_move({
                     'type': 'draw',
+                    'from': {
+                        'piece': from_piece,
+                        'position': from_pos
+                    },
+                    'to': {
+                        'piece': to_piece,
+                        'position': to_pos
+                    }
+                })
+
+            elif move_type == move_types.CAPTURE:
+                from_piece = game.get_piece(from_pos)
+                to_piece = game.get_piece(to_pos)
+
+                game.move_piece(from_pos, to_pos)
+
+                game.set_last_move({
+                    'type': 'capture',
                     'from': {
                         'piece': from_piece,
                         'position': from_pos
@@ -293,25 +315,36 @@ class ProcessPoolHandler(webapp2.RequestHandler):
         oldest_game = models.Pool.query().order(-models.Pool.created).get()
 
         if oldest_game:
-            channel_info = pusher.channel_info(
+            oldest_game_channel_info = pusher.channel_info(
                 'public-pool-%s' % oldest_game.socket_id, ['occupied'])
 
-            # We connect these two guys and create a game with the oldest game as
-            # red.
-            if channel_info['occupied']:
-                red_game = _create_game(json.loads(oldest_game.setup))
+            # Is red still here?
+            if oldest_game_channel_info['occupied']:
+                task_game_channel_info = pusher.channel_info(
+                    'public-pool-%s' % socket_id, ['occupied'])
 
-                blue_game = _join_game(json.loads(setup),
-                                       red_game.join_hash,
-                                       red_game)
+                # Is blue still here?
+                if task_game_channel_info['occupied']:
+                    # We connect these two guys and create a game with the
+                    # oldest game as red.
+                    red_game = _create_game(json.loads(oldest_game.setup))
 
-                pusher.trigger('public-pool-%s' % oldest_game.socket_id,
-                               'opponent_found',
-                               {'player_hash': red_game.red_hash})
+                    blue_game = _join_game(json.loads(setup),
+                                           red_game.join_hash,
+                                           red_game)
 
-                pusher.trigger('public-pool-%s' % socket_id,
-                               'opponent_found',
-                               {'player_hash': blue_game.blue_hash})
+                    pusher.trigger('public-pool-%s' % oldest_game.socket_id,
+                                   'opponent_found',
+                                   {'player_hash': red_game.red_hash})
+
+                    pusher.trigger('public-pool-%s' % socket_id,
+                                   'opponent_found',
+                                   {'player_hash': blue_game.blue_hash})
+
+                # Blue's not here, remove the task
+                else:
+                    self.response.set_status(status_codes.OK)
+                    return
 
             # We fail
             else:

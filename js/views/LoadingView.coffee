@@ -9,18 +9,18 @@ define (require) ->
       @$el.html template()
 
       @$spinnerContainer = @$ '.spinner-container'
-      @$loadingText      = @$ '.loading-text'
+      @$loadingHtml      = @$ '.loading-html'
 
       @spinner = new Spinner().spin()
       @$spinnerContainer.html @spinner.el
 
       _.defaults @options,
-        text: 'Loading...'
+        html: 'Loading...'
 
-      @setText @options.text
+      @setHtml @options.html
 
-    setText: (text) ->
-      @$loadingText.text text
+    setHtml: (html) ->
+      @$loadingHtml.html html
 
     stop: ->
       @spinner.stop()

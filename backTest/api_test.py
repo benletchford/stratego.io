@@ -89,7 +89,8 @@ class CreateHandlerTest(unittest.TestCase):
 class JoinHandlerTest(unittest.TestCase):
     nosegae_datastore_v3 = True
 
-    def test_should_be_able_to_join_game(self):
+    @patch('lib.pusher.pusher.Pusher.trigger')
+    def test_should_be_able_to_join_game(self, pusher):
         app.post('/api/create', params={'board': json.dumps(fixtures.SETUP)})
 
         game = models.Game.query().get()
