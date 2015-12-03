@@ -12,6 +12,7 @@ define (require) ->
 
     initialize: (game) ->
       @channelName = "public-game-#{game.player_hash}"
+
       # We should be connected to pusher at this point...
       @channel = pusherWrapper.pusher.subscribe @channelName
 
@@ -39,7 +40,6 @@ define (require) ->
       if game.side is 0
         console.log "Join hash: #{game.join_hash}"
 
-      # @listenTo @channel, 'update', _.bind @getLatest, @
       @channel.bind 'update', _.bind @getLatest, @
 
     move: (from, to) ->

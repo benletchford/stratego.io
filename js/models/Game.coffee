@@ -45,7 +45,6 @@ define (require) ->
 
         if toPiece
           return moveTypes.ATTACK
-          # return @_attack from, to
 
         else
           return moveTypes.MOVE

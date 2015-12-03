@@ -16,10 +16,3 @@ define (require) ->
 
   # Flag capture
   CAPTURE: 5
-
-  # Miner removes bomb
-  DISARM: 6
-
-  # Spy kills marshall
-  ASSASINATION: 7
-

@@ -3,7 +3,6 @@ define (require) ->
   template     = require '../../jade/grid.jade'
   piece        = require '../../jade/piece.jade'
   phantomPiece = require '../../jade/phantomPiece.jade'
-  wonPiece     = require '../../jade/wonPiece.jade'
   lostPiece    = require '../../jade/lostPiece.jade'
 
   require '../../css/grid.less'
