@@ -2,6 +2,8 @@ define (require) ->
 
   PanelLinkView = require '../panel/PanelLinkView'
 
+  githubLink = require '../../jade/githubLink.jade'
+
   class extends Backbone.View
     className: 'home-view panel'
 
@@ -15,3 +17,5 @@ define (require) ->
         title: 'Play with a friend'
         description: 'Start a private game with a friend.'
         href: '#setup/create').el
+
+      @$el.append githubLink()
