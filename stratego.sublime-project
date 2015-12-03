@@ -2,20 +2,22 @@
 	"folders":
 	[
 		{
-			"path": ".",
-      "folder_exclude_patterns": [
-        "node_modules",
-        "bower_components",
-        "1.test"
-      ],
-      "file_exclude_patterns": [
-        "gae.auth",
-        "js/*.js",
-        "test/testBundle.js",
-        "test/specs/*.js",
-        "1.*.js",
-        "__init__.py"
-      ]
+			"file_exclude_patterns":
+			[
+				"gae.auth",
+				"js/*.js",
+				"test/testBundle.js",
+				"test/specs/*.js",
+				"1.*.js",
+				"__init__.py"
+			],
+			"folder_exclude_patterns":
+			[
+				"node_modules",
+				"bower_components",
+				"1.test"
+			],
+			"path": "."
 		}
 	]
 }

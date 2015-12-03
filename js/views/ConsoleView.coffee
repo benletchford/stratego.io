@@ -1,8 +1,7 @@
 define (require) ->
 
   class extends Backbone.View
-    tagName  : 'div'
-    # tagName  : 'img'
+    tagName  : 'img'
     className: 'console-view'
 
     initialize: ->
