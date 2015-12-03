@@ -104,16 +104,17 @@ define (require) ->
 
           socketId = pusherWrapper.pusher.connection.socket_id
 
-          $.post('api/pool/join',
-            board: board
-            socket_id: socketId
-          )
-            .done (game) =>
-              loadingView.setHtml 'In pool, waiting for an opponent...'
+          channel = pusherWrapper.pusher.subscribe "public-pool-#{socketId}"
+          channel.bind 'pusher:subscription_succeeded', =>
+            $.post('api/pool/join',
+              board: board
+              socket_id: socketId
+            )
+              .done (game) =>
+                loadingView.setHtml 'In pool, waiting for an opponent...'
 
-              channel = pusherWrapper.pusher.subscribe("public-pool-#{socketId}")
-              channel.bind 'opponent_found', (data) =>
-                @navigate "play/#{data.player_hash}", trigger: true
+                channel.bind 'opponent_found', (data) =>
+                  @navigate "play/#{data.player_hash}", trigger: true
 
     _setup: (setupOptions = {}, loadingHtml) ->
       setupView = new SetupView(setupOptions)
