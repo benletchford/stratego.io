@@ -3,6 +3,7 @@ bower_components
 node_modules
 app/static
 stratego.sublime-workspace
+stratego.sublime-project
 *.pyc
 
 js/*.js
