@@ -97,12 +97,14 @@ define (require) ->
       $cell.addClass 'hover'
 
     _dropCell: (e) ->
+      e.preventDefault();
+
       $toCell = @_getCellFromTarget e
       $toCell.removeClass 'hover'
 
       @$cells.removeClass 'selected'
 
-      data = JSON.parse e.originalEvent.dataTransfer.getData 'text'
+      data = JSON.parse e.originalEvent.dataTransfer.getData 'text/plain'
 
       to =
         x: $toCell.data 'x'
