@@ -5,6 +5,8 @@ define (require) ->
   require '../css/main.less'
 
   appReady = ->
+    $(document.body).css 'background-color', '#5EB549'
+
     new Router()
     Backbone.history.start()
 
