@@ -1,7 +1,6 @@
 define (require) ->
 
   BoardView   = require './views/BoardView'
-  ConsoleView = require './views/ConsoleView'
   SetupView   = require './views/SetupView'
   HomeView    = require './views/HomeView'
   GameView    = require './views/GameView'
@@ -19,8 +18,6 @@ define (require) ->
       ''                : 'home'
 
     initialize: ->
-      @consoleView = new ConsoleView()
-      $(document.body).append @consoleView.el
       @boardView = new BoardView()
       $(document.body).append @boardView.el
 
