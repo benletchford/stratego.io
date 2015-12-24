@@ -3,7 +3,7 @@ define (require) ->
   # Plain move
   MOVE: 0
 
-  # Attack "?"
+  # Attack "U"
   ATTACK: 1
 
   ATTACK_DRAW: 2

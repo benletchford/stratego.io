@@ -66,7 +66,7 @@ def is_cell_occupied(cell):
 
 
 def unknown(side):
-    return {'rank': '?', 'side': OPPOSITE_SIDE[side]}
+    return {'rank': 'U', 'side': OPPOSITE_SIDE[side]}
 
 
 def unknown_row(side):

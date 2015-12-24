@@ -17,7 +17,6 @@ define (require) ->
     render: ->
       @$el.html template(board: @boardModel.get('board'))
 
-
       # Render last moved cell shading
       if @boardModel.get('last_move')
         lastMove = @boardModel.get('last_move')
@@ -165,4 +164,4 @@ define (require) ->
       $cell
 
     canSelect: (cell) ->
-      if cell.find('.piece').data('rank') is '?' then false else true
+      if cell.find('.piece').data('rank') is 'U' then false else true
