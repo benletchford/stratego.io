@@ -3,12 +3,11 @@ mixin piece(args)
   - var color = args.piece.side === 0 ? 'red' : args.piece.side === 1 ? 'blue' : 'black'
   - var rankAndColor = args.piece.rank + '-' + color
 
-  .piece(data-rank=args.piece.rank, data-side=args.piece.side, class=('image-' + rankAndColor) + (phantom))
-  if args.piece.rank != 'B' && args.piece.rank != 'F' && args.piece.rank != 'U'
-    .piece-rank(data-rank=args.piece.rank, class=('image-rank-' + rankAndColor) + (phantom))
+  - var p = args.piece
+  .piece(data-rank=p.rank, data-side=p.side, class=('image-' + rankAndColor) + (phantom))
+  if p.rank !== 'B' && p.rank !== 'F' && p.rank !== 'U'
+    .piece-rank(data-rank=p.rank, class=('image-rank-' + rankAndColor) + (phantom))
 
   if args.deadPiece
-    if args.deadPiece.rank === 'B' || args.deadPiece.rank === 'F'
-      .dead-piece-rank(data-rank=args.deadPiece.rank, class='image-' + (args.deadPiece.rank + '-' + (args.deadPiece.side === 0 ? 'red' : 'blue')))
-    else
-      .dead-piece-rank(data-rank=args.deadPiece.rank, class='image-rank-' + (args.deadPiece.rank + '-' + (args.deadPiece.side === 0 ? 'red' : 'blue')))
+    - var dp = args.deadPiece
+    .dead-piece-rank(data-rank=dp.rank, class='image-' + (dp.rank === 'B' || dp.rank === 'F' ? '' : 'rank-') + (dp.rank + '-' + (dp.side === 0 ? 'red' : 'blue')))
