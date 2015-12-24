@@ -1,1 +1,7 @@
-.piece(data-rank=rank, data-side=side, draggable='true')
+include mixins/piece.jade
+
++piece({
+  piece: piece,
+  phantom: phantom || false,
+  deadPiece: deadPiece || false
+})

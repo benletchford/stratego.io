@@ -1,0 +1,14 @@
+mixin piece(args)
+  - var phantom = args.phantom ? ' phantom' : ''
+  - var color = args.piece.side === 0 ? 'red' : args.piece.side === 1 ? 'blue' : 'black'
+  - var rankAndColor = args.piece.rank + '-' + color
+
+  .piece(data-rank=args.piece.rank, data-side=args.piece.side, class=('image-' + rankAndColor) + (phantom))
+  if args.piece.rank != 'B' && args.piece.rank != 'F' && args.piece.rank != 'U'
+    .piece-rank(data-rank=args.piece.rank, class=('image-rank-' + rankAndColor) + (phantom))
+
+  if args.deadPiece
+    if args.deadPiece.rank === 'B' || args.deadPiece.rank === 'F'
+      .dead-piece-rank(data-rank=args.deadPiece.rank, class='image-' + (args.deadPiece.rank + '-' + (args.deadPiece.side === 0 ? 'red' : 'blue')))
+    else
+      .dead-piece-rank(data-rank=args.deadPiece.rank, class='image-rank-' + (args.deadPiece.rank + '-' + (args.deadPiece.side === 0 ? 'red' : 'blue')))

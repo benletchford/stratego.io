@@ -9,11 +9,11 @@ webpackBase =
         test: /\.less$/, loader: "style!css!less"
       ,
         test: /\.coffee$/, loader: 'coffee-loader'
-      ,
-        test: /\.(jpe?g|png|gif|svg)$/i, loaders: [
-            'file?hash=sha512&digest=hex&name=[hash].[ext]',
-            'image-webpack?bypassOnDebug=true&optimizationLevel=0&interlaced=false'
-        ],
+      # ,
+        # test: /\.(jpe?g|png|gif|svg)$/i, loaders: [
+        #     'file?hash=sha512&digest=hex&name=[hash].[ext]',
+        #     'image-webpack?bypassOnDebug=true&optimizationLevel=0&interlaced=false'
+        # ],
       ,
         test: /\.jade$/, loader: 'jade-loader'
     ]
@@ -62,16 +62,23 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-watch'
+  grunt.loadNpmTasks 'grunt-grunticon'
 
   grunt.initConfig
     pkg: grunt.file.readJSON 'package.json'
 
-    clean: ['js/**/*.js', 'app/static']
+    clean:
+      app:
+        ['js/**/*.js', 'app/static/**/*', '!app/static/graphics.css']
+      graphics:
+        ['app/static/graphics.css']
+      tmp:
+        ['tmp']
 
     copy:
-      favicon:
-        src: 'graphics/favicon.ico'
-        dest: 'app/static/favicon.ico'
+      graphics:
+        src: 'tmp/graphics-output/graphics.css'
+        dest: 'app/static/graphics.css'
 
     htmlmin:
       app:
@@ -119,12 +126,38 @@ module.exports = (grunt) ->
         files: ['js/**/*', 'jade/**/*', 'css/**/*']
         tasks: ['webpack:app']
 
+    grunticon:
+      pieces:
+        files: [
+          expand: true
+          cwd: './graphics'
+          src: [
+            'board-no-trees.svg'
+            'pieces/*.colors-black-blue-red.svg'
+            'pieces/ranks/*.svg'
+          ]
+          dest: './tmp/graphics-output'
+        ]
+        options:
+          dynamicColorOnly: true
+          datasvgcss: 'graphics.css'
+          cssprefix: '.image-'
+          colors:
+            red: '#bf0000'
+
   grunt.registerTask 'build', [
-    'clean'
+    'clean:app'
     'htmlmin'
     'webpack:app'
-    'copy:favicon'
   ]
+
+  grunt.registerTask 'build:graphics', [
+    'clean:graphics'
+    'grunticon'
+    'copy:graphics'
+    'clean:tmp'
+  ]
+
 
   grunt.registerTask 'build:tests', [
     'webpack:tests'

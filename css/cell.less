@@ -1,181 +1,57 @@
-@red-color: red;
-@blue-color: blue;
-@neutral-color: black;
+@highlight: rgba(0, 0, 0, 0.05);
+@dark-highlight: rgba(0, 0, 0, 0.25);
 
 .cell {
-  &.drag-hover, &.hover {
-    background: rgba(0, 0, 0, 0.1);
-  }
-  &.selected {
-    background: rgba(0, 0, 0, 0.5);
-  }
+  opacity: 0.7;
   &.last-move-from {
-    background: rgba(255, 255, 255, 0.2);
-    background: rgba(0, 0, 0, 0.1);
+    background: @highlight;
+    opacity: 0.7;
   }
   &.last-move-to {
-    background: rgba(255, 255, 255, 0.6);
-    background: rgba(0, 0, 0, 0.5);
+    background: @dark-highlight;
+    opacity: 0.7;
   }
-  &.pending-attack-from {
-    background: rgba(255, 255, 255, 0.6);
-    background: rgba(0, 0, 0, 0.5);
+  &.selected {
+    background: @dark-highlight;
+    opacity: 0.7;
   }
-  &.pending-attack-to {
-    background: rgba(255, 255, 255, 0.6);
-    background: rgba(0, 0, 0, 0.5);
+  &.drag-hover, &.hover {
+    background: @highlight;
+    opacity: 0.7;
   }
 }
 
-.piece, .phantom-piece, .won-piece, .lost-piece {
+.piece {
+  position: absolute;
   width: 100%;
   height: 100%;
 
-  background-size: 80%;
-  background-repeat: no-repeat;
-  background-position: 50%;
+  z-index: 1;
 
-  &[data-rank='1'] {
-    background-image: url('../graphics/pieces/1.svg');
-  }
-  &[data-rank='2'] {
-    background-image: url('../graphics/pieces/2.svg');
-  }
-  &[data-rank='3'] {
-    background-image: url('../graphics/pieces/3.svg');
-  }
-  &[data-rank='4'] {
-    background-image: url('../graphics/pieces/4.svg');
-  }
-  &[data-rank='5'] {
-    background-image: url('../graphics/pieces/5.svg');
-  }
-  &[data-rank='6'] {
-    background-image: url('../graphics/pieces/6.svg');
-  }
-  &[data-rank='7'] {
-    background-image: url('../graphics/pieces/7.svg');
-  }
-  &[data-rank='8'] {
-    background-image: url('../graphics/pieces/8.svg');
-  }
-  &[data-rank='9'] {
-    background-image: url('../graphics/pieces/9.svg');
-  }
-  &[data-rank='S'] {
-    background-image: url('../graphics/pieces/S.svg');
-  }
-  &[data-rank='B'] {
-    background-image: url('../graphics/pieces/B.svg');
-  }
-  &[data-rank='F'] {
-    background-image: url('../graphics/pieces/F.svg');
-  }
-  &[data-rank='?'] {
-    background-image: url('../graphics/pieces/U.svg');
-  }
+  background-size: 70%;
+  background-position: 50% 70%;
 
-  &[data-side='0'] {
-    &[data-rank='1'] {
-      background-image: url('../graphics/pieces/red/1.svg');
-    }
-    &[data-rank='2'] {
-      background-image: url('../graphics/pieces/red/2.svg');
-    }
-    &[data-rank='3'] {
-      background-image: url('../graphics/pieces/red/3.svg');
-    }
-    &[data-rank='4'] {
-      background-image: url('../graphics/pieces/red/4.svg');
-    }
-    &[data-rank='5'] {
-      background-image: url('../graphics/pieces/red/5.svg');
-    }
-    &[data-rank='6'] {
-      background-image: url('../graphics/pieces/red/6.svg');
-    }
-    &[data-rank='7'] {
-      background-image: url('../graphics/pieces/red/7.svg');
-    }
-    &[data-rank='8'] {
-      background-image: url('../graphics/pieces/red/8.svg');
-    }
-    &[data-rank='9'] {
-      background-image: url('../graphics/pieces/red/9.svg');
-    }
-    &[data-rank='S'] {
-      background-image: url('../graphics/pieces/red/S.svg');
-    }
-    &[data-rank='B'] {
-      background-image: url('../graphics/pieces/red/B.svg');
-    }
-    &[data-rank='F'] {
-      background-image: url('../graphics/pieces/red/F.svg');
-    }
-    &[data-rank='?'] {
-      background-image: url('../graphics/pieces/red/U.svg');
-    }
-  }
-  &[data-side='1'] {
-    &[data-rank='1'] {
-      background-image: url('../graphics/pieces/blue/1.svg');
-    }
-    &[data-rank='2'] {
-      background-image: url('../graphics/pieces/blue/2.svg');
-    }
-    &[data-rank='3'] {
-      background-image: url('../graphics/pieces/blue/3.svg');
-    }
-    &[data-rank='4'] {
-      background-image: url('../graphics/pieces/blue/4.svg');
-    }
-    &[data-rank='5'] {
-      background-image: url('../graphics/pieces/blue/5.svg');
-    }
-    &[data-rank='6'] {
-      background-image: url('../graphics/pieces/blue/6.svg');
-    }
-    &[data-rank='7'] {
-      background-image: url('../graphics/pieces/blue/7.svg');
-    }
-    &[data-rank='8'] {
-      background-image: url('../graphics/pieces/blue/8.svg');
-    }
-    &[data-rank='9'] {
-      background-image: url('../graphics/pieces/blue/9.svg');
-    }
-    &[data-rank='S'] {
-      background-image: url('../graphics/pieces/blue/S.svg');
-    }
-    &[data-rank='B'] {
-      background-image: url('../graphics/pieces/blue/B.svg');
-    }
-    &[data-rank='F'] {
-      background-image: url('../graphics/pieces/blue/F.svg');
-    }
-    &[data-rank='?'] {
-      background-image: url('../graphics/pieces/blue/U.svg');
-    }
+  &[data-rank='B'], &[data-rank='F'], &[data-rank='U'] {
+    background-position: 50%;
   }
 }
 
-.phantom-piece, .lost-piece {
-  opacity: 0.4;
-}
-
-.won-piece, .lost-piece {
+.piece-rank, .dead-piece-rank {
   position: absolute;
+  top: 5%;
+  background-size: 100%;
+  z-index: 0;
+
+  width: 30%;
+  height: 30%;
+}
+.piece-rank {
+  left: 5%;
+}
+.dead-piece-rank {
+  right: 5%;
 }
 
-.won-piece {
-  width: 75%;
-  height: 75%;
-  bottom: 0;
-}
-
-.lost-piece {
-  width: 50%;
-  height: 50%;
-  top: 0;
-  right: 0;
+.phantom {
+  opacity: 0.2;
 }

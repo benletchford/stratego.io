@@ -5,7 +5,7 @@ define (require) ->
   MIN_WIDTH = 320
 
   class extends Backbone.View
-    className:  'board-view'
+    className:  'board-view image-board-no-trees'
 
     initialize: ->
       @_resize()

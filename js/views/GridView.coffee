@@ -2,8 +2,6 @@ define (require) ->
 
   template     = require '../../jade/grid.jade'
   piece        = require '../../jade/piece.jade'
-  phantomPiece = require '../../jade/phantomPiece.jade'
-  lostPiece    = require '../../jade/lostPiece.jade'
 
   require '../../css/grid.less'
 
@@ -31,24 +29,29 @@ define (require) ->
 
         switch lastMove.type
           when 'draw'
-            fromCell.html phantomPiece(lastMove.from.piece)
-            toCell.html phantomPiece(lastMove.to.piece)
+            fromCell.html piece(
+              piece: lastMove.from.piece
+              phantom: true
+            )
+            toCell.html piece(
+              piece: lastMove.to.piece
+              phantom: true
+            )
 
           when 'lost'
-            fromCell.html phantomPiece(lastMove.from.piece)
-            toCell.html piece(lastMove.to.piece)
+            fromCell.html piece(
+              piece: lastMove.from.piece
+              phantom: true
+            )
+            toCell.html piece(piece: lastMove.to.piece)
 
-          when 'won'
+          when 'won', 'capture'
             toCell
               .empty()
-              .append piece(lastMove.from.piece)
-              .append lostPiece(lastMove.to.piece)
-
-          when 'capture'
-            toCell
-              .empty()
-              .append piece(lastMove.from.piece)
-              .append lostPiece(lastMove.to.piece)
+              .append piece(
+                piece: lastMove.from.piece
+                deadPiece: lastMove.to.piece
+              )
 
       @bindEvents()
 
