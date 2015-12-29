@@ -31,9 +31,17 @@ You can build the app with:
 
     $ grunt build
 
+You can build the graphics with:
+
+    $ grunt build:graphics
+
 You can deploy the app to App Engine by doing (the grunt task will look for a gae.auth file which you must create yourself, see [grunt-gae](https://github.com/maciejzasada/grunt-gae)):
 
     $ grunt deploy
+
+Piece Graphics
+======
+Pieces found at [vector.gissen.nl](http://vector.gissen.nl/stratego.html)
 
 Issues
 ======
