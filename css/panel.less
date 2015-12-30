@@ -1,4 +1,4 @@
-@panel-color: rgb(43,43,43);
+@panel-color: rgb(0, 0, 0);
 
 .panel {
   position: absolute;
@@ -12,6 +12,7 @@
   border: 1px solid lighten(@panel-color, 10%);
   border-radius: 5px;
   color: white;
+  overflow-y: scroll;
 }
 
 button.panel-option {
@@ -41,5 +42,13 @@ button.panel-option {
   }
   .description {
     font-size: 11px;
+  }
+}
+
+.panel-textbox {
+  width: 100%;
+  text-align: center;
+  a {
+    text-decoration: underline;
   }
 }

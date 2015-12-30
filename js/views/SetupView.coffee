@@ -1,12 +1,14 @@
 define (require) ->
 
-  GameSetup = require '../models/GameSetup'
-  template  = require '../../jade/setup.jade'
-  ranks     = require '../ranks'
+  GameSetup    = require '../models/GameSetup'
+  template     = require '../../jade/setup.jade'
+  setupTextbox = require '../../jade/setupTextbox.jade'
+  ranks        = require '../ranks'
 
-  GridView        = require './GridView'
-  PanelLinkView   = require '../panel/PanelLinkView'
-  PanelButtonView = require '../panel/PanelButtonView'
+  GridView         = require './GridView'
+  PanelLinkView    = require '../panel/PanelLinkView'
+  PanelButtonView  = require '../panel/PanelButtonView'
+  PanelTextboxView = require '../panel/PanelTextboxView'
 
   class extends Backbone.View
     className: 'setup-view'
@@ -34,6 +36,10 @@ define (require) ->
 
       @$panel.append startBtn.el
 
+      @$panel.append (new PanelTextboxView
+        html: setupTextbox()
+      ).el
+
       @setup = new GameSetup()
 
       @grid = new GridView @setup
@@ -47,31 +53,3 @@ define (require) ->
 
       @setup.setPiece from, toPiece
       @setup.setPiece to, fromPiece
-
-    # clickStart: ->
-    #   @trigger 'move', data.from, to
-
-      # data =
-      #   board: JSON.stringify @setup.get('board')
-
-      # switch @options.type
-      #   when 'join'
-      #     api_location = 'api/join'
-      #     data['join_hash'] = @options.hash
-
-      #   when 'create'
-      #     api_location = 'api/create'
-
-      #   when 'pool'
-      #     api_location = 'api/pool'
-
-      # $.post(api_location, data)
-      #   .done (game) =>
-      #     Cookies.set 'lastBoard', @setup.get('board')
-
-      #     # TODO, do this better... don't use global variables.
-      #     # In this case it's hard to avoid as we're using routers and we don't
-      #     # want to pass information via the URL or via cookies/local storage.
-      #     window._game = game
-      #     window.location.hash = "play/#{game.player_hash}"
-

@@ -1,8 +1,9 @@
 define (require) ->
 
-  PanelLinkView = require '../panel/PanelLinkView'
+  PanelLinkView    = require '../panel/PanelLinkView'
+  PanelTextboxView = require '../panel/PanelTextboxView'
 
-  githubLink = require '../../jade/githubLink.jade'
+  homeTextbox = require '../../jade/homeTextbox.jade'
 
   class extends Backbone.View
     className: 'home-view panel'
@@ -18,4 +19,6 @@ define (require) ->
         description: 'Start a private game with a friend.'
         href: '#setup/create').el
 
-      @$el.append githubLink()
+      @$el.append (new PanelTextboxView
+        html: homeTextbox()
+      ).el
