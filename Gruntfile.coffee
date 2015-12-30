@@ -9,11 +9,6 @@ webpackBase =
         test: /\.less$/, loader: "style!css!less"
       ,
         test: /\.coffee$/, loader: 'coffee-loader'
-      # ,
-        # test: /\.(jpe?g|png|gif|svg)$/i, loaders: [
-        #     'file?hash=sha512&digest=hex&name=[hash].[ext]',
-        #     'image-webpack?bypassOnDebug=true&optimizationLevel=0&interlaced=false'
-        # ],
       ,
         test: /\.jade$/, loader: 'jade-loader'
     ]
