@@ -1,13 +1,16 @@
 define (require) ->
 
-  BoardView   = require './views/BoardView'
-  SetupView   = require './views/SetupView'
-  HomeView    = require './views/HomeView'
-  GameView    = require './views/GameView'
-  LoadingView = require './views/LoadingView'
+  BoardView           = require './views/BoardView'
+  OverlayGraphicsView = require './views/OverlayGraphicsView'
+  SetupView           = require './views/SetupView'
+  HomeView            = require './views/HomeView'
+  GameView            = require './views/GameView'
+  LoadingView         = require './views/LoadingView'
 
   gameStates    = require './gameStates'
   pusherWrapper = require './pusherWrapper'
+
+  MIN_WIDTH = 320
 
   class extends Backbone.Router
     routes:
@@ -20,6 +23,33 @@ define (require) ->
     initialize: ->
       @boardView = new BoardView()
       $(document.body).append @boardView.el
+
+      @overlayGraphicsView = new OverlayGraphicsView()
+      $(document.body).append @overlayGraphicsView.el
+
+      @_resize()
+      $(window).on 'resize', _.debounce _.bind(@_resize, @), 100
+
+    _resize: ->
+      w = $(window).width()
+      h = $(window).height()
+
+      min = Math.min w, h
+      min = Math.max min, MIN_WIDTH
+
+      @boardView.resize(w, h, min)
+
+      boardPosition = @boardView.$el.position()
+      rect1 =
+        left: 0
+        right: boardPosition.left
+        top: 0
+        bottom: h
+      rect2 =
+        left: rect1.right + @boardView.$el.width()
+        right: w
+        top: 0
+        bottom: h
 
     home: ->
       homeView = new HomeView()
