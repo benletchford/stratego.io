@@ -28,6 +28,15 @@ a {
   }
 }
 
+.overlay-graphic-view {
+  position: absolute;
+  background-size: contain;
+  z-index: 1;
+  &.grass1, &.grass2 {
+    z-index: 0;
+  }
+}
+
 .vertical-align {
   position: relative;
   top: 50%;

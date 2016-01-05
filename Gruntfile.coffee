@@ -127,7 +127,7 @@ module.exports = (grunt) ->
           expand: true
           cwd: './graphics'
           src: [
-            'board-no-trees.svg'
+            '*.svg'
             'pieces/*.colors-black-blue-red.svg'
             'pieces/ranks/*.svg'
           ]

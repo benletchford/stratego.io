@@ -2,6 +2,7 @@ define (require) ->
 
   BoardView           = require './views/BoardView'
   OverlayGraphicsView = require './views/OverlayGraphicsView'
+  OverlayGraphicView  = require './views/OverlayGraphicView'
   SetupView           = require './views/SetupView'
   HomeView            = require './views/HomeView'
   GameView            = require './views/GameView'
@@ -39,10 +40,12 @@ define (require) ->
 
       @boardView.resize(w, h, min)
 
-      boardPosition = @boardView.$el.position()
+      @overlayGraphicsView.$el.empty()
+
+      boardOffset = @boardView.$el.offset()
       rect1 =
         left: 0
-        right: boardPosition.left
+        right: boardOffset.left
         top: 0
         bottom: h
       rect2 =
@@ -50,6 +53,9 @@ define (require) ->
         right: w
         top: 0
         bottom: h
+
+      for i in [0..50]
+        @overlayGraphicsView.$el.append new OverlayGraphicView(rect1).$el
 
     home: ->
       homeView = new HomeView()
