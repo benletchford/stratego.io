@@ -42,6 +42,8 @@ define (require) ->
           .css 'border-left', '0'
           .css 'border-right', '0'
 
+      @$el.css 'border-color', 'rgba(0, 0, 0, 0.2)'
+
       @$el
         .width min
         .height min
