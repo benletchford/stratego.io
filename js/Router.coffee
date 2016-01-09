@@ -36,6 +36,7 @@ define (require) ->
       h = $(window).height()
 
       min = Math.min w, h
+      max = Math.max w, h
       min = Math.max min, MIN_WIDTH
 
       @boardView.resize(w, h, min)
@@ -43,19 +44,40 @@ define (require) ->
       @overlayGraphicsView.$el.empty()
 
       boardOffset = @boardView.$el.offset()
-      rect1 =
-        left: 0
-        right: boardOffset.left
-        top: 0
-        bottom: h
-      rect2 =
-        left: rect1.right + @boardView.$el.width()
-        right: w
-        top: 0
-        bottom: h
+      if w > h
+        rect1 =
+          left: 0
+          right: boardOffset.left
+          top: 0
+          bottom: h
+        rect2 =
+          left: rect1.right + @boardView.$el.width()
+          right: w
+          top: 0
+          bottom: h
 
-      for i in [0..50]
-        @overlayGraphicsView.$el.append new OverlayGraphicView(rect1).$el
+      else
+        rect1 =
+          left: 0
+          right: w
+          top: 0
+          bottom: boardOffset.top
+        rect2 =
+          left: 0
+          right: w
+          top: rect1.bottom + @boardView.$el.height()
+          bottom: h
+
+      amount = Math.round (max - min) / 100
+
+      if amount > 1
+        for i in [0..amount]
+          @overlayGraphicsView.$el.append new OverlayGraphicView(rect1, 'grass').$el
+          @overlayGraphicsView.$el.append new OverlayGraphicView(rect2, 'grass').$el
+
+        for i in [0..amount]
+          @overlayGraphicsView.$el.append new OverlayGraphicView(rect1, 'tree').$el
+          @overlayGraphicsView.$el.append new OverlayGraphicView(rect2, 'tree').$el
 
     home: ->
       homeView = new HomeView()
