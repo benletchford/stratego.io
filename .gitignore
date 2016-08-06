@@ -9,7 +9,7 @@ app/static
 
 js/*.js
 
-test/testBundle.js
-test/specs/*.js
+frontTest/testBundle.js
+frontTest/specs/*.js
 
 1.*.js
