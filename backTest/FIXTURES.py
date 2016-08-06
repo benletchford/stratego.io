@@ -1,4 +1,5 @@
 import json
+import copy
 
 
 SETUP = [
@@ -52,106 +53,23 @@ SETUP = [
     ]
 ]
 
-DEFAULT_GAME = [
-    [
-        {'rank': '9', 'side': 1},
-        {'rank': '9', 'side': 1},
-        {'rank': 'S', 'side': 1},
-        {'rank': 'B', 'side': 1},
-        {'rank': 'B', 'side': 1},
-        {'rank': 'B', 'side': 1},
-        {'rank': 'B', 'side': 1},
-        {'rank': 'B', 'side': 1},
-        {'rank': 'B', 'side': 1},
-        {'rank': 'F', 'side': 1}
-    ],
-    [
-        {'rank': '8', 'side': 1},
-        {'rank': '8', 'side': 1},
-        {'rank': '8', 'side': 1},
-        {'rank': '8', 'side': 1},
-        {'rank': '9', 'side': 1},
-        {'rank': '9', 'side': 1},
-        {'rank': '9', 'side': 1},
-        {'rank': '9', 'side': 1},
-        {'rank': '9', 'side': 1},
-        {'rank': '9', 'side': 1}
-    ],
-    [
-        {'rank': '5', 'side': 1},
-        {'rank': '6', 'side': 1},
-        {'rank': '6', 'side': 1},
-        {'rank': '6', 'side': 1},
-        {'rank': '6', 'side': 1},
-        {'rank': '7', 'side': 1},
-        {'rank': '7', 'side': 1},
-        {'rank': '7', 'side': 1},
-        {'rank': '7', 'side': 1},
-        {'rank': '8', 'side': 1}
-    ],
-    [
-        {'rank': '1', 'side': 1},
-        {'rank': '2', 'side': 1},
-        {'rank': '3', 'side': 1},
-        {'rank': '3', 'side': 1},
-        {'rank': '4', 'side': 1},
-        {'rank': '4', 'side': 1},
-        {'rank': '4', 'side': 1},
-        {'rank': '5', 'side': 1},
-        {'rank': '5', 'side': 1},
-        {'rank': '5', 'side': 1}
-    ],
-    [0, 0, 1, 1, 0, 0, 1, 1, 0, 0],
-    [0, 0, 1, 1, 0, 0, 1, 1, 0, 0],
-    [
-        {'rank': '1', 'side': 0},
-        {'rank': '2', 'side': 0},
-        {'rank': '3', 'side': 0},
-        {'rank': '3', 'side': 0},
-        {'rank': '4', 'side': 0},
-        {'rank': '4', 'side': 0},
-        {'rank': '4', 'side': 0},
-        {'rank': '5', 'side': 0},
-        {'rank': '5', 'side': 0},
-        {'rank': '5', 'side': 0}
-    ],
-    [
-        {'rank': '5', 'side': 0},
-        {'rank': '6', 'side': 0},
-        {'rank': '6', 'side': 0},
-        {'rank': '6', 'side': 0},
-        {'rank': '6', 'side': 0},
-        {'rank': '7', 'side': 0},
-        {'rank': '7', 'side': 0},
-        {'rank': '7', 'side': 0},
-        {'rank': '7', 'side': 0},
-        {'rank': '8', 'side': 0}
-    ],
-    [
-        {'rank': '8', 'side': 0},
-        {'rank': '8', 'side': 0},
-        {'rank': '8', 'side': 0},
-        {'rank': '8', 'side': 0},
-        {'rank': '9', 'side': 0},
-        {'rank': '9', 'side': 0},
-        {'rank': '9', 'side': 0},
-        {'rank': '9', 'side': 0},
-        {'rank': '9', 'side': 0},
-        {'rank': '9', 'side': 0}
-    ],
-    [
-        {'rank': '9', 'side': 0},
-        {'rank': '9', 'side': 0},
-        {'rank': 'S', 'side': 0},
-        {'rank': 'B', 'side': 0},
-        {'rank': 'B', 'side': 0},
-        {'rank': 'B', 'side': 0},
-        {'rank': 'B', 'side': 0},
-        {'rank': 'B', 'side': 0},
-        {'rank': 'B', 'side': 0},
-        {'rank': 'F', 'side': 0}
-    ]
-]
+SETUP_0 = copy.deepcopy(SETUP)
+for row in SETUP_0:
+    for cell in row:
+        cell['side'] = 0
+
+SETUP_1 = copy.deepcopy(SETUP)
+SETUP_1 = SETUP_1[::-1]
+for i in xrange(0, len(SETUP_1)):
+    SETUP_1[i] = SETUP_1[i][::-1]
+for row in SETUP_1:
+    for cell in row:
+        cell['side'] = 1
+
+DEFAULT_GAME = SETUP_1 + [
+        [0, 0, 1, 1, 0, 0, 1, 1, 0, 0],
+        [0, 0, 1, 1, 0, 0, 1, 1, 0, 0]
+    ] + SETUP_0
 
 MARSHAL = {
     'rank': '1',

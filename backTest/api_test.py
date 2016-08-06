@@ -7,8 +7,9 @@ from google.appengine.ext import ndb
 from webtest import TestApp
 
 import api
-import fixtures
+import FIXTURES
 import models
+from utils import board_utils
 
 app = TestApp(api.app)
 
@@ -17,7 +18,7 @@ class CreateHandlerTest(unittest.TestCase):
     nosegae_datastore_v3 = True
 
     def test_should_be_able_to_create_game(self):
-        app.post('/api/create', params={'board': json.dumps(fixtures.SETUP)})
+        app.post('/api/create', params={'board': json.dumps(FIXTURES.SETUP)})
 
         game = models.Game.query().get()
 
@@ -91,18 +92,18 @@ class JoinHandlerTest(unittest.TestCase):
 
     @patch('lib.pusher.pusher.Pusher.trigger')
     def test_should_be_able_to_join_game(self, pusher):
-        app.post('/api/create', params={'board': json.dumps(fixtures.SETUP)})
+        app.post('/api/create', params={'board': json.dumps(FIXTURES.SETUP)})
 
         game = models.Game.query().get()
 
         app.post('/api/join', params={
-            'board': json.dumps(fixtures.SETUP),
+            'board': json.dumps(FIXTURES.SETUP),
             'join_hash': game.join_hash
         })
 
         game = models.Game.query().get()
 
-        current_state_of_game = copy.deepcopy(fixtures.DEFAULT_GAME)
+        current_state_of_game = copy.deepcopy(FIXTURES.DEFAULT_GAME)
 
         self.assertEqual(game.get_board(), current_state_of_game)
 
@@ -112,12 +113,12 @@ class MoveHandlerTest(unittest.TestCase):
 
     @patch('lib.pusher.pusher.Pusher.trigger')
     def test_should_be_able_to_move(self, pusher):
-        app.post('/api/create', params={'board': json.dumps(fixtures.SETUP)})
+        app.post('/api/create', params={'board': json.dumps(FIXTURES.SETUP)})
 
         game = models.Game.query().get()
 
         app.post('/api/join', params={
-            'board': json.dumps(fixtures.SETUP),
+            'board': json.dumps(FIXTURES.SETUP),
             'join_hash': game.join_hash
         })
 
@@ -130,7 +131,7 @@ class MoveHandlerTest(unittest.TestCase):
 
         game = models.Game.query().get()
 
-        current_state_of_game = copy.deepcopy(fixtures.DEFAULT_GAME)
+        current_state_of_game = copy.deepcopy(FIXTURES.DEFAULT_GAME)
 
         current_state_of_game[5][5] = {'side': 0, 'rank': '4'}
         current_state_of_game[6][5] = 0
@@ -142,12 +143,12 @@ class MoveHandlerTest(unittest.TestCase):
 
     @patch('lib.pusher.pusher.Pusher.trigger')
     def test_should_be_able_to_attack_and_draw(self, pusher):
-        app.post('/api/create', params={'board': json.dumps(fixtures.SETUP)})
+        app.post('/api/create', params={'board': json.dumps(FIXTURES.SETUP)})
 
         game = models.Game.query().get()
 
         app.post('/api/join', params={
-            'board': json.dumps(fixtures.SETUP),
+            'board': json.dumps(FIXTURES.SETUP),
             'join_hash': game.join_hash
         })
 
@@ -161,8 +162,8 @@ class MoveHandlerTest(unittest.TestCase):
         app.post('/api/move', params={
             'player_hash': game.blue_hash,
             'side': 1,
-            'from': json.dumps({'x': 5, 'y': 3}),
-            'to': json.dumps({'x': 5, 'y': 4})
+            'from': json.dumps({'x': 4, 'y': 6}),
+            'to': json.dumps({'x': 4, 'y': 5})
         })
 
         app.post('/api/move', params={
@@ -174,7 +175,7 @@ class MoveHandlerTest(unittest.TestCase):
 
         game = models.Game.query().get()
 
-        current_state_of_game = copy.deepcopy(fixtures.DEFAULT_GAME)
+        current_state_of_game = copy.deepcopy(FIXTURES.DEFAULT_GAME)
 
         # These pieces should have been destroyed
         current_state_of_game[3][5] = 0
@@ -199,12 +200,12 @@ class MoveHandlerTest(unittest.TestCase):
 
     @patch('lib.pusher.pusher.Pusher.trigger')
     def test_should_be_able_to_attack_and_win(self, pusher):
-        app.post('/api/create', params={'board': json.dumps(fixtures.SETUP)})
+        app.post('/api/create', params={'board': json.dumps(FIXTURES.SETUP)})
 
         game = models.Game.query().get()
 
         app.post('/api/join', params={
-            'board': json.dumps(fixtures.SETUP),
+            'board': json.dumps(FIXTURES.SETUP),
             'join_hash': game.join_hash
         })
 
@@ -238,7 +239,7 @@ class MoveHandlerTest(unittest.TestCase):
 
         game = models.Game.query().get()
 
-        current_state_of_game = copy.deepcopy(fixtures.DEFAULT_GAME)
+        current_state_of_game = copy.deepcopy(FIXTURES.DEFAULT_GAME)
 
         current_state_of_game[6][1] = 0
         current_state_of_game[3][0] = 0
@@ -265,12 +266,12 @@ class MoveHandlerTest(unittest.TestCase):
 
     @patch('lib.pusher.pusher.Pusher.trigger')
     def test_should_be_able_to_attack_and_lose(self, pusher):
-        app.post('/api/create', params={'board': json.dumps(fixtures.SETUP)})
+        app.post('/api/create', params={'board': json.dumps(FIXTURES.SETUP)})
 
         game = models.Game.query().get()
 
         app.post('/api/join', params={
-            'board': json.dumps(fixtures.SETUP),
+            'board': json.dumps(FIXTURES.SETUP),
             'join_hash': game.join_hash
         })
 
@@ -311,7 +312,7 @@ class MoveHandlerTest(unittest.TestCase):
 
         game = models.Game.query().get()
 
-        current_state_of_game = copy.deepcopy(fixtures.DEFAULT_GAME)
+        current_state_of_game = copy.deepcopy(FIXTURES.DEFAULT_GAME)
 
         current_state_of_game[6][1] = 0
         current_state_of_game[3][0] = 0
