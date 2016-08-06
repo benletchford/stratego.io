@@ -9,7 +9,13 @@ from lib.pusher.pusher import Pusher
 
 import models
 from CONSTANTS import MOVE_TYPES, GAME_STATES, STATUS_CODES, PUSHER_CREDENTIALS
-from utils import general, board_utils
+from utils import board_utils
+
+import logging
+
+
+def _array_has_values(array, values):
+    return all(x in array for x in values)
 
 
 def _create_game(setup):
@@ -68,7 +74,7 @@ class CreateHandler(webapp2.RequestHandler):
 class JoinHandler(webapp2.RequestHandler):
 
     def post(self):
-        if not general.array_has_values(self.request.arguments(), ['join_hash', 'board']):
+        if not _array_has_values(self.request.arguments(), ['join_hash', 'board']):
             self.response.set_status(STATUS_CODES.INTERNAL_ERROR)
             return
 
@@ -110,7 +116,7 @@ class JoinHandler(webapp2.RequestHandler):
 class MoveHandler(webapp2.RequestHandler):
 
     def post(self):
-        if not general.array_has_values(self.request.arguments(), ['player_hash', 'side', 'from', 'to']):
+        if not _array_has_values(self.request.arguments(), ['player_hash', 'side', 'from', 'to']):
             self.response.set_status(STATUS_CODES.INTERNAL_ERROR)
             return
 
@@ -134,6 +140,10 @@ class MoveHandler(webapp2.RequestHandler):
             return
 
         try:
+            if side == 1:
+                board_utils.reverse_position(from_pos)
+                board_utils.reverse_position(to_pos)
+
             # Will raise if not valid.
             move_type = game.check_move(from_pos, to_pos)
 
@@ -280,7 +290,7 @@ class GameHandler(webapp2.RequestHandler):
 class JoinPoolHandler(webapp2.RequestHandler):
 
     def post(self):
-        if not general.array_has_values(self.request.arguments(), ['board', 'socket_id']):
+        if not _array_has_values(self.request.arguments(), ['board', 'socket_id']):
             self.response.set_status(STATUS_CODES.INTERNAL_ERROR)
             return
 
@@ -364,7 +374,7 @@ class ProcessPoolHandler(webapp2.RequestHandler):
 class PusherAuthHandler(webapp2.RequestHandler):
 
     def post(self):
-        if not general.array_has_values(self.request.arguments(), ['channel_name', 'socket_id']):
+        if not _array_has_values(self.request.arguments(), ['channel_name', 'socket_id']):
             self.response.set_status(STATUS_CODES.INTERNAL_ERROR)
             return
 

@@ -1,7 +1,17 @@
 import json
 
 from lib import ndb_json
+from models import Game
 
+FLIPPED_POSITIONS = [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+
+import logging
+
+def reverse_position(xy_pos):
+    xy_pos['x'] = FLIPPED_POSITIONS[xy_pos['x']]
+    xy_pos['y'] = FLIPPED_POSITIONS[xy_pos['y']]
+
+    return xy_pos
 
 def get_sendable_game(game, side):
     game_dict = json.loads(ndb_json.dumps(game))
@@ -22,10 +32,15 @@ def get_sendable_game(game, side):
 
     if game_dict['last_move']:
         game_dict['last_move'] = json.loads(game_dict['last_move'])
+        if side == 1:
+            reverse_position(game_dict['last_move']['to']['position'])
+            reverse_position(game_dict['last_move']['from']['position'])
+
     else:
         del game_dict['last_move']
 
     game_dict['board'] = get_sendable_board(game, side)
+
 
     return game_dict
 
@@ -46,7 +61,13 @@ def get_sendable_board(game, side):
         return board
 
     else:
-        return hide_side(board, side)
+        hidden_side_board = hide_side(board, side)
+
+        if side == 1:
+            return Game.reverse_board(hidden_side_board)
+
+        else:
+            return hidden_side_board
 
 
 def hide_side(board, side):

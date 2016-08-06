@@ -70,10 +70,10 @@ class Game(BaseModel):
         if not self.blue_setup:
             board = self.get_board()
 
-            board[3] = blue_setup[0]
-            board[2] = blue_setup[1]
-            board[1] = blue_setup[2]
-            board[0] = blue_setup[3]
+            board[3] = blue_setup[0][::-1]
+            board[2] = blue_setup[1][::-1]
+            board[1] = blue_setup[2][::-1]
+            board[0] = blue_setup[3][::-1]
 
             self.set_board(board)
             self.blue_setup = json.dumps(blue_setup)
@@ -154,6 +154,14 @@ class Game(BaseModel):
 
         self.set_board(board)
 
+    @staticmethod
+    def reverse_board(board):
+        board = board[::-1]
+        for i in xrange(0, len(board)):
+            board[i] = board[i][::-1]
+
+        return board
+
     def check_move(self, fromPos, toPos):
         fromPiece = self.get_piece(fromPos)
         toPiece = self.get_piece(toPos)
@@ -205,7 +213,6 @@ class Game(BaseModel):
 
     # We must know at this point that we're not moving on multiple axis
     def _is_piece_between(self, fromPos, toPos, diff):
-
         board = self.get_board()
 
         # We're moving on the x axis
