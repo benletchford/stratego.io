@@ -1,6 +1,7 @@
 # Returns a singleton Wrapper that has some util functions for Pusher
 
 define (require) ->
+  PUSHER_CREDENTIALS = require './PUSHER_CREDENTIALS'
 
   instance = null
 
@@ -12,7 +13,7 @@ define (require) ->
       if not @pusher
         @connectionPromise = $.Deferred()
 
-        @pusher = new Pusher 'fd2e668a4ea4f7e23ab6',
+        @pusher = new Pusher PUSHER_CREDENTIALS.KEY,
           encrypted: true
           authEndpoint: '/api/pusher/auth'
 

@@ -7,11 +7,9 @@ from google.appengine.api import taskqueue
 from lib import ndb_json
 from lib.pusher.pusher import Pusher
 
-from utils import status_codes, general, board_utils, pusher_utils
-
 import models
-import move_types
-import game_states
+from CONSTANTS import MOVE_TYPES, GAME_STATES, STATUS_CODES, PUSHER_CREDENTIALS
+from utils import general, board_utils
 
 
 def _create_game(setup):
@@ -46,7 +44,7 @@ def _join_game(setup, join_hash, game=None):
 
     if game:
         game.set_blue_setup(setup)
-        game.game_state = game_states.READY
+        game.game_state = GAME_STATES.READY
         game.put()
 
     else:
@@ -71,7 +69,7 @@ class JoinHandler(webapp2.RequestHandler):
 
     def post(self):
         if not general.array_has_values(self.request.arguments(), ['join_hash', 'board']):
-            self.response.set_status(status_codes.INTERNAL_ERROR)
+            self.response.set_status(STATUS_CODES.INTERNAL_ERROR)
             return
 
         join_hash = self.request.get('join_hash')
@@ -87,13 +85,13 @@ class JoinHandler(webapp2.RequestHandler):
 
         if game:
             game.set_blue_setup(board)
-            game.game_state = game_states.READY
+            game.game_state = GAME_STATES.READY
             game.put()
 
             # Tell red we're ready.
-            pusher = Pusher(app_id=pusher_utils.APP_ID,
-                            key=pusher_utils.KEY,
-                            secret=pusher_utils.SECRET)
+            pusher = Pusher(app_id=PUSHER_CREDENTIALS.APP_ID,
+                            key=PUSHER_CREDENTIALS.KEY,
+                            secret=PUSHER_CREDENTIALS.SECRET)
 
             pusher.trigger('public-game-%s' % game.red_hash,
                            'blue_ready',
@@ -105,7 +103,7 @@ class JoinHandler(webapp2.RequestHandler):
             self.response.write(json.dumps(game_dict))
 
         else:
-            self.response.set_status(status_codes.NOT_FOUND)
+            self.response.set_status(STATUS_CODES.NOT_FOUND)
             return
 
 
@@ -113,7 +111,7 @@ class MoveHandler(webapp2.RequestHandler):
 
     def post(self):
         if not general.array_has_values(self.request.arguments(), ['player_hash', 'side', 'from', 'to']):
-            self.response.set_status(status_codes.INTERNAL_ERROR)
+            self.response.set_status(STATUS_CODES.INTERNAL_ERROR)
             return
 
         player_hash = self.request.get('player_hash')
@@ -132,14 +130,14 @@ class MoveHandler(webapp2.RequestHandler):
             ).get()
 
         if game.has_ended():
-            self.response.set_status(status_codes.UNAUTHORIZED)
+            self.response.set_status(STATUS_CODES.UNAUTHORIZED)
             return
 
         try:
             # Will raise if not valid.
             move_type = game.check_move(from_pos, to_pos)
 
-            if move_type == move_types.MOVE:
+            if move_type == MOVE_TYPES.MOVE:
                 game.move_piece(from_pos, to_pos)
                 game.flip_turn()
                 game.set_last_move({
@@ -152,7 +150,7 @@ class MoveHandler(webapp2.RequestHandler):
                     }
                 })
 
-            elif move_type == move_types.ATTACK_WON:
+            elif move_type == MOVE_TYPES.ATTACK_WON:
                 from_piece = game.get_piece(from_pos)
                 to_piece = game.get_piece(to_pos)
 
@@ -171,7 +169,7 @@ class MoveHandler(webapp2.RequestHandler):
                     }
                 })
 
-            elif move_type == move_types.ATTACK_LOST:
+            elif move_type == MOVE_TYPES.ATTACK_LOST:
                 from_piece = game.get_piece(from_pos)
                 to_piece = game.get_piece(to_pos)
 
@@ -190,7 +188,7 @@ class MoveHandler(webapp2.RequestHandler):
                     }
                 })
 
-            elif move_type == move_types.ATTACK_DRAW:
+            elif move_type == MOVE_TYPES.ATTACK_DRAW:
                 from_piece = game.get_piece(from_pos)
                 to_piece = game.get_piece(to_pos)
 
@@ -210,7 +208,7 @@ class MoveHandler(webapp2.RequestHandler):
                     }
                 })
 
-            elif move_type == move_types.CAPTURE:
+            elif move_type == MOVE_TYPES.CAPTURE:
                 from_piece = game.get_piece(from_pos)
                 to_piece = game.get_piece(to_pos)
 
@@ -231,9 +229,9 @@ class MoveHandler(webapp2.RequestHandler):
             game.put()
 
             # Tell clients to update
-            pusher = Pusher(app_id=pusher_utils.APP_ID,
-                            key=pusher_utils.KEY,
-                            secret=pusher_utils.SECRET)
+            pusher = Pusher(app_id=PUSHER_CREDENTIALS.APP_ID,
+                            key=PUSHER_CREDENTIALS.KEY,
+                            secret=PUSHER_CREDENTIALS.SECRET)
 
             pusher.trigger('public-game-%s' % game.get_opponent_hash(player_hash),
                            'update',
@@ -245,7 +243,7 @@ class MoveHandler(webapp2.RequestHandler):
             self.response.write(json.dumps(game_dict))
 
         except models.InvalidMove:
-            self.response.set_status(status_codes.UNAUTHORIZED)
+            self.response.set_status(STATUS_CODES.UNAUTHORIZED)
 
 
 class GameHandler(webapp2.RequestHandler):
@@ -254,7 +252,7 @@ class GameHandler(webapp2.RequestHandler):
         player_hash = self.request.get('player_hash')
 
         if not player_hash:
-            self.response.set_status(status_codes.UNAUTHORIZED)
+            self.response.set_status(STATUS_CODES.UNAUTHORIZED)
             return
 
         game = models.Game.query(
@@ -270,7 +268,7 @@ class GameHandler(webapp2.RequestHandler):
 
         # If still not ;)
         if not game:
-            self.response.set_status(status_codes.NOT_FOUND)
+            self.response.set_status(STATUS_CODES.NOT_FOUND)
             return
 
         game_dict = board_utils.get_sendable_game(game, side)
@@ -283,7 +281,7 @@ class JoinPoolHandler(webapp2.RequestHandler):
 
     def post(self):
         if not general.array_has_values(self.request.arguments(), ['board', 'socket_id']):
-            self.response.set_status(status_codes.INTERNAL_ERROR)
+            self.response.set_status(STATUS_CODES.INTERNAL_ERROR)
             return
 
         board = self.request.get('board')
@@ -307,9 +305,9 @@ class ProcessPoolHandler(webapp2.RequestHandler):
         setup = self.request.get('setup')
         socket_id = self.request.get('socket_id')
 
-        pusher = Pusher(app_id=pusher_utils.APP_ID,
-                        key=pusher_utils.KEY,
-                        secret=pusher_utils.SECRET)
+        pusher = Pusher(app_id=PUSHER_CREDENTIALS.APP_ID,
+                        key=PUSHER_CREDENTIALS.KEY,
+                        secret=PUSHER_CREDENTIALS.SECRET)
 
         # Get the oldest...
         oldest_game = models.Pool.query().order(-models.Pool.created).get()
@@ -343,12 +341,12 @@ class ProcessPoolHandler(webapp2.RequestHandler):
 
                 # Blue's not here, remove the task
                 else:
-                    self.response.set_status(status_codes.OK)
+                    self.response.set_status(STATUS_CODES.OK)
                     return
 
             # We fail
             else:
-                self.response.set_status(status_codes.NOT_FOUND)
+                self.response.set_status(STATUS_CODES.NOT_FOUND)
 
             # Delete the oldest game as it should no longer be in the pool.
             oldest_game.key.delete()
@@ -360,22 +358,22 @@ class ProcessPoolHandler(webapp2.RequestHandler):
                 socket_id=socket_id
             ).put()
 
-            self.response.set_status(status_codes.OK)
+            self.response.set_status(STATUS_CODES.OK)
 
 
 class PusherAuthHandler(webapp2.RequestHandler):
 
     def post(self):
         if not general.array_has_values(self.request.arguments(), ['channel_name', 'socket_id']):
-            self.response.set_status(status_codes.INTERNAL_ERROR)
+            self.response.set_status(STATUS_CODES.INTERNAL_ERROR)
             return
 
         channel_name = self.request.get('channel_name')
         socket_id = self.request.get('socket_id')
 
-        pusher = Pusher(app_id=pusher_utils.APP_ID,
-                        key=pusher_utils.KEY,
-                        secret=pusher_utils.SECRET)
+        pusher = Pusher(app_id=PUSHER_CREDENTIALS.APP_ID,
+                        key=PUSHER_CREDENTIALS.KEY,
+                        secret=PUSHER_CREDENTIALS.SECRET)
 
         auth = pusher.authenticate(
             channel=channel_name,

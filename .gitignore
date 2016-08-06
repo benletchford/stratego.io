@@ -1,9 +1,10 @@
 gae.auth
+app/CONSTANTS/PUSHER_CREDENTIALS.py
+js/PUSHER_CREDENTIALS.coffee
+
 bower_components
 node_modules
 app/static
-stratego.sublime-workspace
-stratego.sublime-project
 *.pyc
 
 js/*.js

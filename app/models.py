@@ -2,8 +2,7 @@ import json
 
 from google.appengine.ext import ndb
 
-import move_types
-import game_states
+from CONSTANTS import MOVE_TYPES
 
 
 class InvalidMove(Exception):
@@ -199,7 +198,7 @@ class Game(BaseModel):
                 return self._check_attack(fromPiece, toPiece)
 
             else:
-                return move_types.MOVE
+                return MOVE_TYPES.MOVE
 
         else:
             raise InvalidMove('Illegal movement.')
@@ -230,37 +229,37 @@ class Game(BaseModel):
     def _check_attack(self, fromPiece, toPiece):
         # Are we gonna draw?
         if fromPiece['rank'] == toPiece['rank']:
-            return move_types.ATTACK_DRAW
+            return MOVE_TYPES.ATTACK_DRAW
 
         # Any movable piece can capture the flag.
         if toPiece['rank'] == 'F':
-            return move_types.CAPTURE
+            return MOVE_TYPES.CAPTURE
 
         # Are we attacking a bomb?
         if toPiece['rank'] == 'B':
             if fromPiece['rank'] == '8':
-                return move_types.ATTACK_WON
+                return MOVE_TYPES.ATTACK_WON
             else:
-                return move_types.ATTACK_LOST
+                return MOVE_TYPES.ATTACK_LOST
 
         # Everything wins attacking a spy.
         if toPiece['rank'] == 'S':
-            return move_types.ATTACK_WON
+            return MOVE_TYPES.ATTACK_WON
 
         # Are we a spy?
         if fromPiece['rank'] == 'S':
             if toPiece['rank'] == '1':
-                return move_types.ATTACK_WON
+                return MOVE_TYPES.ATTACK_WON
             else:
-                return move_types.ATTACK_LOST
+                return MOVE_TYPES.ATTACK_LOST
 
         fromRank = int(fromPiece['rank'])
         toRank = int(toPiece['rank'])
 
         if toRank > fromRank:
-            return move_types.ATTACK_WON
+            return MOVE_TYPES.ATTACK_WON
         else:
-            return move_types.ATTACK_LOST
+            return MOVE_TYPES.ATTACK_LOST
 
     def _cell_is_occupied(self, piece):
         return not self._cell_is_empty(piece)

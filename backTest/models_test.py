@@ -1,8 +1,8 @@
 import unittest
 
 import models
-import move_types
-import fixtures
+from CONSTANTS import MOVE_TYPES
+import FIXTURES
 
 
 class GameTest(unittest.TestCase):
@@ -32,15 +32,15 @@ class GameTest(unittest.TestCase):
 
         for to_pos in valid_moves:
             game = models.Game()
-            game.set_piece(from_pos, fixtures.MARSHAL)
+            game.set_piece(from_pos, FIXTURES.MARSHAL)
 
             move = game.check_move(from_pos, to_pos)
 
-            self.assertEqual(move, move_types.MOVE)
+            self.assertEqual(move, MOVE_TYPES.MOVE)
 
         for to_pos in invalid_moves:
             game = models.Game()
-            game.set_piece(from_pos, fixtures.MARSHAL)
+            game.set_piece(from_pos, FIXTURES.MARSHAL)
 
             self.assertRaisesRegexp(models.InvalidMove,
                                     'Illegal movement.',
@@ -69,11 +69,11 @@ class GameTest(unittest.TestCase):
 
         for to_pos in valid_moves:
             game = models.Game()
-            game.set_piece(from_pos, fixtures.SCOUT)
+            game.set_piece(from_pos, FIXTURES.SCOUT)
 
         for to_pos in invalid_moves:
             game = models.Game()
-            game.set_piece(from_pos, fixtures.SCOUT)
+            game.set_piece(from_pos, FIXTURES.SCOUT)
 
             self.assertRaisesRegexp(models.InvalidMove,
                                     'Illegal movement.',
@@ -87,7 +87,7 @@ class GameTest(unittest.TestCase):
         }
 
         game = models.Game()
-        game.set_piece(from_pos, fixtures.FLAG)
+        game.set_piece(from_pos, FIXTURES.FLAG)
 
         self.assertRaisesRegexp(models.InvalidMove,
                                 'Flags cannot be moved.',
@@ -101,7 +101,7 @@ class GameTest(unittest.TestCase):
         }
 
         game = models.Game()
-        game.set_piece(from_pos, fixtures.BOMB)
+        game.set_piece(from_pos, FIXTURES.BOMB)
 
         self.assertRaisesRegexp(models.InvalidMove,
                                 'Bombs cannot be moved.',
@@ -120,8 +120,8 @@ class GameTest(unittest.TestCase):
         }
 
         game = models.Game()
-        game.set_piece(from_pos, fixtures.MARSHAL)
-        game.set_piece(to_pos, fixtures.SCOUT)
+        game.set_piece(from_pos, FIXTURES.MARSHAL)
+        game.set_piece(to_pos, FIXTURES.SCOUT)
 
         self.assertRaisesRegexp(models.InvalidMove,
                                 'Can not move onto friendly piece.',
@@ -157,7 +157,7 @@ class GameTest(unittest.TestCase):
 
         for i in xrange(len(to_positions)):
             game = models.Game()
-            game.set_piece(from_pos, fixtures.SCOUT)
+            game.set_piece(from_pos, FIXTURES.SCOUT)
             game.set_piece(inTheWayPositions[i], 1)
 
             self.assertRaisesRegexp(models.InvalidMove,
@@ -167,8 +167,8 @@ class GameTest(unittest.TestCase):
 
         for i in xrange(len(to_positions)):
             game = models.Game()
-            game.set_piece(from_pos, fixtures.SCOUT)
-            game.set_piece(notInTheWayPositions[i], fixtures.FLAG)
+            game.set_piece(from_pos, FIXTURES.SCOUT)
+            game.set_piece(notInTheWayPositions[i], FIXTURES.FLAG)
 
             game.check_move(from_pos, to_positions[i])
 
@@ -181,7 +181,7 @@ class GameTest(unittest.TestCase):
         block_pos = {'x': 6, 'y': 5}
 
         game = models.Game()
-        game.set_piece(from_pos, fixtures.MARSHAL)
+        game.set_piece(from_pos, FIXTURES.MARSHAL)
         game.set_piece(block_pos, 1)
 
         self.assertRaisesRegexp(models.InvalidMove,
@@ -200,23 +200,23 @@ class GameTest(unittest.TestCase):
         }
 
         rules = {
-            '1': move_types.ATTACK_DRAW,
-            '2': move_types.ATTACK_WON,
-            '3': move_types.ATTACK_WON,
-            '4': move_types.ATTACK_WON,
-            '5': move_types.ATTACK_WON,
-            '6': move_types.ATTACK_WON,
-            '7': move_types.ATTACK_WON,
-            '8': move_types.ATTACK_WON,
-            '9': move_types.ATTACK_WON,
-            'S': move_types.ATTACK_WON,
-            'B': move_types.ATTACK_LOST,
-            'F': move_types.CAPTURE
+            '1': MOVE_TYPES.ATTACK_DRAW,
+            '2': MOVE_TYPES.ATTACK_WON,
+            '3': MOVE_TYPES.ATTACK_WON,
+            '4': MOVE_TYPES.ATTACK_WON,
+            '5': MOVE_TYPES.ATTACK_WON,
+            '6': MOVE_TYPES.ATTACK_WON,
+            '7': MOVE_TYPES.ATTACK_WON,
+            '8': MOVE_TYPES.ATTACK_WON,
+            '9': MOVE_TYPES.ATTACK_WON,
+            'S': MOVE_TYPES.ATTACK_WON,
+            'B': MOVE_TYPES.ATTACK_LOST,
+            'F': MOVE_TYPES.CAPTURE
         }
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(from_pos, fixtures.MARSHAL)
+            game.set_piece(from_pos, FIXTURES.MARSHAL)
             game.set_piece(to_pos, {'rank': key, 'side': 1})
 
             self.assertEqual(game.check_move(from_pos, to_pos), result)
@@ -232,23 +232,23 @@ class GameTest(unittest.TestCase):
         }
 
         rules = {
-            '1': move_types.ATTACK_LOST,
-            '2': move_types.ATTACK_DRAW,
-            '3': move_types.ATTACK_WON,
-            '4': move_types.ATTACK_WON,
-            '5': move_types.ATTACK_WON,
-            '6': move_types.ATTACK_WON,
-            '7': move_types.ATTACK_WON,
-            '8': move_types.ATTACK_WON,
-            '9': move_types.ATTACK_WON,
-            'S': move_types.ATTACK_WON,
-            'B': move_types.ATTACK_LOST,
-            'F': move_types.CAPTURE
+            '1': MOVE_TYPES.ATTACK_LOST,
+            '2': MOVE_TYPES.ATTACK_DRAW,
+            '3': MOVE_TYPES.ATTACK_WON,
+            '4': MOVE_TYPES.ATTACK_WON,
+            '5': MOVE_TYPES.ATTACK_WON,
+            '6': MOVE_TYPES.ATTACK_WON,
+            '7': MOVE_TYPES.ATTACK_WON,
+            '8': MOVE_TYPES.ATTACK_WON,
+            '9': MOVE_TYPES.ATTACK_WON,
+            'S': MOVE_TYPES.ATTACK_WON,
+            'B': MOVE_TYPES.ATTACK_LOST,
+            'F': MOVE_TYPES.CAPTURE
         }
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(from_pos, fixtures.GENERAL)
+            game.set_piece(from_pos, FIXTURES.GENERAL)
             game.set_piece(to_pos, {'rank': key, 'side': 1})
 
             self.assertEqual(game.check_move(from_pos, to_pos), result)
@@ -264,23 +264,23 @@ class GameTest(unittest.TestCase):
         }
 
         rules = {
-            '1': move_types.ATTACK_LOST,
-            '2': move_types.ATTACK_LOST,
-            '3': move_types.ATTACK_DRAW,
-            '4': move_types.ATTACK_WON,
-            '5': move_types.ATTACK_WON,
-            '6': move_types.ATTACK_WON,
-            '7': move_types.ATTACK_WON,
-            '8': move_types.ATTACK_WON,
-            '9': move_types.ATTACK_WON,
-            'S': move_types.ATTACK_WON,
-            'B': move_types.ATTACK_LOST,
-            'F': move_types.CAPTURE
+            '1': MOVE_TYPES.ATTACK_LOST,
+            '2': MOVE_TYPES.ATTACK_LOST,
+            '3': MOVE_TYPES.ATTACK_DRAW,
+            '4': MOVE_TYPES.ATTACK_WON,
+            '5': MOVE_TYPES.ATTACK_WON,
+            '6': MOVE_TYPES.ATTACK_WON,
+            '7': MOVE_TYPES.ATTACK_WON,
+            '8': MOVE_TYPES.ATTACK_WON,
+            '9': MOVE_TYPES.ATTACK_WON,
+            'S': MOVE_TYPES.ATTACK_WON,
+            'B': MOVE_TYPES.ATTACK_LOST,
+            'F': MOVE_TYPES.CAPTURE
         }
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(from_pos, fixtures.COLONEL)
+            game.set_piece(from_pos, FIXTURES.COLONEL)
             game.set_piece(to_pos, {'rank': key, 'side': 1})
 
             self.assertEqual(game.check_move(from_pos, to_pos), result)
@@ -296,23 +296,23 @@ class GameTest(unittest.TestCase):
         }
 
         rules = {
-            '1': move_types.ATTACK_LOST,
-            '2': move_types.ATTACK_LOST,
-            '3': move_types.ATTACK_LOST,
-            '4': move_types.ATTACK_DRAW,
-            '5': move_types.ATTACK_WON,
-            '6': move_types.ATTACK_WON,
-            '7': move_types.ATTACK_WON,
-            '8': move_types.ATTACK_WON,
-            '9': move_types.ATTACK_WON,
-            'S': move_types.ATTACK_WON,
-            'B': move_types.ATTACK_LOST,
-            'F': move_types.CAPTURE
+            '1': MOVE_TYPES.ATTACK_LOST,
+            '2': MOVE_TYPES.ATTACK_LOST,
+            '3': MOVE_TYPES.ATTACK_LOST,
+            '4': MOVE_TYPES.ATTACK_DRAW,
+            '5': MOVE_TYPES.ATTACK_WON,
+            '6': MOVE_TYPES.ATTACK_WON,
+            '7': MOVE_TYPES.ATTACK_WON,
+            '8': MOVE_TYPES.ATTACK_WON,
+            '9': MOVE_TYPES.ATTACK_WON,
+            'S': MOVE_TYPES.ATTACK_WON,
+            'B': MOVE_TYPES.ATTACK_LOST,
+            'F': MOVE_TYPES.CAPTURE
         }
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(from_pos, fixtures.MAJOR)
+            game.set_piece(from_pos, FIXTURES.MAJOR)
             game.set_piece(to_pos, {'rank': key, 'side': 1})
 
             self.assertEqual(game.check_move(from_pos, to_pos), result)
@@ -328,23 +328,23 @@ class GameTest(unittest.TestCase):
         }
 
         rules = {
-            '1': move_types.ATTACK_LOST,
-            '2': move_types.ATTACK_LOST,
-            '3': move_types.ATTACK_LOST,
-            '4': move_types.ATTACK_LOST,
-            '5': move_types.ATTACK_DRAW,
-            '6': move_types.ATTACK_WON,
-            '7': move_types.ATTACK_WON,
-            '8': move_types.ATTACK_WON,
-            '9': move_types.ATTACK_WON,
-            'S': move_types.ATTACK_WON,
-            'B': move_types.ATTACK_LOST,
-            'F': move_types.CAPTURE
+            '1': MOVE_TYPES.ATTACK_LOST,
+            '2': MOVE_TYPES.ATTACK_LOST,
+            '3': MOVE_TYPES.ATTACK_LOST,
+            '4': MOVE_TYPES.ATTACK_LOST,
+            '5': MOVE_TYPES.ATTACK_DRAW,
+            '6': MOVE_TYPES.ATTACK_WON,
+            '7': MOVE_TYPES.ATTACK_WON,
+            '8': MOVE_TYPES.ATTACK_WON,
+            '9': MOVE_TYPES.ATTACK_WON,
+            'S': MOVE_TYPES.ATTACK_WON,
+            'B': MOVE_TYPES.ATTACK_LOST,
+            'F': MOVE_TYPES.CAPTURE
         }
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(from_pos, fixtures.CAPTAIN)
+            game.set_piece(from_pos, FIXTURES.CAPTAIN)
             game.set_piece(to_pos, {'rank': key, 'side': 1})
 
             self.assertEqual(game.check_move(from_pos, to_pos), result)
@@ -360,23 +360,23 @@ class GameTest(unittest.TestCase):
         }
 
         rules = {
-            '1': move_types.ATTACK_LOST,
-            '2': move_types.ATTACK_LOST,
-            '3': move_types.ATTACK_LOST,
-            '4': move_types.ATTACK_LOST,
-            '5': move_types.ATTACK_LOST,
-            '6': move_types.ATTACK_DRAW,
-            '7': move_types.ATTACK_WON,
-            '8': move_types.ATTACK_WON,
-            '9': move_types.ATTACK_WON,
-            'S': move_types.ATTACK_WON,
-            'B': move_types.ATTACK_LOST,
-            'F': move_types.CAPTURE
+            '1': MOVE_TYPES.ATTACK_LOST,
+            '2': MOVE_TYPES.ATTACK_LOST,
+            '3': MOVE_TYPES.ATTACK_LOST,
+            '4': MOVE_TYPES.ATTACK_LOST,
+            '5': MOVE_TYPES.ATTACK_LOST,
+            '6': MOVE_TYPES.ATTACK_DRAW,
+            '7': MOVE_TYPES.ATTACK_WON,
+            '8': MOVE_TYPES.ATTACK_WON,
+            '9': MOVE_TYPES.ATTACK_WON,
+            'S': MOVE_TYPES.ATTACK_WON,
+            'B': MOVE_TYPES.ATTACK_LOST,
+            'F': MOVE_TYPES.CAPTURE
         }
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(from_pos, fixtures.LIEUTENANT)
+            game.set_piece(from_pos, FIXTURES.LIEUTENANT)
             game.set_piece(to_pos, {'rank': key, 'side': 1})
 
             self.assertEqual(game.check_move(from_pos, to_pos), result)
@@ -392,23 +392,23 @@ class GameTest(unittest.TestCase):
         }
 
         rules = {
-            '1': move_types.ATTACK_LOST,
-            '2': move_types.ATTACK_LOST,
-            '3': move_types.ATTACK_LOST,
-            '4': move_types.ATTACK_LOST,
-            '5': move_types.ATTACK_LOST,
-            '6': move_types.ATTACK_LOST,
-            '7': move_types.ATTACK_DRAW,
-            '8': move_types.ATTACK_WON,
-            '9': move_types.ATTACK_WON,
-            'S': move_types.ATTACK_WON,
-            'B': move_types.ATTACK_LOST,
-            'F': move_types.CAPTURE
+            '1': MOVE_TYPES.ATTACK_LOST,
+            '2': MOVE_TYPES.ATTACK_LOST,
+            '3': MOVE_TYPES.ATTACK_LOST,
+            '4': MOVE_TYPES.ATTACK_LOST,
+            '5': MOVE_TYPES.ATTACK_LOST,
+            '6': MOVE_TYPES.ATTACK_LOST,
+            '7': MOVE_TYPES.ATTACK_DRAW,
+            '8': MOVE_TYPES.ATTACK_WON,
+            '9': MOVE_TYPES.ATTACK_WON,
+            'S': MOVE_TYPES.ATTACK_WON,
+            'B': MOVE_TYPES.ATTACK_LOST,
+            'F': MOVE_TYPES.CAPTURE
         }
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(from_pos, fixtures.SERGEANT)
+            game.set_piece(from_pos, FIXTURES.SERGEANT)
             game.set_piece(to_pos, {'rank': key, 'side': 1})
 
             self.assertEqual(game.check_move(from_pos, to_pos), result)
@@ -424,23 +424,23 @@ class GameTest(unittest.TestCase):
         }
 
         rules = {
-            '1': move_types.ATTACK_LOST,
-            '2': move_types.ATTACK_LOST,
-            '3': move_types.ATTACK_LOST,
-            '4': move_types.ATTACK_LOST,
-            '5': move_types.ATTACK_LOST,
-            '6': move_types.ATTACK_LOST,
-            '7': move_types.ATTACK_LOST,
-            '8': move_types.ATTACK_DRAW,
-            '9': move_types.ATTACK_WON,
-            'S': move_types.ATTACK_WON,
-            'B': move_types.ATTACK_WON,
-            'F': move_types.CAPTURE
+            '1': MOVE_TYPES.ATTACK_LOST,
+            '2': MOVE_TYPES.ATTACK_LOST,
+            '3': MOVE_TYPES.ATTACK_LOST,
+            '4': MOVE_TYPES.ATTACK_LOST,
+            '5': MOVE_TYPES.ATTACK_LOST,
+            '6': MOVE_TYPES.ATTACK_LOST,
+            '7': MOVE_TYPES.ATTACK_LOST,
+            '8': MOVE_TYPES.ATTACK_DRAW,
+            '9': MOVE_TYPES.ATTACK_WON,
+            'S': MOVE_TYPES.ATTACK_WON,
+            'B': MOVE_TYPES.ATTACK_WON,
+            'F': MOVE_TYPES.CAPTURE
         }
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(from_pos, fixtures.MINER)
+            game.set_piece(from_pos, FIXTURES.MINER)
             game.set_piece(to_pos, {'rank': key, 'side': 1})
 
             self.assertEqual(game.check_move(from_pos, to_pos), result)
@@ -456,23 +456,23 @@ class GameTest(unittest.TestCase):
         }
 
         rules = {
-            '1': move_types.ATTACK_LOST,
-            '2': move_types.ATTACK_LOST,
-            '3': move_types.ATTACK_LOST,
-            '4': move_types.ATTACK_LOST,
-            '5': move_types.ATTACK_LOST,
-            '6': move_types.ATTACK_LOST,
-            '7': move_types.ATTACK_LOST,
-            '8': move_types.ATTACK_LOST,
-            '9': move_types.ATTACK_DRAW,
-            'S': move_types.ATTACK_WON,
-            'B': move_types.ATTACK_LOST,
-            'F': move_types.CAPTURE
+            '1': MOVE_TYPES.ATTACK_LOST,
+            '2': MOVE_TYPES.ATTACK_LOST,
+            '3': MOVE_TYPES.ATTACK_LOST,
+            '4': MOVE_TYPES.ATTACK_LOST,
+            '5': MOVE_TYPES.ATTACK_LOST,
+            '6': MOVE_TYPES.ATTACK_LOST,
+            '7': MOVE_TYPES.ATTACK_LOST,
+            '8': MOVE_TYPES.ATTACK_LOST,
+            '9': MOVE_TYPES.ATTACK_DRAW,
+            'S': MOVE_TYPES.ATTACK_WON,
+            'B': MOVE_TYPES.ATTACK_LOST,
+            'F': MOVE_TYPES.CAPTURE
         }
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(from_pos, fixtures.SCOUT)
+            game.set_piece(from_pos, FIXTURES.SCOUT)
             game.set_piece(to_pos, {'rank': key, 'side': 1})
 
             self.assertEqual(game.check_move(from_pos, to_pos), result)
@@ -488,23 +488,23 @@ class GameTest(unittest.TestCase):
         }
 
         rules = {
-            '1': move_types.ATTACK_WON,
-            '2': move_types.ATTACK_LOST,
-            '3': move_types.ATTACK_LOST,
-            '4': move_types.ATTACK_LOST,
-            '5': move_types.ATTACK_LOST,
-            '6': move_types.ATTACK_LOST,
-            '7': move_types.ATTACK_LOST,
-            '8': move_types.ATTACK_LOST,
-            '9': move_types.ATTACK_LOST,
-            'S': move_types.ATTACK_DRAW,
-            'B': move_types.ATTACK_LOST,
-            'F': move_types.CAPTURE
+            '1': MOVE_TYPES.ATTACK_WON,
+            '2': MOVE_TYPES.ATTACK_LOST,
+            '3': MOVE_TYPES.ATTACK_LOST,
+            '4': MOVE_TYPES.ATTACK_LOST,
+            '5': MOVE_TYPES.ATTACK_LOST,
+            '6': MOVE_TYPES.ATTACK_LOST,
+            '7': MOVE_TYPES.ATTACK_LOST,
+            '8': MOVE_TYPES.ATTACK_LOST,
+            '9': MOVE_TYPES.ATTACK_LOST,
+            'S': MOVE_TYPES.ATTACK_DRAW,
+            'B': MOVE_TYPES.ATTACK_LOST,
+            'F': MOVE_TYPES.CAPTURE
         }
 
         for key, result in rules.iteritems():
             game = models.Game()
-            game.set_piece(from_pos, fixtures.SPY)
+            game.set_piece(from_pos, FIXTURES.SPY)
             game.set_piece(to_pos, {'rank': key, 'side': 1})
 
             self.assertEqual(game.check_move(from_pos, to_pos), result)
