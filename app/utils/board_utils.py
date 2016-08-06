@@ -31,7 +31,7 @@ def get_sendable_game(game, side):
 
     if game_dict['last_move']:
         game_dict['last_move'] = json.loads(game_dict['last_move'])
-        
+
         # We need to reverse if we're blue
         if side == 1:
             reverse_position(game_dict['last_move']['to']['position'])
@@ -51,7 +51,10 @@ def get_sendable_board(game, side):
 
     # Only continue if the game hasn't finished
     if game.has_ended():
-        return board
+        if side == 1:
+            return Game.reverse_board(board)
+        else:
+            return board
 
     if side == 0 and not game.blue_setup:
         board[0] = unknown_row(side)
@@ -66,7 +69,6 @@ def get_sendable_board(game, side):
 
         if side == 1:
             return Game.reverse_board(hidden_side_board)
-
         else:
             return hidden_side_board
 
