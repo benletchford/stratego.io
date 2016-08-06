@@ -140,6 +140,7 @@ class MoveHandler(webapp2.RequestHandler):
             return
 
         try:
+            # We need to reverse if we're blue
             if side == 1:
                 board_utils.reverse_position(from_pos)
                 board_utils.reverse_position(to_pos)

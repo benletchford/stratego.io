@@ -70,6 +70,7 @@ class Game(BaseModel):
         if not self.blue_setup:
             board = self.get_board()
 
+            # We store things from the perspective of red, so we need to reverse
             board[3] = blue_setup[0][::-1]
             board[2] = blue_setup[1][::-1]
             board[1] = blue_setup[2][::-1]

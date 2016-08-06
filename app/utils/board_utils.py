@@ -3,15 +3,14 @@ import json
 from lib import ndb_json
 from models import Game
 
+
 FLIPPED_POSITIONS = [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
 
-import logging
 
 def reverse_position(xy_pos):
     xy_pos['x'] = FLIPPED_POSITIONS[xy_pos['x']]
     xy_pos['y'] = FLIPPED_POSITIONS[xy_pos['y']]
 
-    return xy_pos
 
 def get_sendable_game(game, side):
     game_dict = json.loads(ndb_json.dumps(game))
@@ -32,6 +31,8 @@ def get_sendable_game(game, side):
 
     if game_dict['last_move']:
         game_dict['last_move'] = json.loads(game_dict['last_move'])
+        
+        # We need to reverse if we're blue
         if side == 1:
             reverse_position(game_dict['last_move']['to']['position'])
             reverse_position(game_dict['last_move']['from']['position'])
