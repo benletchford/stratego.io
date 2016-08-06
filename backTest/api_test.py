@@ -219,8 +219,8 @@ class MoveHandlerTest(unittest.TestCase):
         app.post('/api/move', params={
             'player_hash': game.blue_hash,
             'side': 1,
-            'from': json.dumps({'x': 0, 'y': 3}),
-            'to': json.dumps({'x': 0, 'y': 4})
+            'from': json.dumps({'x': 8, 'y': 6}),
+            'to': json.dumps({'x': 8, 'y': 5})
         })
 
         app.post('/api/move', params={
@@ -230,39 +230,37 @@ class MoveHandlerTest(unittest.TestCase):
             'to': json.dumps({'x': 1, 'y': 4})
         })
 
-        app.post('/api/move', params={
-            'player_hash': game.blue_hash,
-            'side': 1,
-            'from': json.dumps({'x': 0, 'y': 4}),
-            'to': json.dumps({'x': 1, 'y': 4})
-        })
+        # app.post('/api/move', params={
+        #     'player_hash': game.blue_hash,
+        #     'side': 1,
+        #     'from': json.dumps({'x': 0, 'y': 4}),
+        #     'to': json.dumps({'x': 1, 'y': 4})
+        # })
 
         game = models.Game.query().get()
 
         current_state_of_game = copy.deepcopy(FIXTURES.DEFAULT_GAME)
 
+        current_state_of_game[3][1] = 0
         current_state_of_game[6][1] = 0
-        current_state_of_game[3][0] = 0
-
-        current_state_of_game[4][1] = {'side': 1, 'rank': '1'}
-        current_state_of_game[4][0] = 0
+        current_state_of_game[4][1] = {'side': 0, 'rank': '2'}
 
         self.assertEqual(game.get_board(), current_state_of_game)
 
         self.assertEqual(json.loads(game.last_move), {
             'type': 'won',
             'from': {
-                'piece': {'side': 1, 'rank': '1'},
-                'position': {'x': 0, 'y': 4}
+                'piece': {'side': 0, 'rank': '2'},
+                'position': {'x': 1, 'y': 5}
             },
             'to': {
-                'piece': {'side': 0, 'rank': '2'},
+                'piece': {'side': 1, 'rank': '5'},
                 'position': {'x': 1, 'y': 4}
             }
         })
 
-        # Red's turn
-        self.assertEqual(game.turn, 0)
+        # Blue's turn
+        self.assertEqual(game.turn, 1)
 
     @patch('lib.pusher.pusher.Pusher.trigger')
     def test_should_be_able_to_attack_and_lose(self, pusher):
@@ -285,8 +283,8 @@ class MoveHandlerTest(unittest.TestCase):
         app.post('/api/move', params={
             'player_hash': game.blue_hash,
             'side': 1,
-            'from': json.dumps({'x': 0, 'y': 3}),
-            'to': json.dumps({'x': 0, 'y': 4})
+            'from': json.dumps({'x': 9, 'y': 6}),
+            'to': json.dumps({'x': 9, 'y': 5})
         })
 
         app.post('/api/move', params={
@@ -299,15 +297,8 @@ class MoveHandlerTest(unittest.TestCase):
         app.post('/api/move', params={
             'player_hash': game.blue_hash,
             'side': 1,
-            'from': json.dumps({'x': 4, 'y': 3}),
-            'to': json.dumps({'x': 4, 'y': 4})
-        })
-
-        app.post('/api/move', params={
-            'player_hash': game.red_hash,
-            'side': 0,
-            'from': json.dumps({'x': 1, 'y': 4}),
-            'to': json.dumps({'x': 0, 'y': 4})
+            'from': json.dumps({'x': 9, 'y': 5}),
+            'to': json.dumps({'x': 8, 'y': 5})
         })
 
         game = models.Game.query().get()
@@ -316,25 +307,21 @@ class MoveHandlerTest(unittest.TestCase):
 
         current_state_of_game[6][1] = 0
         current_state_of_game[3][0] = 0
-
-        current_state_of_game[3][4] = 0
-        current_state_of_game[4][4] = {'side': 1, 'rank': '4'}
-
-        current_state_of_game[4][0] = {'side': 1, 'rank': '1'}
+        current_state_of_game[4][1] = {'side': 0, 'rank': '2'}
 
         self.assertEqual(game.get_board(), current_state_of_game)
 
         self.assertEqual(json.loads(game.last_move), {
             'type': 'lost',
             'from': {
-                'piece': {'side': 0, 'rank': '2'},
-                'position': {'x': 1, 'y': 4}
+                'piece': {'side': 1, 'rank': '5'},
+                'position': {'x': 0, 'y': 4}
             },
             'to': {
-                'piece': {'side': 1, 'rank': '1'},
-                'position': {'x': 0, 'y': 4}
+                'piece': {'side': 0, 'rank': '2'},
+                'position': {'x': 1, 'y': 4}
             }
         })
 
-        # Blue's turn
-        self.assertEqual(game.turn, 1)
+        # Red's turn
+        self.assertEqual(game.turn, 0)
