@@ -30,6 +30,8 @@ define (require) ->
         maxScale  : 2
         minScale  : 0.5
 
+  PADDING = 20
+
   class extends Backbone.View
     className:  'overlay-graphic-view'
 
@@ -44,21 +46,21 @@ define (require) ->
 
       if rect.bottom > rect.right
         if rect.top isnt 0
-          top = (rect.bottom - rect.top - height) * Math.random() << 0
+          top = (rect.bottom - rect.top - height - PADDING) * Math.random() << 0
           top += rect.top
         else
           top = (rect.bottom - height) * Math.random() << 0
 
-        left = (rect.right - width) * Math.random() << 0
+        left = (rect.right - width - PADDING) * Math.random() << 0
 
       else
         if rect.left isnt 0
-          left = (rect.right - rect.left - width) * Math.random() << 0
+          left = (rect.right - rect.left - width - PADDING) * Math.random() << 0
           left += rect.left
         else
           left = (rect.right - width) * Math.random() << 0
 
-        top = (rect.bottom - height) * Math.random() << 0
+        top = (rect.bottom - height - PADDING) * Math.random() << 0
 
       @$el.addClass "image-#{randomKey}"
       @$el.css 'width', width
