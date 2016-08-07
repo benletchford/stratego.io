@@ -6,4 +6,4 @@ from pynt import task
 @task()
 def test():
     os.system(
-        'nosetests ./backTest ./app --logging-level=ERROR --with-gae --gae-application="app/app.yaml"')
+        'nosetests ./gae/tests ./gae --logging-level=ERROR --with-gae --gae-application="gae/app.yaml"')

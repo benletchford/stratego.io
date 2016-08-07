@@ -1,10 +1,10 @@
 gae.auth
-app/CONSTANTS/PUSHER_CREDENTIALS.py
+gae/CONSTANTS/PUSHER_CREDENTIALS.py
 js/PUSHER_CREDENTIALS.coffee
 
 bower_components
 node_modules
-app/static
+gae/static
 *.pyc
 
 js/*.js
