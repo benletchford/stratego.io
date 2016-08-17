@@ -64,16 +64,16 @@ module.exports = (grunt) ->
 
     clean:
       app:
-        ['js/**/*.js', 'app/static/**/*', '!app/static/graphics.css']
+        ['js/**/*.js', 'gae/static/**/*', '!gae/static/graphics.css']
       graphics:
-        ['app/static/graphics.css']
+        ['gae/static/graphics.css']
       tmp:
         ['tmp']
 
     copy:
       graphics:
         src: 'tmp/graphics-output/graphics.css'
-        dest: 'app/static/graphics.css'
+        dest: 'gae/static/graphics.css'
 
     htmlmin:
       app:
@@ -83,7 +83,7 @@ module.exports = (grunt) ->
           link: true
           minifyJS: true
         files:
-          'app/static/index.html': 'html/index.html'
+          'gae/static/index.html': 'html/index.html'
 
     mocha_phantomjs:
       options:
@@ -102,7 +102,7 @@ module.exports = (grunt) ->
       app: _.extend({
           entry: './js/main.coffee'
           output:
-            path: __dirname + '/app/static'
+            path: __dirname + '/gae/static'
             filename: 'stratego.js'
         }, webpackBase)
 
