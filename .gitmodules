@@ -1,4 +1,0 @@
-[submodule "gae"]
-	path = gae
-	url = git@bitbucket.org:strategoio/gae.git
-	branch = master
