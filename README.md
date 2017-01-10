@@ -2,6 +2,8 @@ www.stratego.io
 ======
 HTML5 app that is a recreation of the classic game of [Stratego](https://en.wikipedia.org/wiki/Stratego).
 
+![Stratego.io preview](/preview.png)
+
 Built upon [Pusher](https://pusher.com/) (for websockets) and Google App Engine.
 
 In theory should work on anything that has a browser!
