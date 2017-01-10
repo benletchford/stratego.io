@@ -1,6 +1,6 @@
 www.stratego.io
 ======
-HTML5 app that is a recreation of the classic game of [Stratego](https://en.wikipedia.org/wiki/Stratego).
+Multiplayer HTML5 [Stratego](https://en.wikipedia.org/wiki/Stratego).
 
 ![Stratego.io preview](/preview.png)
 
