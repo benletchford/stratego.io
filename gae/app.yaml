@@ -5,12 +5,15 @@ threadsafe: true
 handlers:
 
 - script: api.app
+  secure: always
   url: /api/.*
 
 - url: /
   static_files: static/index.html
+  secure: always
   upload: static/index.html
 
 - url: /(.*)
+  secure: always
   static_files: static/\1
   upload: static/(.*)
