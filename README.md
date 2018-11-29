@@ -41,6 +41,22 @@ You can deploy the app to App Engine by doing (the grunt task will look for a ga
 
     $ grunt deploy
 
+You'll need to create `js/PUSHER_CREDENTIALS.coffee`, eg:
+
+```
+define (require) ->
+
+  KEY: "YOUR_PUSHER_KEY"
+```
+
+You'll need to create `gae/CONSTANTS/PUSHER_CREDENTIALS.py`, eg:
+
+```
+APP_ID = "YOUR_APP_ID"
+KEY = "YOUR_KEY"
+SECRET = "YOUR_SECRET"
+```
+
 Piece Graphics
 ======
 Pieces found at [vector.gissen.nl](http://vector.gissen.nl/stratego.html)
