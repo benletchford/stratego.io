@@ -1,4 +1,4 @@
-www.stratego.io
+https://www.stratego.io
 ======
 Multiplayer HTML5 [Stratego](https://en.wikipedia.org/wiki/Stratego).
 
