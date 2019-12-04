@@ -135,6 +135,15 @@ class MoveHandler(webapp2.RequestHandler):
                 models.Game.blue_hash == player_hash
             ).get()
 
+        # These checks fix an issue where an opponent can move the other players
+        # piece when they attacked and lost.
+        if game.red_hash == player_hash and game.turn != False:
+            self.response.set_status(STATUS_CODES.UNAUTHORIZED)
+            return
+        elif game.blue_hash == player_hash and game.turn != True:
+            self.response.set_status(STATUS_CODES.UNAUTHORIZED)
+            return
+
         if game.has_ended():
             self.response.set_status(STATUS_CODES.UNAUTHORIZED)
             return
