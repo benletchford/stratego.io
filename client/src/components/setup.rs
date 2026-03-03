@@ -3,6 +3,7 @@ use stratego::constants::RANKS;
 use stratego::models::{Board, Cell, Piece};
 
 use super::grid::{Grid, LastMoveInfo, MoveEvent};
+use super::loading::Loading;
 
 /// Default 4x10 board setup using RANKS from shared crate.
 fn default_setup() -> Board {
@@ -61,6 +62,9 @@ pub fn SetupPage(
     // Move signal: Grid writes swap events here
     let (move_event, set_move_event) = signal(Option::<MoveEvent>::None);
 
+    // Loading state: None = setup visible, Some(msg) = loading screen
+    let (loading_msg, set_loading_msg) = signal(Option::<String>::None);
+
     // Watch for swap events from the grid
     Effect::new(move |_| {
         if let Some((fx, fy, tx, ty)) = move_event.get() {
@@ -90,6 +94,13 @@ pub fn SetupPage(
         let hash_val = hash.get_value();
         let nav = navigate.clone();
 
+        let msg = match mode_val.as_str() {
+            "create" => "Creating game...",
+            "join" => "Joining game...",
+            _ => "Starting...",
+        };
+        set_loading_msg.set(Some(msg.to_string()));
+
         wasm_bindgen_futures::spawn_local(async move {
             match mode_val.as_str() {
                 "create" => {
@@ -101,6 +112,7 @@ pub fn SetupPage(
                         }
                         Err(e) => {
                             web_sys::console::error_1(&format!("Create error: {}", e).into());
+                            set_loading_msg.set(None);
                         }
                     }
                 }
@@ -113,6 +125,7 @@ pub fn SetupPage(
                         }
                         Err(e) => {
                             web_sys::console::error_1(&format!("Join error: {}", e).into());
+                            set_loading_msg.set(None);
                         }
                     }
                 }
@@ -124,38 +137,47 @@ pub fn SetupPage(
         });
     };
 
-    view! {
-        <div class="setup-view">
-            <div class="panel">
-                <a class="panel-link-view panel-option" href="/">
-                    <div class="title">"Back"</div>
-                    <div class="description">"Go back to the main menu."</div>
-                </a>
-                <button class="panel-button-view panel-option" on:click=on_start>
-                    <div class="title">"Start"</div>
-                    <div class="description">"Once you're happy with the setup click here to start the game."</div>
-                </button>
-                <div class="panel-textbox-view panel-textbox">
-                    "This is where you setup your pieces to better protect your flag."
-                    <br /><br />
-                    "Click or drag to rearrange. Your last used setup will be saved."
-                </div>
-            </div>
-            <div class="grid-container">
-                {(0..3).map(|i| view! {
-                    <div class="horizontal-grid-line" data-number=i.to_string()></div>
-                }).collect::<Vec<_>>()}
-                {(0..9).map(|i| view! {
-                    <div class="vertical-grid-line" data-number=i.to_string()></div>
-                }).collect::<Vec<_>>()}
+    let loading_signal = Signal::derive(move || {
+        loading_msg.get().unwrap_or_default()
+    });
 
-                <Grid
-                    board=board.into()
-                    side=side
-                    last_move=last_move
-                    set_move=set_move_event
-                />
-            </div>
+    let is_loading = move || loading_msg.get().is_some();
+
+    view! {
+        <div style=move || if is_loading() { "" } else { "display:none" }>
+            <Loading message=loading_signal />
+        </div>
+        <div class="setup-view" style=move || if is_loading() { "display:none" } else { "" }>
+            <div class="panel">
+                    <a class="panel-link-view panel-option" href="/">
+                        <div class="title">"Back"</div>
+                        <div class="description">"Go back to the main menu."</div>
+                    </a>
+                    <button class="panel-button-view panel-option" on:click=on_start>
+                        <div class="title">"Start"</div>
+                        <div class="description">"Once you're happy with the setup click here to start the game."</div>
+                    </button>
+                    <div class="panel-textbox-view panel-textbox">
+                        "This is where you setup your pieces to better protect your flag."
+                        <br /><br />
+                        "Click or drag to rearrange. Your last used setup will be saved."
+                    </div>
+                </div>
+                <div class="grid-container">
+                    {(0..3).map(|i| view! {
+                        <div class="horizontal-grid-line" data-number=i.to_string()></div>
+                    }).collect::<Vec<_>>()}
+                    {(0..9).map(|i| view! {
+                        <div class="vertical-grid-line" data-number=i.to_string()></div>
+                    }).collect::<Vec<_>>()}
+
+                    <Grid
+                        board=board.into()
+                        side=side
+                        last_move=last_move
+                        set_move=set_move_event
+                    />
+                </div>
         </div>
     }
 }
