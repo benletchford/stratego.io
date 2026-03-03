@@ -1,4 +1,4 @@
-https://www.stratego.io
+https://stratego.io
 ======
 Multiplayer HTML5 [Stratego](https://en.wikipedia.org/wiki/Stratego).
 
@@ -51,6 +51,14 @@ CLI options:
 | `--no-static` | | Don't serve static files (API/WebSocket only) |
 | `--rebuild` | | Force rebuild client assets before starting |
 | `--build-only` | | Build client assets and exit |
+
+Environment variables:
+
+| Variable | Description |
+|---|---|
+| `NO_STATIC` | Same as `--no-static` flag |
+| `CORS_ORIGINS` | Comma-separated allowed origins (e.g. `https://stratego.io`) |
+| `API_BASE_URL` | Compile-time client override for API base URL (e.g. `https://api.stratego.io`) |
 
 Architecture
 ======
