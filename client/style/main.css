@@ -346,17 +346,23 @@ button.panel-option {
 
 .home-view.panel {
   width: 80%;
-  height: 50%;
+  max-height: 90%;
   position: relative;
   top: 50%;
   transform: translateY(-50%);
+}
+
+@media (max-width: 600px), (max-height: 600px) {
+  .home-view.panel {
+    width: 90%;
+  }
 }
 
 @media (max-width: 480px), (max-height: 480px) {
   .home-view.panel {
     padding: 0;
     width: 95%;
-    height: 95%;
+    max-height: 95%;
   }
 }
 
