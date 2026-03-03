@@ -43,7 +43,7 @@ jobs:
         run: cargo run --release -- --build-only
 
       - name: Add CNAME for custom domain
-        run: echo "www.stratego.io" > client/dist/CNAME
+        run: echo "stratego.io" > client/dist/CNAME
 
       - name: Add 404.html for SPA routing
         run: cp client/dist/index.html client/dist/404.html
