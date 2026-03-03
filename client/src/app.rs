@@ -8,13 +8,22 @@ use crate::components::home::HomePage;
 use crate::components::overlay::OverlayGraphics;
 use crate::components::setup::SetupPage;
 use crate::components::game::PlayPage;
+use crate::config::{self, RankStyle};
 use crate::ws::{ConnectionState, ConnectionStateSignal};
+
+/// Newtype wrapper for reading rank style from Leptos context.
+#[derive(Clone)]
+pub struct RankStyleSignal(pub ReadSignal<RankStyle>);
 
 #[component]
 pub fn App() -> impl IntoView {
     let (conn_state, set_conn_state) = signal(ConnectionState::Idle);
     provide_context(ConnectionStateSignal(conn_state));
     provide_context(set_conn_state);
+
+    let (rank_style, set_rank_style) = signal(config::load_rank_style());
+    provide_context(RankStyleSignal(rank_style));
+    provide_context(set_rank_style);
 
     view! {
         <Board>

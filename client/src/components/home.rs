@@ -1,5 +1,8 @@
 use leptos::prelude::*;
 
+use crate::app::RankStyleSignal;
+use crate::config::{self, RankStyle};
+
 mod built_info {
     include!(concat!(env!("OUT_DIR"), "/built.rs"));
 }
@@ -14,6 +17,23 @@ pub fn HomePage() -> impl IntoView {
             .unwrap_or_default()
     );
 
+    let rank_style = use_context::<RankStyleSignal>().unwrap().0;
+    let set_rank_style = use_context::<WriteSignal<RankStyle>>().unwrap();
+
+    let toggle_rank_style = move |_: web_sys::MouseEvent| {
+        let new_style = match rank_style.get_untracked() {
+            RankStyle::European => RankStyle::American,
+            RankStyle::American => RankStyle::European,
+        };
+        set_rank_style.set(new_style);
+        config::save_rank_style(new_style);
+    };
+
+    let rank_label = move || match rank_style.get() {
+        RankStyle::European => "European (1 = Marshal)",
+        RankStyle::American => "American (10 = Marshal)",
+    };
+
     view! {
         <div class="home-view panel">
             <a class="panel-link-view panel-option" href="/setup/pool">
@@ -24,6 +44,10 @@ pub fn HomePage() -> impl IntoView {
                 <div class="title">"Play with a friend"</div>
                 <div class="description">"Start a private game with a friend."</div>
             </a>
+            <button class="panel-button-view panel-option" on:click=toggle_rank_style>
+                <div class="title">"Ranking Style"</div>
+                <div class="description">{rank_label}</div>
+            </button>
             <div class="panel-textbox-view panel-textbox">
                 "App by "
                 <a href="https://benletchford.com">"Ben Letchford"</a>
