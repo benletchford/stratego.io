@@ -337,10 +337,17 @@ button.panel-option {
   text-decoration: underline;
 }
 
+a.commit-link {
+  text-decoration: none;
+  color: inherit;
+}
+
 .version-info {
   font-size: 10px;
   opacity: 0.5;
+  padding-bottom: 8px;
 }
+
 
 /* === home.less === */
 

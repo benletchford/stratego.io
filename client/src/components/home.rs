@@ -7,15 +7,19 @@ mod built_info {
     include!(concat!(env!("OUT_DIR"), "/built.rs"));
 }
 
+const REPO_URL: &str = "https://github.com/benletchford/stratego.io";
+
 #[component]
 pub fn HomePage() -> impl IntoView {
-    let version = format!(
-        "v{}{}",
-        built_info::PKG_VERSION,
-        built_info::GIT_COMMIT_HASH_SHORT
-            .map(|h| format!(" ({})", h))
-            .unwrap_or_default()
-    );
+    let version_label = format!("v{}", built_info::PKG_VERSION);
+
+    let last_commit = env!("GIT_RECENT_COMMITS")
+        .split("||")
+        .next()
+        .and_then(|line| {
+            let (hash, msg) = line.split_once(' ')?;
+            Some((hash.to_string(), msg.to_string()))
+        });
 
     let rank_style = use_context::<RankStyleSignal>().unwrap().0;
     let set_rank_style = use_context::<WriteSignal<RankStyle>>().unwrap();
@@ -53,15 +57,22 @@ pub fn HomePage() -> impl IntoView {
                 <a href="https://benletchford.com">"Ben Letchford"</a>
                 <br />
                 <br />
-                <a href="https://github.com/benletchford/stratego.io">"Github Repository"</a>
+                <a href=REPO_URL>"Github Repository"</a>
                 <br />
                 "Pieces from "
                 <a href="http://vector.gissen.nl/stratego.html">"vector.gissen.nl"</a>
                 <br />
                 <br />
-                <span class="version-info">
-                    {version}
-                </span>
+                <div class="version-info">
+                    <div>{version_label}</div>
+                    {last_commit.map(|(hash, msg)| {
+                        let url = format!("{}/commit/{}", REPO_URL, hash);
+                        let label = format!("({}) {}", hash, msg);
+                        view! {
+                            <div><a href={url} class="commit-link">{label}</a></div>
+                        }
+                    })}
+                </div>
             </div>
         </div>
     }
