@@ -1,7 +1,6 @@
 mod api;
 mod build;
 mod storage;
-mod websocket;
 
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -13,7 +12,7 @@ use axum::{
 };
 use clap::Parser;
 use dashmap::DashMap;
-use tokio::sync::{broadcast, Mutex};
+use tokio::sync::Mutex;
 use tower_http::{
     cors::{AllowOrigin, CorsLayer},
     services::{ServeDir, ServeFile},
@@ -21,9 +20,9 @@ use tower_http::{
 
 pub struct AppState {
     pub game_locks: DashMap<String, Arc<tokio::sync::Mutex<()>>>,
-    pub channels: DashMap<String, broadcast::Sender<String>>,
     pub pool: Mutex<Vec<api::PoolEntry>>,
-    pub connected_sockets: DashMap<String, ()>,
+    /// Stores poll_id → player_hash for matched pool entries.
+    pub pool_matches: DashMap<String, String>,
     pub storage: storage::Storage,
 }
 
@@ -58,7 +57,7 @@ struct Cli {
     #[arg(short, long, default_value = "client/dist")]
     static_dir: PathBuf,
 
-    /// Don't serve static files (API/WebSocket only)
+    /// Don't serve static files (API only)
     #[arg(long, env = "NO_STATIC")]
     no_static: bool,
 
@@ -115,19 +114,18 @@ async fn main() {
 
     let state = Arc::new(AppState {
         game_locks: DashMap::new(),
-        channels: DashMap::new(),
         pool: Mutex::new(Vec::new()),
-        connected_sockets: DashMap::new(),
+        pool_matches: DashMap::new(),
         storage,
     });
 
     let mut api_routes = Router::new()
-        .route("/ws", get(websocket::ws_handler))
         .route("/api/create", post(api::create_handler))
         .route("/api/join", post(api::join_handler))
         .route("/api/move", post(api::move_handler))
         .route("/api/game", get(api::game_handler))
         .route("/api/pool/join", post(api::pool_join_handler))
+        .route("/api/pool/status", get(api::pool_status_handler))
         .with_state(state);
 
     // Add CORS layer when CORS_ORIGINS is set (for cross-origin deployments)

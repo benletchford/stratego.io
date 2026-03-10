@@ -87,31 +87,46 @@ pub async fn get_game(player_hash: &str) -> Result<GameResponse, String> {
     resp.json().await.map_err(|e| e.to_string())
 }
 
-/// Returns `Some(player_hash)` if immediately matched, `None` if queued in pool.
-pub async fn join_pool(board: &str, socket_id: &str) -> Result<Option<String>, String> {
+/// Join the matchmaking pool. Returns JSON with either:
+/// - `{"matched": true, "player_hash": "..."}` if immediately matched
+/// - `{"matched": false, "poll_id": "..."}` if queued (poll for match)
+pub async fn join_pool(board: &str) -> Result<serde_json::Value, String> {
     let body = format!(
-        "board={}&socket_id={}",
+        "board={}",
         js_sys::encode_uri_component(board),
-        js_sys::encode_uri_component(socket_id)
     );
-    let resp: serde_json::Value = Request::post(&format!("{}/api/pool/join", config::api_base_url()))
+    let resp = Request::post(&format!("{}/api/pool/join", config::api_base_url()))
         .header("Content-Type", "application/x-www-form-urlencoded")
         .body(body)
         .map_err(|e| e.to_string())?
         .send()
         .await
-        .map_err(|e| e.to_string())?
-        .json()
+        .map_err(|e| e.to_string())?;
+
+    let resp = check_response(resp).await?;
+    resp.json().await.map_err(|e| e.to_string())
+}
+
+/// Check if a pool entry has been matched. Returns `Some(player_hash)` if matched.
+pub async fn poll_pool(poll_id: &str) -> Result<Option<String>, String> {
+    let url = format!(
+        "{}/api/pool/status?poll_id={}",
+        config::api_base_url(),
+        js_sys::encode_uri_component(poll_id)
+    );
+    let resp = Request::get(&url)
+        .send()
         .await
         .map_err(|e| e.to_string())?;
 
-    if resp.get("matched").and_then(|v| v.as_bool()) == Some(true) {
-        let hash = resp
+    let resp = check_response(resp).await?;
+    let data: serde_json::Value = resp.json().await.map_err(|e| e.to_string())?;
+
+    if data.get("matched").and_then(|v| v.as_bool()) == Some(true) {
+        Ok(data
             .get("player_hash")
             .and_then(|v| v.as_str())
-            .unwrap_or_default()
-            .to_string();
-        Ok(Some(hash))
+            .map(|s| s.to_string()))
     } else {
         Ok(None)
     }

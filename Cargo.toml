@@ -3,7 +3,7 @@ members = ["client"]
 resolver = "2"
 
 [workspace.package]
-version = "0.2.6"
+version = "0.2.7"
 edition = "2021"
 
 [package]
@@ -30,7 +30,6 @@ server = [
     "dep:chrono",
     "dep:tracing",
     "dep:tracing-subscriber",
-    "dep:futures-util",
     "dep:clap",
     "dep:base64",
     "dep:uuid",
@@ -39,7 +38,7 @@ server = [
 [dependencies]
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-axum = { version = "0.8", features = ["ws"], optional = true }
+axum = { version = "0.8", optional = true }
 tokio = { version = "1", features = ["full"], optional = true }
 uuid = { version = "1", features = ["v4"], optional = true }
 tower-http = { version = "0.6", features = ["fs", "cors"], optional = true }
@@ -47,6 +46,5 @@ dashmap = { version = "6", optional = true }
 chrono = { version = "0.4", features = ["serde"], optional = true }
 tracing = { version = "0.1", optional = true }
 tracing-subscriber = { version = "0.3", optional = true }
-futures-util = { version = "0.3", optional = true }
 clap = { version = "4", features = ["derive", "env"], optional = true }
 base64 = { version = "0.22.1", optional = true }

@@ -14,7 +14,7 @@ use stratego::{
     models::{Cell, Game, Position},
 };
 
-use crate::{websocket, AppState};
+use crate::AppState;
 
 // ----- Create -----
 
@@ -131,10 +131,7 @@ pub async fn join_handler(
         return (StatusCode::INTERNAL_SERVER_ERROR, "Failed to save").into_response();
     }
 
-    // Tell red we're ready
-    let red_channel = format!("game-{}", game.red_hash);
-    websocket::trigger(&state, &red_channel, "blue_ready", serde_json::json!({}));
-
+    // Red player will detect the opponent joined via polling (modified timestamp changes)
     let game_dict = board_utils::get_sendable_game(&game, 1);
     Json(game_dict).into_response()
 }
@@ -283,16 +280,7 @@ pub async fn move_handler(
         return (StatusCode::INTERNAL_SERVER_ERROR, "Failed to save").into_response();
     }
 
-    // Notify opponent
-    let opponent_hash = game.get_opponent_hash(&form.player_hash).unwrap().to_string();
-    let opponent_channel = format!("game-{}", opponent_hash);
-    websocket::trigger(
-        &state,
-        &opponent_channel,
-        "update",
-        serde_json::json!({"command": "refresh"}),
-    );
-
+    // Opponent will detect the move via polling (modified timestamp changes)
     let game_dict = board_utils::get_sendable_game(&game, side);
     Json(game_dict).into_response()
 }
@@ -322,7 +310,6 @@ pub async fn game_handler(
 #[derive(Deserialize)]
 pub struct PoolJoinForm {
     board: String,
-    socket_id: String,
 }
 
 pub async fn pool_join_handler(
@@ -341,99 +328,95 @@ pub async fn pool_join_handler(
     let mut pool = state.pool.lock().await;
 
     if let Some(oldest) = pool.first().cloned() {
-        // Check if oldest player still connected
-        if state.connected_sockets.contains_key(&oldest.socket_id) {
-            // Check if new player still connected
-            if state.connected_sockets.contains_key(&form.socket_id) {
-                // Both connected - create game and match them
+        // Match with the oldest waiting player
+        pool.remove(0);
 
-                // Create game with oldest as red
-                let mut red_setup = oldest.setup.clone();
-                for row in &mut red_setup {
-                    for cell in row {
-                        if let Cell::Piece(p) = cell {
-                            p.side = 0;
-                        }
-                    }
+        // Create game with oldest as red
+        let mut red_setup = oldest.setup.clone();
+        for row in &mut red_setup {
+            for cell in row {
+                if let Cell::Piece(p) = cell {
+                    p.side = 0;
                 }
-
-                let mut game = Game {
-                    id: uuid::Uuid::new_v4().to_string(),
-                    red_hash: uuid::Uuid::new_v4().hex_string_short(),
-                    blue_hash: uuid::Uuid::new_v4().hex_string_short(),
-                    join_hash: uuid::Uuid::new_v4().hex_string_short(),
-                    board: Game::empty_board(),
-                    red_setup: None,
-                    blue_setup: None,
-                    moves: vec![],
-                    turn: false,
-                    private: false,
-                    game_state: 0,
-                    created: chrono::Utc::now().to_rfc3339(),
-                    modified: chrono::Utc::now().to_rfc3339(),
-                };
-                game.set_red_setup(&red_setup);
-                game.set_blocks();
-
-                // Join blue
-                let mut blue_setup = setup;
-                for row in &mut blue_setup {
-                    for cell in row {
-                        if let Cell::Piece(p) = cell {
-                            p.side = 1;
-                        }
-                    }
-                }
-                game.set_blue_setup(&blue_setup);
-                game.game_state = 1; // READY
-
-                if let Err(e) = state.storage.save_game(&game).await {
-                    tracing::error!("Failed to save pool game: {}", e);
-                    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
-                }
-
-                // Notify both players
-                let red_channel = format!("pool-{}", oldest.socket_id);
-                websocket::trigger(
-                    &state,
-                    &red_channel,
-                    "opponent_found",
-                    serde_json::json!({"player_hash": game.red_hash}),
-                );
-
-                let blue_channel = format!("pool-{}", form.socket_id);
-                websocket::trigger(
-                    &state,
-                    &blue_channel,
-                    "opponent_found",
-                    serde_json::json!({"player_hash": game.blue_hash}),
-                );
-
-                pool.remove(0);
-
-                // Return match result directly so the joining player
-                // doesn't depend on the WS notification (race condition fix)
-                return Json(serde_json::json!({
-                    "matched": true,
-                    "player_hash": game.blue_hash
-                }))
-                .into_response();
             }
-            // Blue not connected - just ignore
-        } else {
-            // Red disconnected - replace with new player
-            pool.remove(0);
-            pool.push(PoolEntry {
-                setup,
-                socket_id: form.socket_id,
-            });
         }
-    } else {
-        // Empty pool - become the host
-        pool.push(PoolEntry {
-            setup,
-            socket_id: form.socket_id,
-        });
+
+        let mut game = Game {
+            id: uuid::Uuid::new_v4().to_string(),
+            red_hash: uuid::Uuid::new_v4().hex_string_short(),
+            blue_hash: uuid::Uuid::new_v4().hex_string_short(),
+            join_hash: uuid::Uuid::new_v4().hex_string_short(),
+            board: Game::empty_board(),
+            red_setup: None,
+            blue_setup: None,
+            moves: vec![],
+            turn: false,
+            private: false,
+            game_state: 0,
+            created: chrono::Utc::now().to_rfc3339(),
+            modified: chrono::Utc::now().to_rfc3339(),
+        };
+        game.set_red_setup(&red_setup);
+        game.set_blocks();
+
+        // Join blue
+        let mut blue_setup = setup;
+        for row in &mut blue_setup {
+            for cell in row {
+                if let Cell::Piece(p) = cell {
+                    p.side = 1;
+                }
+            }
+        }
+        game.set_blue_setup(&blue_setup);
+        game.game_state = 1; // READY
+
+        if let Err(e) = state.storage.save_game(&game).await {
+            tracing::error!("Failed to save pool game: {}", e);
+            return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+        }
+
+        // Store match result for red player to discover via polling
+        state
+            .pool_matches
+            .insert(oldest.poll_id.clone(), game.red_hash.clone());
+
+        // Return match result directly to blue (the joining player)
+        return Json(serde_json::json!({
+            "matched": true,
+            "player_hash": game.blue_hash
+        }))
+        .into_response();
+    }
+
+    // Empty pool - become the host, return a poll_id for checking later
+    let poll_id = uuid::Uuid::new_v4().simple().to_string()[..8].to_string();
+    pool.push(PoolEntry {
+        setup,
+        poll_id: poll_id.clone(),
+    });
+
+    Json(serde_json::json!({"matched": false, "poll_id": poll_id})).into_response()
+}
+
+// ----- Pool Status (GET) -----
+
+#[derive(Deserialize)]
+pub struct PoolStatusQuery {
+    poll_id: String,
+}
+
+pub async fn pool_status_handler(
+    State(state): State<Arc<AppState>>,
+    Query(query): Query<PoolStatusQuery>,
+) -> impl IntoResponse {
+    // Check if this poll_id has been matched
+    if let Some((_, player_hash)) = state.pool_matches.remove(&query.poll_id) {
+        return Json(serde_json::json!({
+            "matched": true,
+            "player_hash": player_hash
+        }))
+        .into_response();
     }
 
     Json(serde_json::json!({"matched": false})).into_response()
@@ -442,7 +425,7 @@ pub async fn pool_join_handler(
 #[derive(Clone)]
 pub struct PoolEntry {
     pub setup: Vec<Vec<Cell>>,
-    pub socket_id: String,
+    pub poll_id: String,
 }
 
 // Helper trait to generate short hex strings from UUIDs

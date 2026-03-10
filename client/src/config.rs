@@ -72,24 +72,3 @@ pub fn save_rank_style(style: RankStyle) {
         let _ = storage.set_item("rankStyle", val);
     }
 }
-
-/// WebSocket URL. Derived from `API_BASE_URL` if set, otherwise from `window.location`.
-pub fn ws_url() -> String {
-    let base = api_base_url();
-    if base.is_empty() {
-        let window = web_sys::window().unwrap();
-        let location = window.location();
-        let protocol = if location.protocol().unwrap() == "https:" {
-            "wss:"
-        } else {
-            "ws:"
-        };
-        let host = location.host().unwrap();
-        format!("{}//{}/ws", protocol, host)
-    } else {
-        let ws_base = base
-            .replace("https://", "wss://")
-            .replace("http://", "ws://");
-        format!("{}/ws", ws_base)
-    }
-}

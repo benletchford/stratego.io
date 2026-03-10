@@ -3,7 +3,7 @@ use stratego::models::{Board, Cell, Piece};
 
 use super::grid::{Grid, LastMoveInfo, MoveEvent};
 use super::loading::Loading;
-use crate::ws::{sleep_ms, ConnectionState, ConnectionStateSignal, WsClient};
+use crate::poll::{Poller, PoolPoller};
 
 /// Parse the server's last_move JSON into our LastMoveInfo struct.
 fn parse_last_move(val: &serde_json::Value) -> Option<LastMoveInfo> {
@@ -50,7 +50,7 @@ fn parse_board(val: &serde_json::Value) -> Board {
 /// The main play page component.
 /// Handles two flows:
 /// 1. Normal play (hash is a player_hash) - loads game via API
-/// 2. Pool mode (hash is "pool") - joins matchmaking pool via WebSocket
+/// 2. Pool mode (hash is "pool") - joins matchmaking pool via polling
 #[component]
 pub fn PlayPage(#[prop(into)] hash: String) -> impl IntoView {
     let hash_stored = StoredValue::new(hash);
@@ -114,86 +114,18 @@ pub fn PlayPage(#[prop(into)] hash: String) -> impl IntoView {
         }
     });
 
-    // Must be called in component scope (not inside spawn_local)
     let navigate = leptos_router::hooks::use_navigate();
-    let conn_writer = use_context::<WriteSignal<ConnectionState>>();
 
-    // Refetch game state on WebSocket reconnect (catches missed events)
-    let conn_signal = use_context::<ConnectionStateSignal>();
-    let (had_connection, set_had_connection) = signal(false);
-    Effect::new(move |_| {
-        let state = conn_signal
-            .as_ref()
-            .map(|s| s.0.get())
-            .unwrap_or(ConnectionState::Idle);
-        match state {
-            ConnectionState::Connected => {
-                if had_connection.get_untracked() {
-                    // This is a REconnect — reset the flag
-                    set_had_connection.set(false);
-                    let ph = player_hash.get_untracked();
-                    if !ph.is_empty() {
-                        // Normal game mode — refetch game state
-                        wasm_bindgen_futures::spawn_local(async move {
-                            if let Ok(game) = crate::api::get_game(&ph).await {
-                                update_game(&game);
-                            }
-                        });
-                    } else if hash_stored.get_value() == "pool" {
-                        // Pool mode — socket_id changed, must re-join pool.
-                        // Reload to restart the flow with the new connection.
-                        let win = web_sys::window().unwrap();
-                        let _ = win.location().reload();
-                    }
-                }
-            }
-            ConnectionState::Disconnected | ConnectionState::Reconnecting(_) => {
-                set_had_connection.set(true);
-            }
-            _ => {}
-        }
-    });
-
-    // Load game and set up WebSocket
+    // Load game and set up polling
     let hash_val = hash_stored.get_value();
     if hash_val == "pool" {
         // Pool mode
-        set_loading_msg.set("Connecting to pool...".to_string());
+        set_loading_msg.set("Joining pool...".to_string());
 
         let nav1 = navigate.clone();
         let nav2 = navigate.clone();
         let nav3 = navigate.clone();
         wasm_bindgen_futures::spawn_local(async move {
-            let ws_client = WsClient::connect(conn_writer);
-
-            // Wait for socket_id
-            let mut attempts = 0;
-            while ws_client.socket_id().is_none() && attempts < 50 {
-                sleep_ms(100).await;
-                attempts += 1;
-            }
-
-            let socket_id = match ws_client.socket_id() {
-                Some(id) => id,
-                None => {
-                    set_loading_msg.set("Failed to connect to WebSocket.".to_string());
-                    return;
-                }
-            };
-
-            set_loading_msg.set("Connected to pool, setting up match...".to_string());
-
-            // Subscribe to pool channel
-            let channel_name = format!("pool-{}", socket_id);
-            ws_client.subscribe(&channel_name);
-
-            // Bind opponent_found event (for the first player waiting in pool)
-            ws_client.bind(&channel_name, "opponent_found", move |data| {
-                if let Some(ph) = data.get("player_hash").and_then(|v| v.as_str()) {
-                    nav1(&format!("/play/{}", ph), Default::default());
-                }
-            });
-
             // Get saved board from localStorage (saved by setup page)
             let board_json = {
                 let win = web_sys::window().unwrap();
@@ -212,24 +144,36 @@ pub fn PlayPage(#[prop(into)] hash: String) -> impl IntoView {
             };
 
             // Join the pool
-            match crate::api::join_pool(&board_json, &socket_id).await {
-                Ok(Some(player_hash)) => {
-                    nav2(&format!("/play/{}", player_hash), Default::default());
-                }
-                Ok(None) => {
+            match crate::api::join_pool(&board_json).await {
+                Ok(result) => {
+                    if let Some(player_hash) = result.get("player_hash").and_then(|v| v.as_str()) {
+                        // Immediately matched
+                        nav2(&format!("/play/{}", player_hash), Default::default());
+                        return;
+                    }
+
+                    let poll_id = result
+                        .get("poll_id")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or_default()
+                        .to_string();
+
                     set_loading_msg.set("In pool, waiting for an opponent...".to_string());
+
+                    // Start polling for match
+                    let poller = PoolPoller::start(poll_id, 2000, move |player_hash| {
+                        nav1(&format!("/play/{}", player_hash), Default::default());
+                    });
+                    std::mem::forget(poller);
                 }
                 Err(e) => {
                     set_loading_msg
                         .set(format!("Failed to join pool: {}", e));
                 }
             }
-
-            // Keep ws_client alive (don't drop it)
-            std::mem::forget(ws_client);
         });
     } else {
-        // Normal play mode - load game
+        // Normal play mode - load game and start polling
         let hash_clone = hash_val.clone();
         wasm_bindgen_futures::spawn_local(async move {
             set_loading_msg.set("Loading game...".to_string());
@@ -238,36 +182,19 @@ pub fn PlayPage(#[prop(into)] hash: String) -> impl IntoView {
                 Ok(game) => {
                     update_game(&game);
 
-                    set_loading_msg.set("Connecting to websocket...".to_string());
-
-                    // Connect WebSocket
-                    let ws_client = WsClient::connect(conn_writer);
-
-                    // Wait for connection and connected event
-                    let mut attempts = 0;
-                    while ws_client.socket_id().is_none() && attempts < 50 {
-                        sleep_ms(100).await;
-                        attempts += 1;
-                    }
-
                     let ph = game
                         .get("player_hash")
                         .and_then(|v| v.as_str())
                         .unwrap_or("")
                         .to_string();
 
-                    // Subscribe to game channel
-                    let channel_name = format!("game-{}", ph);
-                    ws_client.subscribe(&channel_name);
-
-                    // Handle game state
                     let gs = game
                         .get("game_state")
                         .and_then(|v| v.as_i64())
                         .unwrap_or(0);
 
                     if gs == 0 {
-                        // Waiting for opponent
+                        // Waiting for opponent — show join URL and poll for updates
                         let join_url = {
                             let win = web_sys::window().unwrap();
                             let loc = win.location();
@@ -283,40 +210,24 @@ pub fn PlayPage(#[prop(into)] hash: String) -> impl IntoView {
                             "Waiting for opponent...<br /><br /> {}",
                             join_url
                         ));
-
-                        // Bind blue_ready event
-                        let channel_for_bind = channel_name.clone();
-                        let ws_ref = ws_client.clone();
-                        ws_client.bind(&channel_name, "blue_ready", move |_data| {
-                            set_loading.set(false);
-                            ws_ref.unbind(&channel_for_bind, "blue_ready");
-
-                            // Refresh game state
-                            let ph_clone = ph.clone();
-                            wasm_bindgen_futures::spawn_local(async move {
-                                if let Ok(game) = crate::api::get_game(&ph_clone).await {
-                                    update_game(&game);
-                                }
-                            });
-                        });
                     } else {
                         // Game is ready
                         set_loading.set(false);
                     }
 
-                    // Bind update event for ongoing game updates
-                    let ph_for_update = hash_clone.clone();
-                    ws_client.bind(&channel_name, "update", move |_data| {
-                        let ph_clone = ph_for_update.clone();
-                        wasm_bindgen_futures::spawn_local(async move {
-                            if let Ok(game) = crate::api::get_game(&ph_clone).await {
-                                update_game(&game);
-                            }
-                        });
+                    // Start polling for game updates (handles both waiting-for-opponent
+                    // and ongoing game). Poll detects changes via `modified` timestamp.
+                    let poller = Poller::start(ph, 3000, move |game| {
+                        let gs = game
+                            .get("game_state")
+                            .and_then(|v| v.as_i64())
+                            .unwrap_or(0);
+                        if gs != 0 {
+                            set_loading.set(false);
+                        }
+                        update_game(&game);
                     });
-
-                    // Keep ws_client alive
-                    std::mem::forget(ws_client);
+                    std::mem::forget(poller);
                 }
                 Err(e) => {
                     set_loading_msg.set(e);
