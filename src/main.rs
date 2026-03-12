@@ -13,6 +13,7 @@ use axum::{
 use clap::Parser;
 use dashmap::DashMap;
 use tokio::sync::Mutex;
+use tokio::time::Instant;
 use tower_http::{
     cors::{AllowOrigin, CorsLayer},
     services::{ServeDir, ServeFile},
@@ -20,9 +21,11 @@ use tower_http::{
 
 pub struct AppState {
     pub game_locks: DashMap<String, Arc<tokio::sync::Mutex<()>>>,
-    pub pool: Mutex<Vec<api::PoolEntry>>,
+    pub pool_state: Mutex<api::PoolState>,
     /// Stores poll_id → player_hash for matched pool entries.
     pub pool_matches: DashMap<String, String>,
+    /// Tracks when each poll_id was last polled (for staleness detection).
+    pub pool_last_polled: DashMap<String, Instant>,
     pub storage: storage::Storage,
 }
 
@@ -114,8 +117,12 @@ async fn main() {
 
     let state = Arc::new(AppState {
         game_locks: DashMap::new(),
-        pool: Mutex::new(Vec::new()),
+        pool_state: Mutex::new(api::PoolState {
+            entries: Vec::new(),
+            pending: Vec::new(),
+        }),
         pool_matches: DashMap::new(),
+        pool_last_polled: DashMap::new(),
         storage,
     });
 
@@ -126,6 +133,7 @@ async fn main() {
         .route("/api/game", get(api::game_handler))
         .route("/api/pool/join", post(api::pool_join_handler))
         .route("/api/pool/status", get(api::pool_status_handler))
+        .route("/api/pool/leave", post(api::pool_leave_handler))
         .with_state(state);
 
     // Add CORS layer when CORS_ORIGINS is set (for cross-origin deployments)

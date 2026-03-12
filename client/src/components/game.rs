@@ -1,5 +1,6 @@
 use leptos::prelude::*;
 use stratego::models::{Board, Cell, Piece};
+use wasm_bindgen::JsCast;
 
 use super::grid::{Grid, LastMoveInfo, MoveEvent};
 use super::loading::Loading;
@@ -159,6 +160,19 @@ pub fn PlayPage(#[prop(into)] hash: String) -> impl IntoView {
                         .to_string();
 
                     set_loading_msg.set("In pool, waiting for an opponent...".to_string());
+
+                    // Register beforeunload to clean up pool entry
+                    let poll_id_for_cleanup = poll_id.clone();
+                    let cleanup = wasm_bindgen::closure::Closure::<dyn Fn()>::new(move || {
+                        crate::api::leave_pool(&poll_id_for_cleanup);
+                    });
+                    if let Some(win) = web_sys::window() {
+                        let _ = win.add_event_listener_with_callback(
+                            "beforeunload",
+                            cleanup.as_ref().unchecked_ref(),
+                        );
+                    }
+                    cleanup.forget();
 
                     // Start polling for match
                     let poller = PoolPoller::start(poll_id, 2000, move |player_hash| {

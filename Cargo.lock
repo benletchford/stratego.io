@@ -316,7 +316,7 @@ checksum = "3a822ea5bc7590f9d40f1ba12c0dc3c2760f3482c6984db1573ad11031420831"
 
 [[package]]
 name = "client"
-version = "0.2.7"
+version = "0.2.8"
 dependencies = [
  "built",
  "gloo-net",
@@ -1940,7 +1940,7 @@ checksum = "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
 
 [[package]]
 name = "stratego"
-version = "0.2.7"
+version = "0.2.8"
 dependencies = [
  "axum",
  "base64",

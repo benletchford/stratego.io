@@ -107,6 +107,26 @@ pub async fn join_pool(board: &str) -> Result<serde_json::Value, String> {
     resp.json().await.map_err(|e| e.to_string())
 }
 
+/// Best-effort removal of a pool entry (called on navigation away).
+pub fn leave_pool(poll_id: &str) {
+    // Use sendBeacon for reliability during page unload
+    let body = format!(
+        "poll_id={}",
+        js_sys::encode_uri_component(poll_id),
+    );
+    let url = format!("{}/api/pool/leave", config::api_base_url());
+    if let Some(win) = web_sys::window() {
+        let nav = win.navigator();
+        let blob_parts = js_sys::Array::new();
+        blob_parts.push(&wasm_bindgen::JsValue::from_str(&body));
+        let opts = web_sys::BlobPropertyBag::new();
+        opts.set_type("application/x-www-form-urlencoded");
+        if let Ok(blob) = web_sys::Blob::new_with_str_sequence_and_options(&blob_parts, &opts) {
+            let _ = nav.send_beacon_with_opt_blob(&url, Some(&blob));
+        }
+    }
+}
+
 /// Check if a pool entry has been matched. Returns `Some(player_hash)` if matched.
 pub async fn poll_pool(poll_id: &str) -> Result<Option<String>, String> {
     let url = format!(
