@@ -56,7 +56,7 @@ pub fn Grid(
                         }
 
                         if let Some((hx, hy)) = hov {
-                            if hx == x && hy == y {
+                            if hx == x && hy == y && sel != Some((x, y)) {
                                 classes.push("hover".to_string());
                             }
                         }
