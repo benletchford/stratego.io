@@ -9,20 +9,7 @@ pub(crate) async fn sleep_ms(ms: u32) {
     let _ = wasm_bindgen_futures::JsFuture::from(promise).await;
 }
 
-/// Returns true if the document/tab is currently visible.
-fn is_tab_visible() -> bool {
-    web_sys::window()
-        .and_then(|w| w.document())
-        .map(|d| !d.hidden())
-        .unwrap_or(false)
-}
-
-/// Polls `GET /api/game?player_hash=...` at a smart interval:
-/// - Immediately on first call
-/// - Every `interval_ms` while the tab is visible
-/// - Pauses while the tab is hidden
-/// - Resumes with an immediate poll when the tab becomes visible again
-///
+/// Polls `GET /api/game?player_hash=...` at a fixed interval.
 /// Calls `on_update` whenever the game's `modified` timestamp changes.
 /// The returned `Rc` keeps the poller alive; drop it to stop polling.
 pub struct Poller {
@@ -44,12 +31,6 @@ impl Poller {
             loop {
                 if !*active_clone.borrow() {
                     break;
-                }
-
-                // If tab is hidden, sleep briefly and retry
-                if !is_tab_visible() {
-                    sleep_ms(1000).await;
-                    continue;
                 }
 
                 // Poll the game endpoint
@@ -97,6 +78,7 @@ impl Drop for Poller {
 }
 
 /// Polls `GET /api/pool/status?poll_id=...` to check for a pool match.
+/// Times out after `timeout_ms` and calls `on_timeout` if no match is found.
 pub struct PoolPoller {
     active: Rc<RefCell<bool>>,
 }
@@ -105,20 +87,23 @@ impl PoolPoller {
     pub fn start(
         poll_id: String,
         interval_ms: u32,
+        timeout_ms: u32,
         on_matched: impl Fn(String) + 'static,
+        on_timeout: impl Fn() + 'static,
     ) -> Self {
         let active = Rc::new(RefCell::new(true));
         let active_clone = active.clone();
 
         wasm_bindgen_futures::spawn_local(async move {
+            let mut elapsed: u32 = 0;
             loop {
                 if !*active_clone.borrow() {
                     break;
                 }
 
-                if !is_tab_visible() {
-                    sleep_ms(1000).await;
-                    continue;
+                if elapsed >= timeout_ms {
+                    on_timeout();
+                    break;
                 }
 
                 match crate::api::poll_pool(&poll_id).await {
@@ -135,6 +120,7 @@ impl PoolPoller {
                 }
 
                 sleep_ms(interval_ms).await;
+                elapsed += interval_ms;
             }
         });
 

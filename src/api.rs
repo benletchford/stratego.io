@@ -501,16 +501,24 @@ pub async fn pool_status_handler(
         }
 
         // Store results for both players to discover via their next poll
+        let now = Instant::now();
         state
             .pool_matches
-            .insert(pm.red_poll_id, game.red_hash);
+            .insert(pm.red_poll_id, (game.red_hash, now));
         state
             .pool_matches
-            .insert(pm.blue_poll_id, game.blue_hash);
+            .insert(pm.blue_poll_id, (game.blue_hash, now));
     }
 
-    // Check if this poll_id has a finalized match
-    if let Some((_, player_hash)) = state.pool_matches.remove(&query.poll_id) {
+    // Clean up stale pool_matches older than 60s
+    state
+        .pool_matches
+        .retain(|_, (_, created_at)| created_at.elapsed() < std::time::Duration::from_secs(60));
+
+    // Check if this poll_id has a finalized match (use get, not remove,
+    // so the result survives lost HTTP responses)
+    if let Some(entry) = state.pool_matches.get(&query.poll_id) {
+        let player_hash = entry.value().0.clone();
         return Json(serde_json::json!({
             "matched": true,
             "player_hash": player_hash
@@ -534,9 +542,30 @@ pub async fn pool_leave_handler(
 ) -> impl IntoResponse {
     let mut ps = state.pool_state.lock().await;
     ps.entries.retain(|entry| entry.poll_id != form.poll_id);
+
+    // When removing from a pending match, re-queue the other player
+    let mut requeue = vec![];
     ps.pending.retain(|pm| {
-        pm.red_poll_id != form.poll_id && pm.blue_poll_id != form.poll_id
+        if pm.red_poll_id == form.poll_id {
+            requeue.push(PoolEntry {
+                setup: pm.blue_setup.clone(),
+                poll_id: pm.blue_poll_id.clone(),
+                created_at: Instant::now(),
+            });
+            return false;
+        }
+        if pm.blue_poll_id == form.poll_id {
+            requeue.push(PoolEntry {
+                setup: pm.red_setup.clone(),
+                poll_id: pm.red_poll_id.clone(),
+                created_at: Instant::now(),
+            });
+            return false;
+        }
+        true
     });
+    ps.entries.extend(requeue);
+
     state.pool_last_polled.remove(&form.poll_id);
     StatusCode::OK
 }

@@ -22,8 +22,8 @@ use tower_http::{
 pub struct AppState {
     pub game_locks: DashMap<String, Arc<tokio::sync::Mutex<()>>>,
     pub pool_state: Mutex<api::PoolState>,
-    /// Stores poll_id → player_hash for matched pool entries.
-    pub pool_matches: DashMap<String, String>,
+    /// Stores poll_id → (player_hash, created_at) for matched pool entries.
+    pub pool_matches: DashMap<String, (String, Instant)>,
     /// Tracks when each poll_id was last polled (for staleness detection).
     pub pool_last_polled: DashMap<String, Instant>,
     pub storage: storage::Storage,
