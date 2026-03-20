@@ -77,8 +77,7 @@ impl Drop for Poller {
     }
 }
 
-/// Polls `GET /api/pool/status?poll_id=...` to check for a pool match.
-/// Times out after `timeout_ms` and calls `on_timeout` if no match is found.
+/// Polls `GET /api/pool/status?poll_id=...` until a match is found.
 pub struct PoolPoller {
     active: Rc<RefCell<bool>>,
 }
@@ -87,22 +86,14 @@ impl PoolPoller {
     pub fn start(
         poll_id: String,
         interval_ms: u32,
-        timeout_ms: u32,
         on_matched: impl Fn(String) + 'static,
-        on_timeout: impl Fn() + 'static,
     ) -> Self {
         let active = Rc::new(RefCell::new(true));
         let active_clone = active.clone();
 
         wasm_bindgen_futures::spawn_local(async move {
-            let mut elapsed: u32 = 0;
             loop {
                 if !*active_clone.borrow() {
-                    break;
-                }
-
-                if elapsed >= timeout_ms {
-                    on_timeout();
                     break;
                 }
 
@@ -120,7 +111,6 @@ impl PoolPoller {
                 }
 
                 sleep_ms(interval_ms).await;
-                elapsed += interval_ms;
             }
         });
 

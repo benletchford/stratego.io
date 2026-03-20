@@ -174,18 +174,12 @@ pub fn PlayPage(#[prop(into)] hash: String) -> impl IntoView {
                     }
                     cleanup.forget();
 
-                    // Start polling for match (60s timeout, then rejoin)
-                    let nav_timeout = navigate.clone();
+                    // Poll indefinitely until matched
                     let poller = PoolPoller::start(
                         poll_id,
                         2000,
-                        60_000,
                         move |player_hash| {
                             nav1(&format!("/play/{}", player_hash), Default::default());
-                        },
-                        move || {
-                            // Timed out waiting — rejoin the pool
-                            nav_timeout("/play/pool", Default::default());
                         },
                     );
                     std::mem::forget(poller);
