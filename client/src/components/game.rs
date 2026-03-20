@@ -160,6 +160,7 @@ pub fn PlayPage(#[prop(into)] hash: String) -> impl IntoView {
                         .to_string();
 
                     set_loading_msg.set("In pool, waiting for an opponent...".to_string());
+                    crate::notify::request_permission();
 
                     // Register beforeunload to clean up pool entry
                     let poll_id_for_cleanup = poll_id.clone();
@@ -179,6 +180,10 @@ pub fn PlayPage(#[prop(into)] hash: String) -> impl IntoView {
                         poll_id,
                         2000,
                         move |player_hash| {
+                            crate::notify::notify(
+                                "stratego.io",
+                                "Opponent found! Your game is ready.",
+                            );
                             nav1(&format!("/play/{}", player_hash), Default::default());
                         },
                     );
@@ -228,6 +233,7 @@ pub fn PlayPage(#[prop(into)] hash: String) -> impl IntoView {
                             "Waiting for opponent...<br /><br /> {}",
                             join_url
                         ));
+                        crate::notify::request_permission();
                     } else {
                         // Game is ready
                         set_loading.set(false);
@@ -235,12 +241,20 @@ pub fn PlayPage(#[prop(into)] hash: String) -> impl IntoView {
 
                     // Start polling for game updates (handles both waiting-for-opponent
                     // and ongoing game). Poll detects changes via `modified` timestamp.
+                    let notified = std::rc::Rc::new(std::cell::RefCell::new(gs != 0));
                     let poller = Poller::start(ph, 3000, move |game| {
                         let gs = game
                             .get("game_state")
                             .and_then(|v| v.as_i64())
                             .unwrap_or(0);
                         if gs != 0 {
+                            if !*notified.borrow() {
+                                *notified.borrow_mut() = true;
+                                crate::notify::notify(
+                                    "stratego.io",
+                                    "Your opponent has joined! Game is starting.",
+                                );
+                            }
                             set_loading.set(false);
                         }
                         update_game(&game);

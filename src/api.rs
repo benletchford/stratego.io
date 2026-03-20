@@ -318,7 +318,7 @@ pub async fn pool_join_handler(
     State(state): State<Arc<AppState>>,
     Form(form): Form<PoolJoinForm>,
 ) -> impl IntoResponse {
-    let setup: Vec<Vec<Cell>> = match serde_json::from_str(&form.board) {
+    let mut setup: Vec<Vec<Cell>> = match serde_json::from_str(&form.board) {
         Ok(s) => s,
         Err(_) => return (StatusCode::BAD_REQUEST, "Invalid board JSON").into_response(),
     };
@@ -340,25 +340,64 @@ pub async fn pool_join_handler(
     });
 
     if let Some(oldest) = ps.entries.first().cloned() {
-        // Tentative match — don't create game yet.
-        // Both players must confirm via one more poll before we finalize.
+        // Match found — create game immediately
         ps.entries.remove(0);
+        drop(ps); // release lock before IO
 
-        let blue_poll_id = uuid::Uuid::new_v4().simple().to_string()[..8].to_string();
+        let mut red_setup = oldest.setup;
+        for row in &mut red_setup {
+            for cell in row {
+                if let Cell::Piece(p) = cell {
+                    p.side = 0;
+                }
+            }
+        }
 
-        ps.pending.push(PendingMatch {
-            red_setup: oldest.setup,
-            blue_setup: setup,
-            red_poll_id: oldest.poll_id,
-            blue_poll_id: blue_poll_id.clone(),
-            red_confirmed: false,
-            blue_confirmed: false,
-            created_at: Instant::now(),
-        });
+        for row in &mut setup {
+            for cell in row {
+                if let Cell::Piece(p) = cell {
+                    p.side = 1;
+                }
+            }
+        }
 
-        // Joiner also polls — they'll discover the match via pool_status
-        return Json(serde_json::json!({"matched": false, "poll_id": blue_poll_id}))
-            .into_response();
+        let mut game = Game {
+            id: uuid::Uuid::new_v4().to_string(),
+            red_hash: uuid::Uuid::new_v4().hex_string_short(),
+            blue_hash: uuid::Uuid::new_v4().hex_string_short(),
+            join_hash: uuid::Uuid::new_v4().hex_string_short(),
+            board: Game::empty_board(),
+            red_setup: None,
+            blue_setup: None,
+            moves: vec![],
+            turn: false,
+            private: false,
+            game_state: 0,
+            created: chrono::Utc::now().to_rfc3339(),
+            modified: chrono::Utc::now().to_rfc3339(),
+        };
+        game.set_red_setup(&red_setup);
+        game.set_blocks();
+        game.set_blue_setup(&setup);
+        game.game_state = 1; // READY
+
+        if let Err(e) = state.storage.save_game(&game).await {
+            tracing::error!("Failed to save pool game: {}", e);
+            return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+        }
+
+        // Store match for the waiting player to discover via poll
+        let now = Instant::now();
+        state
+            .pool_matches
+            .insert(oldest.poll_id, (game.red_hash, now));
+
+        // Return match directly to the joining player
+        return Json(serde_json::json!({
+            "matched": true,
+            "player_hash": game.blue_hash
+        }))
+        .into_response();
     }
 
     // Empty pool — become the host
@@ -388,126 +427,17 @@ pub async fn pool_status_handler(
         .pool_last_polled
         .insert(query.poll_id.clone(), Instant::now());
 
-    // Check pending matches for this poll_id
-    let finalize = {
+    // Prune stale pool entries (e.g. crashed browsers that missed beforeunload)
+    {
+        let stale_threshold = std::time::Duration::from_secs(10);
         let mut ps = state.pool_state.lock().await;
-
-        // Clean up expired pending matches (5s without both confirming)
-        let confirm_timeout = std::time::Duration::from_secs(5);
-        let mut requeue = vec![];
-        ps.pending.retain(|pm| {
-            if pm.created_at.elapsed() < confirm_timeout {
-                return true; // still fresh
-            }
-            // Expired — re-queue whichever side confirmed
-            if pm.red_confirmed && !pm.blue_confirmed {
-                requeue.push(PoolEntry {
-                    setup: pm.red_setup.clone(),
-                    poll_id: pm.red_poll_id.clone(),
-                    created_at: Instant::now(),
-                });
-            } else if pm.blue_confirmed && !pm.red_confirmed {
-                requeue.push(PoolEntry {
-                    setup: pm.blue_setup.clone(),
-                    poll_id: pm.blue_poll_id.clone(),
-                    created_at: Instant::now(),
-                });
-            }
-            false // remove expired
-        });
-        ps.entries.extend(requeue);
-
-        // Find and confirm this poll_id
-        let mut result = None;
-        ps.pending.retain(|pm| {
-            if result.is_some() {
-                return true;
-            }
-            let is_red = pm.red_poll_id == query.poll_id;
-            let is_blue = pm.blue_poll_id == query.poll_id;
-            if !is_red && !is_blue {
-                return true; // not ours
-            }
-            let both = (is_red && pm.blue_confirmed) || (is_blue && pm.red_confirmed);
-            if both {
-                // Both confirmed — extract for game creation
-                result = Some(pm.clone());
-                false // remove from pending
+        ps.entries.retain(|entry| {
+            if let Some(last_polled) = state.pool_last_polled.get(&entry.poll_id) {
+                last_polled.elapsed() < stale_threshold
             } else {
-                true // keep, mark confirmed on next mutable pass
+                entry.created_at.elapsed() < stale_threshold
             }
         });
-
-        // If not yet both confirmed, mark our side
-        if result.is_none() {
-            for pm in &mut ps.pending {
-                if pm.red_poll_id == query.poll_id {
-                    pm.red_confirmed = true;
-                    break;
-                }
-                if pm.blue_poll_id == query.poll_id {
-                    pm.blue_confirmed = true;
-                    break;
-                }
-            }
-        }
-
-        result
-    }; // lock dropped
-
-    // If both confirmed, create the game
-    if let Some(pm) = finalize {
-        let mut red_setup = pm.red_setup;
-        for row in &mut red_setup {
-            for cell in row {
-                if let Cell::Piece(p) = cell {
-                    p.side = 0;
-                }
-            }
-        }
-
-        let mut game = Game {
-            id: uuid::Uuid::new_v4().to_string(),
-            red_hash: uuid::Uuid::new_v4().hex_string_short(),
-            blue_hash: uuid::Uuid::new_v4().hex_string_short(),
-            join_hash: uuid::Uuid::new_v4().hex_string_short(),
-            board: Game::empty_board(),
-            red_setup: None,
-            blue_setup: None,
-            moves: vec![],
-            turn: false,
-            private: false,
-            game_state: 0,
-            created: chrono::Utc::now().to_rfc3339(),
-            modified: chrono::Utc::now().to_rfc3339(),
-        };
-        game.set_red_setup(&red_setup);
-        game.set_blocks();
-
-        let mut blue_setup = pm.blue_setup;
-        for row in &mut blue_setup {
-            for cell in row {
-                if let Cell::Piece(p) = cell {
-                    p.side = 1;
-                }
-            }
-        }
-        game.set_blue_setup(&blue_setup);
-        game.game_state = 1; // READY
-
-        if let Err(e) = state.storage.save_game(&game).await {
-            tracing::error!("Failed to save pool game: {}", e);
-            return StatusCode::INTERNAL_SERVER_ERROR.into_response();
-        }
-
-        // Store results for both players to discover via their next poll
-        let now = Instant::now();
-        state
-            .pool_matches
-            .insert(pm.red_poll_id, (game.red_hash, now));
-        state
-            .pool_matches
-            .insert(pm.blue_poll_id, (game.blue_hash, now));
     }
 
     // Clean up stale pool_matches older than 60s
@@ -515,8 +445,7 @@ pub async fn pool_status_handler(
         .pool_matches
         .retain(|_, (_, created_at)| created_at.elapsed() < std::time::Duration::from_secs(60));
 
-    // Check if this poll_id has a finalized match (use get, not remove,
-    // so the result survives lost HTTP responses)
+    // Check if this poll_id has a finalized match
     if let Some(entry) = state.pool_matches.get(&query.poll_id) {
         let player_hash = entry.value().0.clone();
         return Json(serde_json::json!({
@@ -542,30 +471,6 @@ pub async fn pool_leave_handler(
 ) -> impl IntoResponse {
     let mut ps = state.pool_state.lock().await;
     ps.entries.retain(|entry| entry.poll_id != form.poll_id);
-
-    // When removing from a pending match, re-queue the other player
-    let mut requeue = vec![];
-    ps.pending.retain(|pm| {
-        if pm.red_poll_id == form.poll_id {
-            requeue.push(PoolEntry {
-                setup: pm.blue_setup.clone(),
-                poll_id: pm.blue_poll_id.clone(),
-                created_at: Instant::now(),
-            });
-            return false;
-        }
-        if pm.blue_poll_id == form.poll_id {
-            requeue.push(PoolEntry {
-                setup: pm.red_setup.clone(),
-                poll_id: pm.red_poll_id.clone(),
-                created_at: Instant::now(),
-            });
-            return false;
-        }
-        true
-    });
-    ps.entries.extend(requeue);
-
     state.pool_last_polled.remove(&form.poll_id);
     StatusCode::OK
 }
@@ -577,20 +482,8 @@ pub struct PoolEntry {
     pub created_at: Instant,
 }
 
-#[derive(Clone)]
-pub struct PendingMatch {
-    pub red_setup: Vec<Vec<Cell>>,
-    pub blue_setup: Vec<Vec<Cell>>,
-    pub red_poll_id: String,
-    pub blue_poll_id: String,
-    pub red_confirmed: bool,
-    pub blue_confirmed: bool,
-    pub created_at: Instant,
-}
-
 pub struct PoolState {
     pub entries: Vec<PoolEntry>,
-    pub pending: Vec<PendingMatch>,
 }
 
 // Helper trait to generate short hex strings from UUIDs

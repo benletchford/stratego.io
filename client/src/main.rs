@@ -2,6 +2,7 @@ mod api;
 mod app;
 mod components;
 mod config;
+pub(crate) mod notify;
 mod poll;
 
 fn main() {

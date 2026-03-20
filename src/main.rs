@@ -119,7 +119,6 @@ async fn main() {
         game_locks: DashMap::new(),
         pool_state: Mutex::new(api::PoolState {
             entries: Vec::new(),
-            pending: Vec::new(),
         }),
         pool_matches: DashMap::new(),
         pool_last_polled: DashMap::new(),
