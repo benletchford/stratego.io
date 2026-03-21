@@ -1,10 +1,13 @@
 use leptos::prelude::*;
 use stratego::models::{Board, Cell, Piece};
+use std::cell::RefCell;
+use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 use wasm_bindgen::JsCast;
 
 use super::grid::{Grid, LastMoveInfo, MoveEvent};
 use super::loading::Loading;
-use crate::poll::{Poller, PoolPoller};
+use crate::poll::StopHandle;
 
 /// Parse the server's last_move JSON into our LastMoveInfo struct.
 fn parse_last_move(val: &serde_json::Value) -> Option<LastMoveInfo> {
@@ -117,6 +120,21 @@ pub fn PlayPage(#[prop(into)] hash: String) -> impl IntoView {
 
     let navigate = leptos_router::hooks::use_navigate();
 
+    // Stop handles created upfront so on_cleanup always has them, even if
+    // the user navigates away before spawn_local finishes its async work.
+    let poll_stop = StopHandle::new();
+    let pool_id_handle: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
+    {
+        let poll_stop = poll_stop.clone();
+        let pool_id_h = pool_id_handle.clone();
+        on_cleanup(move || {
+            poll_stop.stop();
+            if let Some(poll_id) = pool_id_h.lock().unwrap().as_ref() {
+                crate::api::leave_pool(poll_id);
+            }
+        });
+    }
+
     // Load game and set up polling
     let hash_val = hash_stored.get_value();
     if hash_val == "pool" {
@@ -161,6 +179,7 @@ pub fn PlayPage(#[prop(into)] hash: String) -> impl IntoView {
 
                     set_loading_msg.set("In pool, waiting for an opponent...".to_string());
                     crate::notify::request_permission();
+                    *pool_id_handle.lock().unwrap() = Some(poll_id.clone());
 
                     // Register beforeunload to clean up pool entry
                     let poll_id_for_cleanup = poll_id.clone();
@@ -176,7 +195,8 @@ pub fn PlayPage(#[prop(into)] hash: String) -> impl IntoView {
                     cleanup.forget();
 
                     // Poll indefinitely until matched
-                    let poller = PoolPoller::start(
+                    crate::poll::start_pool_poller(
+                        poll_stop,
                         poll_id,
                         2000,
                         move |player_hash| {
@@ -187,7 +207,6 @@ pub fn PlayPage(#[prop(into)] hash: String) -> impl IntoView {
                             nav1(&format!("/play/{}", player_hash), Default::default());
                         },
                     );
-                    std::mem::forget(poller);
                 }
                 Err(e) => {
                     set_loading_msg
@@ -241,8 +260,8 @@ pub fn PlayPage(#[prop(into)] hash: String) -> impl IntoView {
 
                     // Start polling for game updates (handles both waiting-for-opponent
                     // and ongoing game). Poll detects changes via `modified` timestamp.
-                    let notified = std::rc::Rc::new(std::cell::RefCell::new(gs != 0));
-                    let poller = Poller::start(ph, 3000, move |game| {
+                    let notified = Rc::new(RefCell::new(gs != 0));
+                    crate::poll::start_game_poller(poll_stop, ph, 3000, move |game| {
                         let gs = game
                             .get("game_state")
                             .and_then(|v| v.as_i64())
@@ -259,7 +278,6 @@ pub fn PlayPage(#[prop(into)] hash: String) -> impl IntoView {
                         }
                         update_game(&game);
                     });
-                    std::mem::forget(poller);
                 }
                 Err(e) => {
                     set_loading_msg.set(e);
