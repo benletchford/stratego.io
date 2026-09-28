@@ -8,6 +8,19 @@ A self-contained Rust application — single binary, no external dependencies. T
 
 In theory should work on anything that has a browser!
 
+Frontend deployment
+======
+
+The frontend is deployed to Cloudflare Pages by the GitHub Actions workflow on pushes to `master`. The API and WebSocket server remain at `https://api.stratego.io`.
+
+To set up deployment:
+
+1. Create a Cloudflare Pages Direct Upload project named `stratego-io` with `master` as its production branch.
+2. Add GitHub Actions repository secrets `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`. The token needs Account → Cloudflare Pages → Edit permission.
+3. Add `stratego.io` as a custom domain for the Pages project and point its DNS at Cloudflare Pages.
+
+The workflow builds `client/dist` and uploads it to Pages. Cloudflare Pages serves unmatched paths from `index.html` for this single-page app.
+
 Running with Docker
 ======
 
